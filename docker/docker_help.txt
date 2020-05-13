@@ -1,0 +1,16 @@
+Här har jag samlat några bra att ha kommandon för docker
+
+Starta servern och kör den i bakgrunden, terminalen kan användas
+docker-compose up -d
+
+Starta servern och fortsätt visa output i nuvarande terminalfönster, ctrl c för att stäng
+docker-compose up
+
+Stänga ner servern om den har startats i bakgrunden med -d
+docker-compose down
+
+Besöka hemsidan
+http://localhost:8000/
+
+docker ps
+docker exec -it 734c575c5674 bash
