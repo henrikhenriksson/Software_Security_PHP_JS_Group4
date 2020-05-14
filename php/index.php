@@ -1,4 +1,4 @@
-<?HPH
+<?PHP
 /****
 * Test file to see if server is up
 *****/
