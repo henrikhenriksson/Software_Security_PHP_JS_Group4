@@ -21,9 +21,9 @@ CREATE TABLE dt167g.users (
 )
 WITHOUT OIDS;
 
-DROP TABLE IF EXISTS dt167g.messages;
+DROP TABLE IF EXISTS dt167g.posts;
 
-CREATE TABLE dt167g.messages (
+CREATE TABLE dt167g.posts (
   id        SERIAL PRIMARY KEY,
   name      text      NOT NULL CHECK (name <> ''),
   message   text      NOT NULL CHECK (message  <> ''),
@@ -32,13 +32,13 @@ CREATE TABLE dt167g.messages (
 )
 WITHOUT OIDS;
 
-DROP TABLE IF EXISTS dt167g.votes;
+DROP TABLE IF EXISTS dt167g.likes;
 
-CREATE TABLE dt167g.votes(
-      messageId     INTEGER     NOT NULL,
+CREATE TABLE dt167g.likes(
+      postId     INTEGER     NOT NULL,
       userId        INTEGER     NOT NULL,
-      UNIQUE( messageId, userId),
-      FOREIGN KEY(messageId) REFERENCES dt167g.messages(id) ON DELETE CASCADE,
+      UNIQUE( postId, userId),
+      FOREIGN KEY(postId) REFERENCES dt167g.posts(id) ON DELETE CASCADE,
       FOREIGN KEY(userId) REFERENCES dt167g.users(id) ON DELETE CASCADE
   )
 WITHOUT OIDS;
@@ -94,16 +94,16 @@ WITHOUT OIDS;
 -- First we create a change log table for our user table
 -- ##############################################
 
--- DROP TABLE IF EXISTS dt167g.user_changelog;
---
--- CREATE TABLE dt167g.user_changelog (
---   id          SERIAL PRIMARY KEY,
---   user_id   integer REFERENCES dt167g.user (id),
---   username    text,
---   password    text,
---   time_change timestamp without time zone DEFAULT now()
--- )
--- WITHOUT OIDS;
+DROP TABLE IF EXISTS dt167g.user_changelog;
+
+CREATE TABLE dt167g.user_changelog (
+  id          SERIAL PRIMARY KEY,
+  user_id   integer REFERENCES dt167g.users (id),
+  username    text,
+  password    text,
+  time_change timestamp without time zone DEFAULT now()
+)
+WITHOUT OIDS;
 
 
 
