@@ -31,90 +31,84 @@ class Login
     {
         $this->username = $username;
         $this->password = $password;
-        $this->members = DatabaseHandler::getInstance()->getMembers();
-        $this->user = $this->getUser();
+//        $this->members = DatabaseHandler::getInstance()->getMembers();
+//        $this->userId = $this->getUser();
     }
-    /**
-     * Summary. Attempt to a member from $members with given username from login form. If no such user exists null is returned.
-     * @return Member Member with the given username in login form.
-     */
-    private function getUser()
-    {
-        foreach ($this->members as $member) {
-            if ($member->getUsername() == $this->username) {
-                return $member;
-            }
-        }
-        return null;
-    }
-    /**
-     * Summary. Checks if the given username is valid.
-     * @return bool True if username is valid.
-     * False if username is not valid.
-     */
-    public function isValidUser()
-    {
-        return $this->user != null;
-    }
+//    /**
+//     * Summary. Attempt to a member from $members with given username from login form. If no such user exists null is returned.
+//     * @return Member Member with the given username in login form.
+//     */
+//    private function getUser()
+//    {
+//        foreach ($this->members as $member) {
+//            if ($member->getUsername() == $this->username) {
+//                return $member;
+//            }
+//        }
+//        return null;
+//    }
+//    /**
+//     * Summary. Checks if the given username is valid.
+//     * @return bool True if username is valid.
+//     * False if username is not valid.
+//     */
+//    public function isValidUser()
+//    {
+//        return $this->user != null;
+//    }
     /**
      * Summary. Checks if the given password is valid.
      * @return bool True if password is valid.
      * False if password is not valid.
      */
-    public function isValidPsw()
+    public function isValidUserData()
     {
-        if ($this->isValidUser()) {
-            if ($this->user->getPassword() == $this->password) {
-                return true;
-            }
-        }
-
-        return false;
+        return DatabaseHandler::getInstance()->checkUserCredentials($this->username, $this->password);
     }
-    /**
-     * Summary. Checks if the user has admin rights.
-     * @return bool True if the user has admin rights.
-     * False if the user do not have admin rights.
-     */
-    public function isAdmin()
-    {
-        foreach ($this->user->getRoles() as $role) {
-            if ($role->getRole() == "admin") {
-                return true;
-            }
-        }
-
-        return false;
-    }
-    /**
-     * Summary. Gets an array of menu links.
-     * @return array An associative array containing menu links.
-     */
-    public function getLinkArray()
-    {
-        $linkArray = ["Hem" => "index.php"];
-
-        foreach ($this->user->getRoles() as $role) {
-            if ($role->getRole() == "admin") {
-                $linkArray = array_merge($linkArray, Config::getInstance()->getAdminLinks());
-            }
-
-            if ($role->getRole() == "member") {
-                $linkArray = array_merge($linkArray, Config::getInstance()->getMemberLinks());
-            }
-        }
-
-        return $linkArray;
-    }
+//    /**
+//     * Summary. Checks if the user has admin rights.
+//     * @return bool True if the user has admin rights.
+//     * False if the user do not have admin rights.
+//     */
+//    public function isAdmin()
+//    {
+//        foreach ($this->user->getRoles() as $role) {
+//            if ($role->getRole() == "admin") {
+//                return true;
+//            }
+//        }
+//
+//        return false;
+//    }
+//    /**
+//     * Summary. Gets an array of menu links.
+//     * @return array An associative array containing menu links.
+//     */
+//    public function getLinkArray()
+//    {
+//        $linkArray = ["Hem" => "index.php"];
+//
+//        foreach ($this->user->getRoles() as $role) {
+//            if ($role->getRole() == "admin") {
+//                $linkArray = array_merge($linkArray, Config::getInstance()->getAdminLinks());
+//            }
+//
+//            if ($role->getRole() == "member") {
+//                $linkArray = array_merge($linkArray, Config::getInstance()->getMemberLinks());
+//            }
+//        }
+//
+//        return $linkArray;
+//    }
     /**
      * Summary. Gets a status message for the login attempt.
      * @return string Status message for the login attempt.
      */
     public function getMessage()
     {
-        if ($this->isValidPsw()) {
+        if ($this->isValidUserData()) {
             return "Welcome {$this->username}, you are now logged in!";
-        } elseif ($this->isValidUser() && !$this->isValidPsw()) {
+        } elseif ($this->isValidUser() && !$this->isValidUserData()) {
             return "Invalid password.";
         } else {
             return "Unauthorized user.";

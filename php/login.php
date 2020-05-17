@@ -15,11 +15,11 @@ require_once 'util.php';
 //$login = new Login($_GET['uname'], $_GET['psw']);
 $login = new Login($_POST['uname'], $_POST['psw']);
 
-$userId = $login->isValidPsw();
+$userId = $login->isValidUserData();
 
 $responseText = [];
 
-if ($isValidPsw) {
+if ( 0 < $userId ) {
     session_start();
     // Sessionvariable that is created when a user has successfully logged in, this variable holds the username as its value.
     $_SESSION['username'] = $_GET['uname'];
@@ -35,7 +35,7 @@ if ($isValidPsw) {
     $responseText["links"] = $link_array;
 }
 // Add boolean indicating if the login was successful
-$responseText["isValidLogin"] = $isValidPsw;
+$responseText["isValidLogin"] = 0 < $userId;
 $responseText["msg"] = $login->getMessage();
 
 // Send back response
