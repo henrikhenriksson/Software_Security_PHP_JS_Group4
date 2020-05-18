@@ -1,0 +1,14 @@
+# vim: set ft=dockerfile:
+FROM php:7.1-apache
+
+# Documentation purpose only
+EXPOSE 80
+# Mount this at run-time
+
+RUN apt-get update
+
+#https://github.com/docker-library/php/issues/221
+# Install Postgre PDO
+RUN apt-get install -y libpq-dev \
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install pdo pdo_pgsql pgsql
