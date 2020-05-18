@@ -2,13 +2,13 @@
 
 if command -v docker &> /dev/null ; then  # Docker is installed
     echo "Docker is installed"
-    if docker ps | grep -q php_server; then  # server is running
+    if docker ps | grep -q webserver; then  # server is running
         echo "Server is running, stopping..."
-        docker stop php_server
+        docker stop webserver
     fi
 
     echo "Starting server..."
-    docker run -p '8000:80' -p '8080:443' --mount type=bind,src=/php/,dst=/var/www/html -d php_server
+    docker run -p '8000:80' -p '8080:443' --mount type=bind,src=/php/,dst=/var/www/html -d webserver
 
     if [[ $? -eq 0 ]] ; then
         echo "Server started successfully!"
