@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
     d.build_image "/docker/postgres",
       args: "-t 'psql-api-front'"
     d.run "php_server",
-      args: "-p '8000:80' --mount type=bind,src=/php,dst=/var/www/html" # vm -> docker php_server
+      args: "-p '8000:80' --mount type=bind,src=/php/,dst=/var/www/html" # vm -> docker php_server
     d.run "psql-api-front",
       args: "-p '5432:5432'" # vm -> docker psql-api-front
   end
