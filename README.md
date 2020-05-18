@@ -17,6 +17,7 @@ http://localhost:8000 and the database to 127.0.0.1:5432.
 - `vagrant ssh` - ssh into the machine
 - `vagrant destroy` - remove the machine
 - `vagrant provision` - run the Vagrant script provision commands again.
+- `vagrant box update` - update the vagrant box Database
 
 ### Database config
 

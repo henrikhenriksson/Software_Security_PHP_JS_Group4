@@ -3,6 +3,7 @@ FROM php:7.1-apache
 
 # Documentation purpose only
 EXPOSE 80
+EXPOSE 443
 # Mount this at run-time
 
 RUN apt-get update
@@ -12,3 +13,34 @@ RUN apt-get update
 RUN apt-get install -y libpq-dev \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql
+
+# Copy TLS certificate
+RUN mkdir /etc/cert
+COPY cert/dt167g.crt /etc/cert/dt167g.crt
+COPY cert/dt167g.key /etc/cert/dt167g.key
+
+RUN /bin/bash -c 'a2enmod ssl && a2enmod rewrite'
+
+# Set global servername
+RUN /bin/bash -c 'echo "ServerName 127.0.0.1" >> /etc/apache2/apache2.conf'
+
+# Create apache https virtual host and redirect http -> https
+RUN /bin/bash -c '\
+printf "<VirtualHost *:80>\n\
+        Redirect permanent / https://127.0.0.1:8080\n\
+</VirtualHost>\n\
+<VirtualHost *:443>\n\
+        ServerAdmin webmaster@localhost\n\
+        DocumentRoot /var/www/html\n\
+        LogLevel info\n\
+        ErrorLog ${APACHE_LOG_DIR}/error.log\n\
+        CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
+\n\
+        SSLEngine On\n\
+        SSLProtocol -all +TLSv1.2 +TLSv1.3\n\
+        SSLCertificateFile /etc/cert/dt167g.crt\n\
+        SSLCertificateKeyFile /etc/cert/dt167g.key\n\
+</VirtualHost>\n" > /etc/apache2/sites-enabled/000-default.conf'
+
+# Apply server changes
+RUN /bin/bash -c 'service apache2 restart'
