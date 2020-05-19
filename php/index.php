@@ -9,9 +9,12 @@
  * frhe0300
  * frhe0300@student.miun.se
  ******************************************************************************/
-$title = "laboration 4";
+$title = "DT167G - Group 4";
+require_once 'util.php';
 
 session_start();
+
+$posts = DatabaseHandler::getInstance()->getPosts();
 
 /*******************************************************************************
  * HTML section starts here
@@ -39,9 +42,37 @@ session_start();
             <?php require 'aside-menu.php'; ?>
         </aside>
         <section>
-            <h2>VÄLKOMMEN
+            <h2>Welcome!
             </h2>
-            <p>Detta är andra laborationen</p>
+            <p>This is a social networking page where you can share your thoughts on software security. <br />
+                Just log in to your account or sign up to post a message.</p>
+            <br>
+            <hr>
+            <br>
+            <?php if (empty($posts)) : ?>
+                <h2>No recent posts</h2>
+            <?php else : ?>
+                <h2>Recent posts</h2>
+                <table>
+                    <tr>
+                        <th class="th20">FROM
+                        </th>
+                        <th class="th40">POST
+                        </th>
+                        <th class="th40">LOG
+                        </th>
+                    </tr>
+                    <!-- Display the five most recent posts. -->
+                    <?php for ($i = 0; $i < sizeof($posts) && $i < 5; $i++) : ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($posts[$i]->getName()); ?></td>
+                            <td><?php echo htmlspecialchars($posts[$i]->getMessage()); ?></td>
+                            <td><?php echo "IP: {$posts[$i]->getIplog()}"; ?><br><?php echo "TID: {$posts[$i]->getTimelog()}"; ?></td>
+                        </tr>
+                    <?php endfor; ?>
+
+                </table>
+            <?php endif; ?>
         </section>
     </main>
     <footer>
