@@ -17,10 +17,10 @@ class Member
      * @param string $id Member id.
      * @param string $username Member username.
      */
-    public function __construct(int $id = -1, string $username = "", $roles = null)
+    public function __construct(int $id = -1, string $username = "", array $roles = null)
     {
         $this->id = $id;
-        $this->username = $username;
+        $this->username = escape($username);
         if ($roles) {
             $this->roles = $roles;
         }
@@ -64,9 +64,11 @@ class Member
         return new Member($data['id'], $data['username']);
     }
 
+    // TODO fix this method
     public static function fromSession(): Member
     {
         $db = DatabaseHandler::getInstance();
+        // TODO check session user exists
         $id = $_SESSION['user'];
         $sql = "SELECT id, username FROM dt167g.users WHERE id=$1";
         $ok = $db->query($sql, [ $id ]);
@@ -77,7 +79,6 @@ class Member
             return $user;
         }
 
-        // TODO fix this method
         $data = $db->getFirstResult();
         if (empty($data) || !self::validPassword($pass, $data['password'])) {
             $user = new Member();
@@ -91,6 +92,7 @@ class Member
 
     private static function validPassword(string $entered, string $actual): bool
     {
+        // TODO hash
         return $entered === $actual;
     }
 
