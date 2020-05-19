@@ -9,7 +9,7 @@
  * frhe0300
  * frhe0300@student.miun.se
  ******************************************************************************/
-$title = "laboration 4";
+$title = "DT167G - Group 4";
 require_once 'util.php';
 
 # MAIN()
@@ -20,36 +20,23 @@ date_default_timezone_set("Europe/Stockholm");
 $dbHandler = DatabaseHandler::getInstance();
 $name = "";
 $text = "";
-$captchaWarning = "";
 //$hasPosted = isset($_COOKIE["MIUN_GUESTBOOK"]);
 $isLoggedIn = isset($_SESSION['username']);
 //$gbFormClass = (!$hasPosted || $isLoggedIn) ? "" : "hide";
-$gbFormClass = ( $isLoggedIn ) ? "" : "hide";
+$gbFormClass = ($isLoggedIn) ? "" : "hide";
 $posts = $dbHandler->getPosts();
 
 // Om användaren har submittat något
 if (!empty($_POST)) {
-    // Om användaren skrivit rätt captcha
-    if ($_SESSION["captcha"] === $_POST["captcha"]) {
-        // Skapa en post av användarens input
-        $post = new Post(trim($_POST["name"]), trim($_POST["text"]));
-        // Skicka posten till databasen
-        $dbHandler->addPost($post->toArray());
+    // Skapa en post av användarens input
+    $post = new Post(trim($_POST["name"]), trim($_POST["text"]));
+    // Skicka posten till databasen
+    $dbHandler->addPost($post->toArray());
 
-        // Sätt cookie som anger att användaren har gjort en post
-        setcookie("MIUN_GUESTBOOK", "HAS_POSTED");
-        header("Location: guestbook.php"); // Refresha sidan
-    } else {
-        // Om Captcha var fel, behåll användarens input
-        $name = htmlspecialchars($_POST["name"]);
-        $text = htmlspecialchars($_POST["text"]);
-
-        // Skriv ut att inskriven captcha var fel
-        $captchaWarning = "Incorrect captcha, please try again!";
-    }
+    // Sätt cookie som anger att användaren har gjort en post
+    setcookie("MIUN_GUESTBOOK", "HAS_POSTED");
+    header("Location: guestbook.php"); // Refresha sidan
 }
-// Generate a new captcha
-$_SESSION["captcha"] = CaptchaFactory::createCaptcha();
 
 /*******************************************************************************
  * HTML section starts here
@@ -75,6 +62,7 @@ $_SESSION["captcha"] = CaptchaFactory::createCaptcha();
         <aside>
             <?php require 'aside-login.php'; ?>
             <?php require 'aside-menu.php'; ?>
+            <?php require 'aside-search.php'; ?>
         </aside>
         <section>
             <h2>GÄSTBOK</h2>
@@ -107,11 +95,6 @@ $_SESSION["captcha"] = CaptchaFactory::createCaptcha();
                     <br>
                     <label for="text">Inlägg</label>
                     <textarea id="text" name="text" rows="10" cols="50" placeholder="Skriva meddelande här" required><?php echo $text; ?></textarea>
-                    <br>
-                    <label>Captcha: <span class="red"><?php echo $_SESSION["captcha"]; ?></span></label>
-                    <input type="text" placeholder="Skriva captcha här" name="captcha" required>
-                    <button type="submit">Skicka</button>
-                    <h3 class="red"><?php echo $captchaWarning; ?></h3>
                 </fieldset>
             </form>
 
