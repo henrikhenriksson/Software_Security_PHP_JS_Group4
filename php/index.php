@@ -37,6 +37,7 @@ session_start();
         <aside>
             <?php require 'aside-login.php'; ?>
             <?php require 'aside-menu.php'; ?>
+            <?php require 'aside-search.php'; ?>
         </aside>
         <section>
             <h2>VÄLKOMMEN
