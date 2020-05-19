@@ -1,13 +1,11 @@
 <?PHP
 
 /*******************************************************************************
- * laboration 4, Kurs: DT161G
+ * Project, Kurs: DT167G
  * File: guestbook.php
- * Desc: Guestbook page for laboration 4
+ * Desc: Guestbook page for project
  *
- * Fredrik Helgesson
- * frhe0300
- * frhe0300@student.miun.se
+ * Group 4
  ******************************************************************************/
 $title = "DT167G - Group 4";
 require_once 'util.php';
@@ -20,22 +18,21 @@ date_default_timezone_set("Europe/Stockholm");
 $dbHandler = DatabaseHandler::getInstance();
 $name = "";
 $text = "";
-//$hasPosted = isset($_COOKIE["MIUN_GUESTBOOK"]);
 $isLoggedIn = isset($_SESSION['username']);
-//$gbFormClass = (!$hasPosted || $isLoggedIn) ? "" : "hide";
 $gbFormClass = ($isLoggedIn) ? "" : "hide";
 $posts = $dbHandler->getPosts();
 
-// Om användaren har submittat något
-if (!empty($_POST)) {
+
+// TODO: Add TS/TOKEN security instead of $isLoggedIn check
+
+// Om användaren har submittat något och är inloggad
+if (!empty($_POST) && $isLoggedIn) {
     // Skapa en post av användarens input
     $post = new Post(trim($_POST["name"]), trim($_POST["text"]));
     // Skicka posten till databasen
     $dbHandler->addPost($post->toArray());
-
-    // Sätt cookie som anger att användaren har gjort en post
-    setcookie("MIUN_GUESTBOOK", "HAS_POSTED");
-    header("Location: guestbook.php"); // Refresha sidan
+    // Refresha sidan
+    header("Location: guestbook.php");
 }
 
 /*******************************************************************************
@@ -49,7 +46,7 @@ if (!empty($_POST)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css" />
-    <title>DT161G-Laboration2</title>
+    <title>DT167G - Group 4</title>
     <script src="js/main.js"></script>
 </head>
 
@@ -94,7 +91,7 @@ if (!empty($_POST)) {
                     <input type="text" placeholder="Skriv ditt namn" name="name" required value="<?php echo $name; ?>">
                     <br>
                     <label for="text">Inlägg</label>
-                    <textarea id="text" name="text" rows="10" cols="50" placeholder="Skriva meddelande här" required><?php echo $text; ?></textarea>
+                    <textarea id="text" name="text" rows="10" cols="50" placeholder="Skriv meddelande här" required><?php echo $text; ?></textarea>
                 </fieldset>
             </form>
 
