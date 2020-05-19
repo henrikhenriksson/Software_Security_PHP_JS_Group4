@@ -1,76 +1,112 @@
 <?php
 
-/*******************************************************************************
- * Laboration 4, Kurs: DT161G
- * File: member.class.php
- * Desc: Class Member for laboration 4
- *
- * Fredrik Helgesson
- * frhe0300
- * frhe0300@student.miun.se
- ******************************************************************************/
-
 /**
- * Summary. Represents a Member in the database table Member.
+ * Member handles member operations such as login, create and storing
+ * information about the member.
  */
 class Member
 {
-    private $id; ///< Member id
-    private $username; ///< Member username
-    private $password; ///< Member password
-    private $roles; ///< Member roles
+    private $id;
+    private $username;
+    private $error = false;
+    private $error_message;
+    private $roles = [];
 
     /**
      * Summary. Initializing constructor.
      * @param string $id Member id.
      * @param string $username Member username.
-     * @param string $password Member password.
      */
-    public function __construct($id, $username, $password)
+    public function __construct(int $id = -1, string $username = "", $roles = null)
     {
         $this->id = $id;
         $this->username = $username;
-        $this->password = $password;
-        $this->roles = [];
+        if ($roles) {
+            $this->roles = $roles;
+        }
     }
 
-    /**
-     * Get the value of id
-     */
-    public function getId()
+    public static function getAll(int $limit = 0, int $offset = 0): array
     {
-        return $this->id;
+        $db = DatabaseHandler::getInstance();
+        $sql = "SELECT id, username FROM sdt167g.users";
+        if ($limit < 0) {
+            $sql += " LIMIT $limit";
+        }
+        if ($offset < 0) {
+            $sql += " OFFSET $offset";
+        }
+        $ok = $db->query($sql);
+        // TODO
+        return $result ? pg_fetch_all($result) : [];
     }
 
-    /**
-     * Get the value of username
-     */
-    public function getUsername()
+    public static function login(string $uname, string $pass): Member
     {
-        return $this->username;
+        $db = DatabaseHandler::getInstance();
+        $sql = "SELECT id, username, password FROM dt167g.users WHERE username=$1";
+        $ok = $db->query($sql, [$uname]);
+
+        if (!$ok) {
+            $user = new Member();
+            $user->setError("Database error");
+            return $user;
+        }
+
+        $data = $db->getFirstResult();
+        if (empty($data) || !self::validPassword($pass, $data['password'])) {
+            $user = new Member();
+            $user->setError("Invalid credentials!");
+            return $user;
+        }
+
+        $_SESSION['user'] = $data['id'];
+        return new Member($data['id'], $data['username']);
     }
 
-    /**
-     * Get the value of password
-     */
-    public function getPassword()
+    public static function fromSession(): Member
     {
-        return $this->password;
+        $db = DatabaseHandler::getInstance();
+        $id = $_SESSION['user'];
+        $sql = "SELECT id, username FROM dt167g.users WHERE id=$1";
+        $ok = $db->query($sql, [ $id ]);
+
+        if (!$ok) {
+            $user = new Member();
+            $user->setError("Database error");
+            return $user;
+        }
+
+        // TODO fix this method
+        $data = $db->getFirstResult();
+        if (empty($data) || !self::validPassword($pass, $data['password'])) {
+            $user = new Member();
+            $user->setError("Invalid user id: ${id}");
+            return $user;
+        }
+
+        $_SESSION['user'] = $data['id'];
+        return new Member($data['id'], $data['username']);
     }
 
-    /**
-     * Get the value of roles
-     */
-    public function getRoles()
+    private static function validPassword(string $entered, string $actual): bool
     {
-        return $this->roles;
+        return $entered === $actual;
     }
 
-    /**
-     * Set the value of roles
-     */
-    public function setRoles($roles)
+    private function setError(string $msg)
     {
-        $this->roles = $roles;
+        $this->error = true;
+        $this->error_message = $msg;
+    }
+
+    public function error(): bool
+    {
+        return $this->error;
+    }
+
+    public function errorMessage(): string
+    {
+        return $this->error_message;
     }
 }

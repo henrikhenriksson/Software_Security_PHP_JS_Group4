@@ -18,6 +18,11 @@ class DatabaseHandler
         $this->connect();
     }
 
+    public function __destruct()
+    {
+        $this->disconnect();
+    }
+
     /**
      * Summary. Gets an instance of DatabaseHandler class.
      * @return DatabaseHandler An instance of DatabaseHandler class.
@@ -33,8 +38,11 @@ class DatabaseHandler
     public function checkUserCredentials($username, $password)
     {
         // Prepare a query for execution
-        $result = pg_prepare($this->dbconn, "user_check",
-            'SELECT id FROM dt167g.users WHERE username = $1 AND userpassword = $2;');
+        $result = pg_prepare(
+            $this->dbconn,
+            "user_check",
+            'SELECT id FROM dt167g.users WHERE username = $1 AND userpassword = $2;'
+        );
 
         $result = pg_execute($this->dbconn, "user_check", array($username, $password));
 
@@ -90,6 +98,26 @@ class DatabaseHandler
             $query = "Insert into dt167g.likes (postId, userId)values($1, $2)";
             $result = pg_query_params($this->dbconn, $query, $data);
         }
+    }
+
+    public function query(string $query, array $params = []): bool
+    {
+        $this->result = empty($params)
+            ? pg_query($this->dbconn, $query)
+            : pg_query_params($this->dbconn, $query, $params);
+        return $this->result !== false;
+    }
+
+    public function getFirstResult(): array
+    {
+        $row = pg_fetch_assoc($this->result);
+        return $row ? $row : [];
+    }
+
+    public function getResult(): array
+    {
+        $rows = pg_fetch_all($this->result);
+        return $rows ?? [];
     }
 
     /**
