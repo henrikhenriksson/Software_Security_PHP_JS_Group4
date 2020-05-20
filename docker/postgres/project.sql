@@ -21,7 +21,7 @@ CREATE TABLE dt167g.users (
 )
 WITHOUT OIDS;
 
--- Insert user a with the hashed value of 'a'
+-- Insert user a with the hashed value of 'a'gitn
 insert into dt167g.users (username, password) values ('a','$2y$10$fgnxX2bYDC3mMkXErdY80uD9Mh/gBNIVGLuimnP/WddU6TK2dUvKu');
 
 DROP TABLE IF EXISTS dt167g.posts;
