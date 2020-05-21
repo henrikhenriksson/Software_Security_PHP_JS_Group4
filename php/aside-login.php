@@ -18,7 +18,7 @@ $logoutClass = isset($_SESSION['username']) ? "" : "hide";
     <h2>LOGIN</h2>
     <form id="loginForm">
         <input type="hidden" id="token" value="<?php echo Token::generateToken('login');?>">
-        <input type="hidden" id="TS" value="<?php echo "
+        <input type="hidden" id="TS" value="<?php echo Token::generateTs();?>">
         <label><b>Username</b></label>
         <input type="text" placeholder="m" name="uname" id="uname" required maxlength="10" value="m" autocomplete="off">
         <label><b>Password</b></label>
