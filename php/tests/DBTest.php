@@ -3,7 +3,7 @@
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__.'/../classes/db.class.php';
-require_once __DIR__.'/../classes/cfg.class.php';
+require_once __DIR__.'/../classes/config.class.php';
 
 final class DBTest extends TestCase
 {
@@ -11,7 +11,7 @@ final class DBTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
-        self::$config = new Cfg(__DIR__.'/../config.php');
+        self::$config = new Config(__DIR__.'/../config.php');
     }
 
     private function goodDB(): DB
