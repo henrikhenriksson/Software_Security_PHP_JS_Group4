@@ -14,7 +14,7 @@ class DatabaseHandler
      */
     private function __construct()
     {
-//        $this->dbconn = null;
+        //        $this->dbconn = null;
         $this->connect();
     }
 
@@ -33,6 +33,53 @@ class DatabaseHandler
             self::$instance = new DatabaseHandler();
         }
         return self::$instance;
+    }
+
+    /**
+     * Summary. Gets the requested posts from the database.
+     * @param resource|false Result from pg_query.
+     * @return Post[] Array of posts.
+     */
+    private function getPostsFromPgResult($result)
+    {
+        $posts = [];
+
+        while ($row = pg_fetch_array($result)) {
+            $posts[] = new Post($row['name'], $row['message'], $row['iplog'], $row['timelog']);
+        }
+        return $posts;
+    }
+
+    /**
+     * Summary. Makes a query to find posts from searched author. Search is case insensitive.
+     * @param String Author of searched posts.
+     * @return Post[] Array of posts.
+     */
+    public function searchUserPosts($username)
+    {
+        $query = "SELECT * FROM dt167g.posts WHERE name ILIKE $1;";
+        $result = pg_query_params($this->dbconn, $query, array($username));
+
+        $posts = $this->getPostsFromPgResult($result);
+        pg_free_result($result);
+
+        return $posts;
+    }
+
+    /**
+     * Summary. Makes a query to find posts containing searched keyword. Search is case insensitive.
+     * @param String Keyword of searched posts.
+     * @return Post[] Array of posts.
+     */
+    public function searchKeywordPosts($keyword)
+    {
+        $query = "SELECT * FROM dt167g.posts WHERE message ILIKE $1;";
+        $result = pg_query_params($this->dbconn, $query, array("%{$keyword}%"));
+
+        $posts = $this->getPostsFromPgResult($result);
+        pg_free_result($result);
+
+        return $posts;
     }
 
     public function checkUserCredentials($username, $password)
@@ -55,13 +102,13 @@ class DatabaseHandler
      */
     public function addPost(array $post)
     {
-//        if ($this->connect()) {
+        //        if ($this->connect()) {
 
         $query = "INSERT INTO dt167g.messages (name, message, iplog, timelog)VALUES ($1, $2, $3, $4);";
         $result = pg_query_params($this->dbconn, $query, $post);
 
         //$this->disconnect();
-//        }
+        //        }
     }
 
     /**
@@ -72,17 +119,11 @@ class DatabaseHandler
     {
         //if ($this->connect()) {
 
-        $query = 'SELECT * FROM dt167g.messages;';
+        $query = 'SELECT * FROM dt167g.posts;';
         $result = pg_query($this->dbconn, $query);
 
-        $posts = [];
-
-        while ($row = pg_fetch_array($result)) {
-            $posts[] = new Post($row['name'], $row['message'], $row['iplog'], $row['timelog']);
-        }
-
+        $posts = $this->getPostsFromPgResult($result);
         pg_free_result($result);
-        //$this->disconnect();
 
         return $posts;
         //}
@@ -93,7 +134,7 @@ class DatabaseHandler
 
     public function likePost($userId, $postId)
     {
-        if (validUserId($userId)) {
+        if ($this->validUserId($userId)) {
             $data = array($postId, $userId);
             $query = "Insert into dt167g.likes (postId, userId)values($1, $2)";
             $result = pg_query_params($this->dbconn, $query, $data);
@@ -125,7 +166,7 @@ class DatabaseHandler
      * @param $userId
      * @return bool
      */
-    public function validUserId($userId)
+    private function validUserId($userId)
     {
         return $userId > 0;
     }
