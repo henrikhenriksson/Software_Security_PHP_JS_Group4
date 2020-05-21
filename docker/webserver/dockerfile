@@ -1,5 +1,5 @@
 # vim: set ft=dockerfile:
-FROM php:7.1-apache
+FROM php:7.4-apache
 
 # Documentation purpose only
 EXPOSE 80

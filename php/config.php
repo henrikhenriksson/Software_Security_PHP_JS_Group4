@@ -15,11 +15,11 @@ $config = [
     /***** DATABASE CONNECTION *****/
     #MIUN HOST : studentpsql.miun.se
     #LOCALHOST : 127.0.0.1
-    'host' => 'studentpsql.miun.se',    // Database host
+    'host' => '172.17.0.1',    // Database host
     'port' => '5432',                   // Database port
-    'dbname' => 'frhe0300',             // Database name
-    'user' => 'frhe0300',               // Database user
-    'password' => '',          // Database password
+    'dbname' => 'grupp4',             // Database name
+    'user' => 'grupp4',               // Database user
+    'password' => 'test',          // Database password
 
     /***** GUESTBOOK *****/
     'captchaLength' => 5,

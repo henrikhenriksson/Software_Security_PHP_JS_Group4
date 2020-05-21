@@ -42,7 +42,26 @@ spl_autoload_register(function ($class) {
  * for production set to false
  ******************************************************************************/
 
-if (Config::getInstance()->useDebugMode()) {
+function getConfig(): Config
+{
+    static $cfg = null;
+    if (!$cfg) {
+        $cfg = new Config(__DIR__.'/config.php');
+    }
+    return $cfg;
+}
+
+function getDBInstance(): DB
+{
+    static $db = null;
+    if (!$db) {
+        $cfg = getConfig();
+        $db = new DB($cfg->getDbDsn());
+    }
+    return $db;
+}
+
+if (getConfig()->useDebugMode()) {
     error_reporting(E_ALL);
     ini_set('display_errors', 'On');
 }
