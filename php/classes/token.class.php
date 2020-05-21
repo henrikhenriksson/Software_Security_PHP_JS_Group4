@@ -19,7 +19,7 @@ class Token
     public static function generateTs()
     {
         ///@todo implement generateTs
-        retunr "34";
+        return "34";
     }
 
     public static function validateTs(string $userTs)
