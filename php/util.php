@@ -10,6 +10,23 @@
  * frhe0300@student.miun.se
  ******************************************************************************/
 
+session_start();  // Make session global
+
+function escape(string $unsafe): string
+{
+    return htmlspecialchars($unsafe, ENT_QUOTES);
+}
+
+function dump($something)
+{
+    echo '<pre>' , var_dump($something) , '</pre>';
+}
+
+function prettyprint($something)
+{
+    echo '<pre>' , print_r($something) , '</pre>';
+}
+
 /*******************************************************************************
  * autoload functions for Classes stored i directory classes
  * All classes must be saved i lower case to work and end whit class.php
