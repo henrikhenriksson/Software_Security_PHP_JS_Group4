@@ -24,6 +24,7 @@ class Config
     {
         require $fname;
         $this->config = $config;
+        $this->local_config = $local_config;
     }
 
     /**
@@ -36,6 +37,19 @@ class Config
             . "dbname={$this->config['dbname']} user={$this->config['user']} "
             . "password={$this->config['password']} "
             . "connect_timeout={$this->config['connect_timeout']}";
+    }
+
+    /**
+     * Summary. Gets parameters used to connect to the database from config file.
+     * @return string Parameters used to connect to the database.
+     */
+    public function getLocalDbDsn()
+    {
+        return "host={$this->local_config['host']} port={$this->local_config['port']} "
+            . "dbname={$this->local_config['dbname']} "
+            . "user={$this->local_config['user']} "
+            . "password={$this->local_config['password']} "
+            . "connect_timeout={$this->local_config['connect_timeout']}";
     }
 
     /**
