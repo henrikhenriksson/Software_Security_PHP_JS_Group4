@@ -11,10 +11,10 @@
  ******************************************************************************/
 
 // This array holds the links to be displayed when a user has logged out
-$link_array = [
-    "Hem" => "index.php",
-    "Gästbok" => "guestbook.php",
-];
+//$link_array = [
+//    "Hem" => "index.php",
+//    "Gästbok" => "guestbook.php",
+//];
 
 // Initialize the session.
 session_start();
@@ -23,15 +23,11 @@ session_start();
 $responseText = [];
 $responseText["hasPosted"] = isset($_COOKIE["MIUN_GUESTBOOK"]);
 
-// Unset all of the session variables except captcha.
-foreach ($_SESSION as $key => $value) {
-    if ($key !== "captcha") {
-        unset($_SESSION[$key]);
-    }
-}
+resetSession();
+
 
 $responseText["msg"] = "You are logged out and the session cookie has been destroyed";
-$responseText["links"] = $link_array;
+//$responseText["links"] = $link_array;
 
 // Send back response
 header('Content-Type: application/json');

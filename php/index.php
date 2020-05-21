@@ -12,7 +12,7 @@
 $title = "DT167G - Group 4";
 require_once 'util.php';
 
-session_start();
+//session_start();
 
 $posts = DatabaseHandler::getInstance()->getPosts();
 

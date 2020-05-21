@@ -50,18 +50,22 @@ window.addEventListener("load", main, false);
 function doLogin() {
   const UNAME = byId("uname").value;
   const PSW = byId("psw").value;
+  const TOKEN = byId("token").value;
+  const TS = byId("TS").value;
 
-  if (UNAME != "" && PSW != "") {
+  if (UNAME !== "" && PSW !== "") {
     xhr.addEventListener("readystatechange", processLogin, false);
-    $data = new DataForm();
-    $data.append('unmae', $UNAME);
-    $data.append('psw', $PSW);
+    let data = new FormData();
+    data.append('uname', UNAME);
+    data.append('psw', PSW);
+    data.append("token", TOKEN);
+    data.append("TS", TS);
 
 
     // Send formdata with URL to login.php
     //xhr.open("GET", `login.php?uname=${UNAME}&psw=${PSW}`, true);
     xhr.open("POST", `login.php`, true);
-    xhr.send($data);
+    xhr.send(data);
   }
 }
 
@@ -81,6 +85,8 @@ function processLogin() {
   if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
     //First we must remove the registered event since we use the same xhr object for login and logout
     xhr.removeEventListener("readystatechange", processLogin, false);
+    console.log("Login response:" + this.responseText);
+
     var myResponse = JSON.parse(this.responseText);
 
     // Get menu links from XHR response

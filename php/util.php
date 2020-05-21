@@ -27,6 +27,16 @@ function prettyprint($something)
     echo '<pre>' , print_r($something) , '</pre>';
 }
 
+function resetSession()
+{
+    // Unset all of the session variables except captcha.
+    foreach ($_SESSION as $key => $value) {
+        if ($key !== "captcha") {
+            unset($_SESSION[$key]);
+        }
+    }
+}
+
 /*******************************************************************************
  * autoload functions for Classes stored i directory classes
  * All classes must be saved i lower case to work and end whit class.php
