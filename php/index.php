@@ -1,4 +1,4 @@
-<?PHP
+<?php
 
 /*******************************************************************************
  * laboration 4, Kurs: DT161G
@@ -12,9 +12,7 @@
 $title = "DT167G - Group 4";
 require_once 'util.php';
 
-session_start();
-
-$posts = DatabaseHandler::getInstance()->getPosts();
+$posts = [];  // Use posts class to retrieve
 
 /*******************************************************************************
  * HTML section starts here
