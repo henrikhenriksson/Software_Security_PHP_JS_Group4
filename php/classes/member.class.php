@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Member handles member operations such as login, create and storing
- * information about the member.
+ * Member handles member data and operations such as CRUD, login, restore.
  */
 class Member
 {
     private $id;
     private $username;
+    // No password storage
     private $error = false;
     private $error_message;
-    private $roles = [];
+    private $roles;
 
     /**
      * Summary. Initializing constructor.
      * @param string $id Member id.
      * @param string $username Member username.
      */
-    public function __construct(int $id = -1, string $username = "", array $roles = null)
+    public function __construct(int $id = -1, string $username = "", array $roles = [])
     {
+        // XSS escaping in constructor
+        // Returned values from methods are considered safe.
         $this->id = $id;
         $this->username = escape($username);
-        if ($roles) {
-            $this->roles = $roles;
-        }
+        $this->roles = $roles;
     }
 
     public static function getAll(int $limit = 0, int $offset = 0): array
@@ -53,9 +53,12 @@ class Member
             return $user;
         }
 
-        $data = $db->getFirstResult();
+        $data = $db->getNextRow();
         if (empty($data) || !self::validPassword($pass, $data['password'])) {
             $user = new Member();
+            // The only information sent back is if the combination of username
+            // and password was correct. No hints about if the username or
+            // password exists individually.
             $user->setError("Invalid credentials!");
             return $user;
         }
@@ -79,7 +82,7 @@ class Member
             return $user;
         }
 
-        $data = $db->getFirstResult();
+        $data = $db->getNextRow();
         if (empty($data) || !self::validPassword($pass, $data['password'])) {
             $user = new Member();
             $user->setError("Invalid user id: ${id}");
