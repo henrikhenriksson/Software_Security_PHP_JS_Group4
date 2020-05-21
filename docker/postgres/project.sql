@@ -21,8 +21,17 @@ CREATE TABLE dt167g.users (
 )
 WITHOUT OIDS;
 
--- Insert user a with the hashed value of 'a'gitn
-insert into dt167g.users (username, password) values ('a','$2y$10$fgnxX2bYDC3mMkXErdY80uD9Mh/gBNIVGLuimnP/WddU6TK2dUvKu');
+-- Insert test users
+INSERT INTO dt167g.users (username, password) VALUES
+('a','$2y$10$/gT5gQz.QHNsRL7CYtMjMOR9Uz4LDeY7Y346LE35VmbeaG4OCCVj2')
+('b','$2y$10$l3Cy..4.EpUr1wsOG3M79u6pXjSzhYWEEjtT//eUJFwtv1C8dXYJ2')
+('c','$2y$10$/Glrw5RbCwRjgiXDxzxFcu4jkeofu/EFZnHuiTrIjmevDNLyfCRAa')
+('d','$2y$10$B6mZLiQvvyWwd9URiGB8v.YJ05i22P5BUAI7MBnGCI2UZkJ5TAOiq')
+('e','$2y$10$NT1k8g0iUnqWoG6Da6pB5.pr/0fDHf0gNx9hrWl4yK32Vs1wqKIx.')
+('f','$2y$10$45z2siH8ImPqb5SJYhMbg.OPM/C/Dt7RihMmWcbPbQXGZWS5vrJRu')
+('g','$2y$10$wOK9EPCr1V2Lm5Oj/64VQexJ6Y5IieUZPDJfQs1b91HfhITqtUX2K')
+('h','$2y$10$anKsft7OO5YbjYzJC9CU8.GVMwhv5hfDMiqLQza4Wh5iNgNF9g2re');
+
 
 DROP TABLE IF EXISTS dt167g.posts;
 
