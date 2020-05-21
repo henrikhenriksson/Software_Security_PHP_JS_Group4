@@ -1,0 +1,146 @@
+/*******************************************************************************
+ * Laboration 4, Kurs: DT161G
+ * File: style.css
+ * Desc: Style sheets for laboration 4
+ * 
+ * Fredrik Helgesson
+ * frhe0300
+ * frhe0300@student.miun.se
+ ******************************************************************************/
+
+/* Reset margins and padding */
+* {
+  margin: 5px;
+  padding: 0px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html {
+  margin: auto;
+  max-width: 960px;
+  font: 13px/1.2 Helvetica, Arial, sans-serif;
+  background: #eaeaea;
+}
+
+/* Tell the browser to render HTML 5 elements as block */
+header,
+main,
+section,
+article,
+aside,
+nav,
+footer {
+  display: block;
+}
+
+body {
+  padding: 5px;
+  background: #ffffff;
+  border: thin solid #c7c7c7;
+  box-shadow: -2px 5px 25px black;
+  border-radius: 5px;
+}
+
+header {
+  border: 2px solid black;
+  border-radius: 10px;
+}
+
+main {
+  min-height: 400px;
+}
+
+aside {
+  float: left;
+  max-width: 300px;
+  padding-top: 0px;
+  padding-right: 5px;
+  padding-left: 5px;
+  padding-bottom: 5px;
+  min-height: inherit;
+}
+
+form {
+  padding: 0px;
+}
+
+section {
+  margin-left: 300px;
+  padding-top: 5px;
+  padding-right: 5px;
+  padding-left: 5px;
+  padding-bottom: 5px;
+  border-left: 2px solid gray;
+  vertical-align: top;
+  min-height: inherit;
+}
+
+h1 {
+  font-size: 45px;
+  line-height: 90px;
+  padding: 22px 0px;
+}
+
+p {
+  padding-top: 5px;
+  padding-right: 5px;
+  padding-left: 5px;
+  padding-bottom: 5px;
+}
+
+p span {
+  display: block;
+  line-height: 1;
+  font-weight: bold;
+}
+
+header {
+  padding: 5px 20px;
+  margin-bottom: 10px;
+  height: 140px;
+}
+
+nav {
+  padding: 5px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 97%;
+}
+
+table,
+th,
+td {
+  border: 1px solid black;
+  padding: 5px;
+}
+
+.th20 {
+  width: 20%;
+}
+
+.th40 {
+  width: 40%;
+}
+
+footer {
+  border-top: 1px solid black;
+}
+
+.logo {
+  width: 252px;
+  height: 120px;
+  margin: 5px 110px 5px 5px;
+  float: left;
+}
+
+.red {
+  color: red;
+  font-weight: bold;
+}
+.hide {
+  display: none;
+}

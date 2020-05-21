@@ -1,0 +1,14 @@
+# vi: set ft=dockerfile:
+
+FROM postgres:latest
+
+ENV POSTGRES_PASSWORD test
+ENV POSTGRES_USER grupp4
+ENV POSTGRES_DB grupp4
+
+# Documentation purpose only
+EXPOSE 5432
+
+RUN mkdir /home/sql
+COPY project.sql /docker-entrypoint-initdb.d/project.sql
+COPY project.sql /home/sql/project.sql

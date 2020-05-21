@@ -1,3 +1,11 @@
+# Editor / IDE
 *.swp
-
+.idea
 .DS_Store
+*.cache
+
+# Vagrant
+.vagrant/
+/*.log
+
+

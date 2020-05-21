@@ -1,20 +1,27 @@
 <?PHP
 
 /*******************************************************************************
- * laboration 4, Kurs: DT161G
- * File: index.php
- * Desc: Start page for laboration 4
+ * Projekt, Kurs: DT167G
+ * File: search.php
+ * Desc: Search page for displaying guestbook posts matching a keyword or user.
  *
- * Fredrik Helgesson
- * frhe0300
- * frhe0300@student.miun.se
+ * Gang of Five
  ******************************************************************************/
-$title = "DT167G - Group 4";
-require_once 'util.php';
+$title = "laboration 4";
 
+require_once 'util.php';
 session_start();
 
-$posts = DatabaseHandler::getInstance()->getPosts();
+$posts = null;
+
+if (isset($_GET["search-type"]) && isset($_GET["search-field"])) {
+
+    if ($_GET["search-type"] == "username") {
+        $posts = DatabaseHandler::getInstance()->searchUserPosts($_GET["search-field"]);
+    } else if ($_GET["search-type"] == "keyword") {
+        $posts = DatabaseHandler::getInstance()->searchKeywordPosts($_GET["search-field"]);
+    }
+}
 
 /*******************************************************************************
  * HTML section starts here
@@ -43,17 +50,8 @@ $posts = DatabaseHandler::getInstance()->getPosts();
             <?php require 'aside-search.php'; ?>
         </aside>
         <section>
-            <h2>Welcome!
-            </h2>
-            <p>This is a social networking page where you can share your thoughts on software security. <br />
-                Just log in to your account or sign up to post a message.</p>
-            <br>
-            <hr>
-            <br>
-            <?php if (empty($posts)) : ?>
-                <h2>No recent posts</h2>
-            <?php else : ?>
-                <h2>Recent posts</h2>
+            <h2>Search Results</h2>
+            <?php if ($posts != null && !empty($posts)) : ?>
                 <table>
                     <tr>
                         <th class="th20">FROM
@@ -63,16 +61,16 @@ $posts = DatabaseHandler::getInstance()->getPosts();
                         <th class="th40">LOG
                         </th>
                     </tr>
-                    <!-- Display the five most recent posts. -->
-                    <?php for ($i = 0; $i < sizeof($posts) && $i < 5; $i++) : ?>
+                    <?php foreach ($posts as $post) : ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($posts[$i]->getName()); ?></td>
-                            <td><?php echo htmlspecialchars($posts[$i]->getMessage()); ?></td>
-                            <td><?php echo "IP: {$posts[$i]->getIplog()}"; ?><br><?php echo "TID: {$posts[$i]->getTimelog()}"; ?></td>
+                            <td><?php echo htmlspecialchars($post->getName()); ?></td>
+                            <td><?php echo htmlspecialchars($post->getMessage()); ?></td>
+                            <td><?php echo "IP: {$post->getIplog()}"; ?><br><?php echo "TID: {$post->getTimelog()}"; ?></td>
                         </tr>
-                    <?php endfor; ?>
-
+                    <?php endforeach; ?>
                 </table>
+            <?php else : ?>
+                <p>Your search did not return any posts.</p>
             <?php endif; ?>
         </section>
     </main>
