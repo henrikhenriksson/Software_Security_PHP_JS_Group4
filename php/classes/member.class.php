@@ -60,7 +60,7 @@ class Member
         }
 
         $data = $db->getNextRow();
-        if (empty($data) || password_verify($pass, $data['password'])) {
+        if (empty($data) || !password_verify($pass, $data['password'])) {
             // The only error information sent back is if the combination of
             // username and password was correct. No hints about if the
             // username or password exists individually.
