@@ -1,4 +1,4 @@
-<?PHP
+<?php
 
 /*******************************************************************************
  * laboration 4, Kurs: DT161G
@@ -13,28 +13,27 @@
 $config = [
 
     /***** DATABASE CONNECTION *****/
-    #MIUN HOST : studentpsql.miun.se
-    #LOCALHOST : 127.0.0.1
     'host' => '172.17.0.1',    // Database host
-    'port' => '5432',                   // Database port
-    'dbname' => 'grupp4',             // Database name
-    'user' => 'grupp4',               // Database user
-    'password' => 'test',          // Database password
-
-    /***** GUESTBOOK *****/
-    'captchaLength' => 5,
+    'port' => '5432',
+    'dbname' => 'grupp4',
+    'user' => 'grupp4',
+    'password' => 'test',
+    'connect_timeout' => 5,
 
     /***** UTILITY ******/
     'debug' => true
 ];
 
-// This array holds the links to be displayed when a member has logged in
-$member_link_array = [
-    "Gästbok" => "guestbook.php",
-    "Meddlemssida" => "members.php"
-];
+$local_config = [
 
-// This array holds the links to be displayed when a admin has logged in
-$admin_link_array = [
-    "Adminsida" => "admin.php"
+    /***** DATABASE CONNECTION *****/
+    'host' => '127.0.0.1',    // Database host
+    'port' => '15432',
+    'dbname' => 'grupp4',
+    'user' => 'grupp4',
+    'password' => 'test',
+    'connect_timeout' => 5,
+
+    /***** UTILITY ******/
+    'debug' => true
 ];
