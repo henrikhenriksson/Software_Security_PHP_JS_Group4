@@ -9,10 +9,10 @@ class Member
 {
     private $id;
     private $username;
+    private $roles;
     // No password storage
     private $error = false;
-    private $error_message;
-    private $roles;
+    private $error_message = "";
 
     /**
      * Summary. Initializing constructor.
