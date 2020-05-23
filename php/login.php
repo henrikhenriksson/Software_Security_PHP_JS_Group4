@@ -10,7 +10,7 @@
  * frhe0300@student.miun.se
  ******************************************************************************/
 
-require_once 'util.php';
+require_once 'init.php';
 
 $responseText = [];
 
