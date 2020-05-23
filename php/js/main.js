@@ -119,6 +119,7 @@ function processLogout() {
   if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
     //First we most remove the registered event since we use the same xhr object for login and logout
     xhr.removeEventListener("readystatechange", processLogout, false);
+    console.log("Logout: " + this.responseText);
     var myResponse = JSON.parse(this.responseText);
 
     // Get menu links from XHR response

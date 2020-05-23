@@ -17,7 +17,8 @@
 //];
 
 // Initialize the session.
-session_start();
+require_once 'init.php';
+
 
 // Check if user has previously posted and thus have a set cookie
 $responseText = [];
