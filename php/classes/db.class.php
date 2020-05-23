@@ -28,7 +28,7 @@ class DB
     public function query(string $query, array $params = []): bool
     {
         if ($this->badConnection()) {
-            setError("Querying bad database connection");
+            $this->setError("Querying bad database connection");
             return false;
         }
 
@@ -42,8 +42,8 @@ class DB
             ? @ pg_query($this->dbconn, $query)
             : @ pg_query_params($this->dbconn, $query, $params);
 
-        if (!$this->result && !empty($this->result)) {
-            setError("Invalid query");
+        if ($this->result === false) {
+            $this->setError("Invalid query");
             return false;
         }
 
