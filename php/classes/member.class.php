@@ -45,6 +45,11 @@ class Member
         return $rows;
     }
 
+    public static function loggedIn()
+    {
+        return isset($_SESSION['user']);
+    }
+
     public static function login(string $uname, string $pass): Member
     {
         $db = getDBInstance();
@@ -117,3 +122,4 @@ class Member
         return $this->error_message;
     }
 }
+
