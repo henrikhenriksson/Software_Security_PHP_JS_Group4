@@ -1,4 +1,4 @@
-<?PHP
+<?php
 
 /*******************************************************************************
  * laboration 4, Kurs: DT161G
@@ -10,11 +10,30 @@
  * frhe0300@student.miun.se
  ******************************************************************************/
 $title = "DT167G - Group 4";
-require_once 'util.php';
+require_once 'init.php';
 
-session_start();
+// Usage example of DB class.
 
-$posts = DatabaseHandler::getInstance()->getPosts();
+$db = getDBInstance();
+if ($db->error()) {
+    echo $db->errorMessage() . "\n";
+    exit;
+}
+echo "Database connected!<br>";
+$ok = $db->query("SELECT * FROM dt167g.users");
+
+if (!$ok) {
+    echo $db->errorMessage();
+    exit;
+}
+
+$users = $db->getAllRows();
+prettyprint($users);
+
+$members = Member::getAll();
+prettyprint($members);
+
+$posts = [];  // Use posts class to retrieve
 
 /*******************************************************************************
  * HTML section starts here
