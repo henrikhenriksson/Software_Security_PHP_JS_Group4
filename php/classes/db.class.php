@@ -28,19 +28,40 @@ class DB
     public function query(string $query, array $params = []): bool
     {
         if ($this->badConnection()) {
+            $this->setError("Querying bad database connection");
             return false;
         }
+
+        // Query should not contain user input, but this makes sure it is safe.
+        $query = pg_escape_string($query);
+
+        // Reset any errors and release old result, if any.
         $this->resetResult();
+
         $this->result = empty($params)
             ? @ pg_query($this->dbconn, $query)
             : @ pg_query_params($this->dbconn, $query, $params);
-        return $this->result !== false;
+
+        if ($this->result === false) {
+            $this->setError("Invalid query");
+            return false;
+        }
+
+        return true;
     }
 
-    private function resetResult(): void
+    /**
+     * Performs a select query on the database.
+     *
+     * @param $tbl The table to query
+     * @param $fields The fields to select, given as an array of strings
+     * @param $crit The criteria to use in the query
+     */
+    public function select(string $tbl, array $fields = ["*"], array $crit = []): bool
     {
-        $this->error_message = "";
-        $this->result = null;
+        $fields = implode(",", $fields);
+        $sql = "SELECT {$fields} from {$tbl}";
+        return $this->query($sql);
     }
 
     public function error(): bool
@@ -60,8 +81,14 @@ class DB
 
     public function getNextRow(): array
     {
+        if (!$this->result) {
+            $this->setError("Requested result on invalid or not yet executed query");
+            return [];
+        }
+
         $row = pg_fetch_assoc($this->result);
         if (!$row) {
+            // No more rows in result.
             $this->freeResult();
             return [];
         }
@@ -70,9 +97,26 @@ class DB
 
     public function getAllRows(): array
     {
+        if (!$this->result) {
+            $this->setError("Requested result on invalid or not yet executed query");
+            return [];
+        }
+
         $rows = pg_fetch_all($this->result);
         $this->freeResult();
         return $rows ? $rows : [];
+    }
+
+    private function setError(string $msg)
+    {
+        $this->error_message = $msg;
+    }
+
+    private function resetResult(): void
+    {
+        $this->freeResult();
+        $this->error_message = "";
+        $this->result = null;
     }
 
     /**
@@ -86,7 +130,7 @@ class DB
             // Ignore connection error and return false instead
             $this->dbconn = @ pg_connect($dsn);
             if (!$this->dbconn) {
-                $this->error_message = "Could not connect to database";
+                $this->setError("Could not connect to database");
                 return false;
             }
         }
