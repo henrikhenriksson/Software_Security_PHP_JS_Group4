@@ -82,7 +82,7 @@ class DB
     public function getNextRow(): array
     {
         if (!$this->result) {
-            $this->setError("Tried getting result before making query");
+            $this->setError("Requested result on invalid or not yet executed query");
             return [];
         }
 
