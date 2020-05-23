@@ -16,7 +16,7 @@ final class DBTest extends TestCase
 
     private function goodDB(): DB
     {
-        return new DB(self::$config->getDbDsn());
+        return new DB(self::$config->getLocalDbDsn());
     }
 
     private function badDB(): DB
