@@ -1,7 +1,5 @@
 <?php
 
-
-
 /**
  * Member handles member data and operations such as CRUD, login, restore.
  */
@@ -94,7 +92,7 @@ class Member
         }
 
         $data = $db->getNextRow();
-        if (empty($data))) {
+        if (empty($data)) {
             $user = new Member();
             $user->setError("Invalid user id: ${id}");
             return $user;
