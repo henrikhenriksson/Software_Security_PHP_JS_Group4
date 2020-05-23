@@ -1,49 +1,55 @@
 <?php
 
+
+
 /**
- * Member handles member operations such as login, create and storing
- * information about the member.
+ * Member handles member data and operations such as CRUD, login, restore.
  */
 class Member
 {
     private $id;
     private $username;
+    private $roles;
+    // No password storage
     private $error = false;
-    private $error_message;
-    private $roles = [];
+    private $error_message = "";
 
     /**
      * Summary. Initializing constructor.
      * @param string $id Member id.
      * @param string $username Member username.
      */
-    public function __construct(int $id = -1, string $username = "", array $roles = null)
+    public function __construct(int $id = -1, string $username = "", array $roles = [])
     {
+        // XSS escaping in constructor
+        // Returned values from methods are considered safe.
         $this->id = $id;
         $this->username = escape($username);
-        if ($roles) {
-            $this->roles = $roles;
-        }
+        $this->roles = $roles;
     }
 
     public static function getAll(int $limit = 0, int $offset = 0): array
     {
-        $db = DatabaseHandler::getInstance();
-        $sql = "SELECT id, username FROM sdt167g.users";
-        if ($limit < 0) {
+        $db = getDBInstance();
+        $sql = "SELECT id, username FROM dt167g.users";
+        if ($limit > 0) {
             $sql += " LIMIT $limit";
         }
-        if ($offset < 0) {
+        if ($offset > 0) {
             $sql += " OFFSET $offset";
         }
         $ok = $db->query($sql);
-        // TODO
-        return $result ? pg_fetch_all($result) : [];
+
+        if (!$ok) {
+            die("Query error: {$db->errorMessage()}");
+        }
+        $rows = $db->getAllRows();
+        return $rows;
     }
 
     public static function login(string $uname, string $pass): Member
     {
-        $db = DatabaseHandler::getInstance();
+        $db = getDBInstance();
         $sql = "SELECT id, username, password FROM dt167g.users WHERE username=$1";
         $ok = $db->query($sql, [$uname]);
 
@@ -53,8 +59,11 @@ class Member
             return $user;
         }
 
-        $data = $db->getFirstResult();
-        if (empty($data) || !self::validPassword($pass, $data['password'])) {
+        $data = $db->getNextRow();
+        if (empty($data) || !password_verify($pass, $data['password'])) {
+            // The only error information sent back is if the combination of
+            // username and password was correct. No hints about if the
+            // username or password exists individually.
             $user = new Member();
             $user->setError("Invalid credentials!");
             return $user;
@@ -67,8 +76,13 @@ class Member
     // TODO fix this method
     public static function fromSession(): Member
     {
-        $db = DatabaseHandler::getInstance();
-        // TODO check session user exists
+        if (!isset($_SESSION['user'])) {
+            $user = new Member();
+            $user->setError("No user in current session!");
+            return $user;
+        }
+
+        $db = getDBInstance();
         $id = $_SESSION['user'];
         $sql = "SELECT id, username FROM dt167g.users WHERE id=$1";
         $ok = $db->query($sql, [ $id ]);
@@ -79,21 +93,14 @@ class Member
             return $user;
         }
 
-        $data = $db->getFirstResult();
-        if (empty($data) || !self::validPassword($pass, $data['password'])) {
+        $data = $db->getNextRow();
+        if (empty($data))) {
             $user = new Member();
             $user->setError("Invalid user id: ${id}");
             return $user;
         }
 
-        $_SESSION['user'] = $data['id'];
         return new Member($data['id'], $data['username']);
-    }
-
-    private static function validPassword(string $entered, string $actual): bool
-    {
-        // TODO hash
-        return $entered === $actual;
     }
 
     private function setError(string $msg)
