@@ -10,8 +10,8 @@
  * frhe0300@student.miun.se
  ******************************************************************************/
 
-$loginClass = isset($_SESSION['username']) ? "hide" : "";
-$logoutClass = isset($_SESSION['username']) ? "" : "hide";
+$loginClass = Member::loggedIn() ? "hide" : "";
+$logoutClass = Member::loggedIn() ? "" : "hide";
 ?>
 
 <div id="login" class="<?php echo $loginClass; ?>">
