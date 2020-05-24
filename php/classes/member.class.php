@@ -32,6 +32,11 @@ class Member
         $this->db = ($db != null) ? $db : getEasyDB();
     }
 
+    /**
+     * Fetch all members in the database.
+     *
+     * Convenience method for fetchMembers without limit or offset
+     */
     public static function fetchAll(EasyDB $db = null)
     {
         return static::fetchMembers(0, 0, $db);
@@ -58,35 +63,18 @@ class Member
         return $members;
     }
 
-    private static function fromRow(EasyDB $db, array $row): Member
-    {
-        $member = new Member($db);
-        $member->id = (int) $row['id'];
-        $member->setUsername($row['username']);
-        return $member;
-    }
-
-    public function setUsername(string $username): void
-    {
-        $this->username = $username;
-    }
-
-    public function username(): string
-    {
-        return escape($this->username());
-    }
-
-    public function id(): int
-    {
-        return $this->id;
-    }
-
-    public static function loggedIn()
+    /**
+     * Returns true if a user is logged into this session
+     */
+    public static function loggedIn(): bool
     {
         //valid user id TODO check that id in session is an existing id in database.
         return isset($_SESSION['user']);
     }
 
+    /**
+     * Logs in a new user
+     */
     public static function login(string $uname, string $pass, DB $db = null): Member
     {
         $factory = makeQueryFactory();
@@ -105,22 +93,20 @@ class Member
             // The only error information sent back is if the combination of
             // username and password was correct. No hints about if the
             // username or password exists individually.
-            $user = new Member();
-            $user->setError("Invalid credentials!");
-            return $user;
+            return static::memberError("Invalid credentials!");
         }
 
         $_SESSION['user'] = $row['id'];
         return static::fromRow($db, $row);
     }
 
-    // TODO fix this method
+    /**
+     * Fetches the user logged into this session.
+     */
     public static function fromSession(DB $db = null): Member
     {
         if (!isset($_SESSION['user'])) {
-            $user = new Member();
-            $user->setError("No user in current session!");
-            return $user;
+            return static::memberError("No user in current session!");
         }
 
         if ($db == null) {
@@ -136,22 +122,50 @@ class Member
 
         $row = $db->row($query->sql(), $query->params()[0]);
         if (empty($row)) {
-            $user = new Member();
-            $user->setError("Invalid user id: {$_SESSION['user']}");
-            return $user;
+            return static::memberError("Invalid user id: {$_SESSION['user']}");
         }
         return static::fromRow($db, $row);
     }
 
-    // TODO save
-    // TODO update
-    // TODO delete
+    private static function memberError(string $error_msg): Member
+    {
+        $user = new Member();
+        $user->setError($error_msg);
+        return $user;
+    }
+
+    private static function fromRow(EasyDB $db, array $row): Member
+    {
+        $member = new Member($db);
+        $member->id = (int) $row['id'];
+        $member->setUsername($row['username']);
+        return $member;
+    }
 
     private function setError(string $msg)
     {
         $this->error = true;
         $this->error_message = $msg;
     }
+
+    public function setUsername(string $username): void
+    {
+        $this->username = $username;
+    }
+
+    public function username(): string
+    {
+        return escape($this->username());
+    }
+
+    public function id(): int
+    {
+        return $this->id;
+    }
+
+    // TODO save new user
+    // TODO update (password)
+    // TODO delete
 
     public function error(): bool
     {
