@@ -1,6 +1,6 @@
 {
     "autoload": {
-        "classmap": ["."]
+        "classmap": ["classes/"]
     },
     "require": {
         "paragonie/easydb": "^2",
