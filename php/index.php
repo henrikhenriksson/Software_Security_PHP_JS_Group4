@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*******************************************************************************
  * laboration 4, Kurs: DT161G
@@ -11,11 +11,6 @@
  ******************************************************************************/
 $title = "DT167G - Group 4";
 require_once 'init.php';
-
-$limit = 2;
-$offset = 1;
-$members = Member::fetchMembers($limit, $offset);
-prettyprint($members);
 
 // Usage example of DB class.
 $posts = [];  // Use posts class to retrieve

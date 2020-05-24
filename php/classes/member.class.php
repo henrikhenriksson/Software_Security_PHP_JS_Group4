@@ -4,6 +4,7 @@ require_once __DIR__.'/../functions/strings.php';
 require_once __DIR__.'/../functions/sql.php';
 
 use \ParagonIE\EasyDB\EasyDB;
+use function Latitude\QueryBuilder\field;
 
 /**
  * Member handles member data and operations such as CRUD, login, restore.
@@ -26,9 +27,8 @@ class Member
      * @param DB $db the DB instance to use for queries.
      * @param string $id Member id.
      */
-    public function __construct(EasyDB $db = null, int $id = -1)
+    public function __construct(EasyDB $db = null)
     {
-        $this->id = $id;
         $this->db = ($db != null) ? $db : getEasyDB();
     }
 
@@ -60,7 +60,8 @@ class Member
 
     private static function fromRow(EasyDB $db, array $row): Member
     {
-        $member = new Member($db, (int) $row['id']);
+        $member = new Member($db);
+        $member->id = (int) $row['id'];
         $member->setUsername($row['username']);
         return $member;
     }
@@ -86,18 +87,21 @@ class Member
         return isset($_SESSION['user']);
     }
 
-    public static function login(DB $db = null, string $uname, string $pass): Member
+    public static function login(string $uname, string $pass, DB $db = null): Member
     {
         $factory = makeQueryFactory();
         $query = $factory
-            ->select('id', 'username')
+            ->select('id', 'username', 'password')
             ->from('dt167g.users')
-            ->where(field('username')->eq(5))
+            ->where(field('username')->eq($uname))
             ->compile();
 
+        if ($db == null) {
+            $db = getEasyDB();
+        }
 
-        $data = $db->row($query->sql(), $query->params());
-        if (empty($data) || !password_verify($pass, $data['password'])) {
+        $row = $db->row($query->sql(), $query->params()[0]);
+        if (empty($row) || !password_verify($pass, $row['password'])) {
             // The only error information sent back is if the combination of
             // username and password was correct. No hints about if the
             // username or password exists individually.
@@ -106,8 +110,8 @@ class Member
             return $user;
         }
 
-        $_SESSION['user'] = $data['id'];
-        return new Member($data['id'], $data['username']);
+        $_SESSION['user'] = $row['id'];
+        return static::fromRow($db, $row);
     }
 
     // TODO fix this method
@@ -120,28 +124,28 @@ class Member
         }
 
         if ($db == null) {
-            $db = getDBInstance();
+            $db = getEasyDB();
         }
 
-        $id = $_SESSION['user'];
-        $sql = "SELECT id, username FROM dt167g.users WHERE id=$1";
-        $ok = $db->query($sql, [ $id ]);
+        $factory = makeQueryFactory();
+        $query = $factory
+            ->select('id', 'username')
+            ->from('dt167g.users')
+            ->where(field('id')->eq($_SESSION['user']))
+            ->compile();
 
-        if (!$ok) {
+        $row = $db->row($query->sql(), $query->params()[0]);
+        if (empty($row)) {
             $user = new Member();
-            $user->setError("Database error");
+            $user->setError("Invalid user id: {$_SESSION['user']}");
             return $user;
         }
-
-        $data = $db->getNextRow();
-        if (empty($data)) {
-            $user = new Member();
-            $user->setError("Invalid user id: ${id}");
-            return $user;
-        }
-
-        return new Member($data['id'], $data['username']);
+        return static::fromRow($db, $row);
     }
+
+    // TODO save
+    // TODO update
+    // TODO delete
 
     private function setError(string $msg)
     {
