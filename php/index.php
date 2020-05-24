@@ -12,27 +12,12 @@
 $title = "DT167G - Group 4";
 require_once 'init.php';
 
-// Usage example of DB class.
-
-$db = getDBInstance();
-if ($db->error()) {
-    echo $db->errorMessage() . "\n";
-    exit;
-}
-echo "Database connected!<br>";
-$ok = $db->query("SELECT * FROM dt167g.users");
-
-if (!$ok) {
-    echo $db->errorMessage();
-    exit;
-}
-
-$users = $db->getAllRows();
-prettyprint($users);
-
-$members = Member::getAll();
+$limit = 2;
+$offset = 1;
+$members = Member::fetchMembers($limit, $offset);
 prettyprint($members);
 
+// Usage example of DB class.
 $posts = [];  // Use posts class to retrieve
 
 /*******************************************************************************

@@ -15,7 +15,8 @@
  */
 class Config
 {
-    private $config; ///< Array containing config settings
+    private $config;
+    private $local_config;
 
     /**
      * Summary. Default constructor loading settings from config.php.
@@ -23,7 +24,7 @@ class Config
     public function __construct(string $fname)
     {
         require $fname;
-        $this->config = $config;
+        $this->server_config = $server_config;
         $this->local_config = $local_config;
     }
 
@@ -31,33 +32,55 @@ class Config
      * Summary. Gets parameters used to connect to the database from config file.
      * @return string Parameters used to connect to the database.
      */
-    public function getDbDsn()
+    public function getDbDsn(): string
     {
-        return "host={$this->config['host']} port={$this->config['port']} "
-            . "dbname={$this->config['dbname']} user={$this->config['user']} "
-            . "password={$this->config['password']} "
-            . "connect_timeout={$this->config['connect_timeout']}";
+        return $this->makeDsn(
+            $this->get('host'),
+            $this->get('dbname'),
+            $this->get('port'),
+        );
     }
 
-    /**
-     * Summary. Gets parameters used to connect to the database from config file.
-     * @return string Parameters used to connect to the database.
-     */
-    public function getLocalDbDsn()
+    public function getLocalDbDsn(): string
     {
-        return "host={$this->local_config['host']} port={$this->local_config['port']} "
-            . "dbname={$this->local_config['dbname']} "
-            . "user={$this->local_config['user']} "
-            . "password={$this->local_config['password']} "
-            . "connect_timeout={$this->local_config['connect_timeout']}";
+        return $this->makeDsn(
+            $this->getLocal('host'),
+            $this->getLocal('dbname'),
+            $this->getLocal('port'),
+        );
+    }
+
+    private function makeDsn(string $host, string $name, string $port): string
+    {
+        return "pgsql:host={$host};dbname={$name};port={$port}";
+    }
+
+    public function getDBUser(): string
+    {
+        return $this->get('user');
+    }
+
+    public function getDBPass(): string
+    {
+        return $this->get('password');
+    }
+
+    public function get(string $key)
+    {
+        return $this->server_config[$key];
+    }
+
+    public function getLocal(string $key)
+    {
+        return $this->local_config[$key];
     }
 
     /**
      * Summary. Checks with config file if debugmode should be used.
      * @return bool True if debug should be used, otherwise false.
      */
-    public function useDebugMode()
+    public function useDebugMode(): bool
     {
-        return $this->config['debug'];
+        return $this->get('debug');
     }
 }

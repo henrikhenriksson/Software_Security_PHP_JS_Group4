@@ -23,20 +23,12 @@ function resetSession()
     }
 }
 
-/*******************************************************************************
- * autoload functions for Classes stored i directory classes
- * All classes must be saved i lower case to work and end whit class.php
- ******************************************************************************/
-spl_autoload_register(function ($class) {
-    $classfilename = strtolower($class);
-    include 'classes/' . $classfilename . '.class.php';
-});
-
-require_once 'functions/strings.php';
-require_once 'globals.php';
+require_once __DIR__.'/vendor/autoload.php';  // Let composer handle autoloads
+require_once __DIR__.'/functions/strings.php';
+require_once __DIR__.'/globals.php';
 
 if (getConfig()->useDebugMode()) {
-    require_once 'functions/debug.php';
+    require_once __DIR__.'/functions/debug.php';
     error_reporting(E_ALL);
     ini_set('display_errors', 'On');
 }
