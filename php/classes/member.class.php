@@ -68,12 +68,12 @@ class Member
 
     public function setUsername(string $username): void
     {
-        $this->username = escape($username);
+        $this->username = $username;
     }
 
     public function username(): string
     {
-        return $this->username();
+        return escape($this->username());
     }
 
     public function id(): int
