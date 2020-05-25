@@ -1,6 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
+/*******************************************************************************
+ * Project Group 4 DT167G
+ * File: debug.php
+ * Contains  Helper functions for debugging
+ ******************************************************************************/
 /**
- * Helper functions for debugging
+
  */
 
 
@@ -11,7 +19,7 @@
  */
 function dump($something)
 {
-    echo '<pre>' , var_dump($something) , '</pre>';
+    echo '<pre>', var_dump($something), '</pre>';
 }
 
 
@@ -23,5 +31,5 @@ function dump($something)
  */
 function prettyprint($something)
 {
-    echo '<pre>' , print_r($something) , '</pre>';
+    echo '<pre>', print_r($something), '</pre>';
 }

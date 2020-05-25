@@ -1,13 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 /*******************************************************************************
- * laboration 4, Kurs: DT161G
+ * Project Group 4 DT167G
  * File: config.class.php
- * Desc: Class Config for laboration 4
- *
- * Fredrik Helgesson
- * frhe0300
- * frhe0300@student.miun.se
  ******************************************************************************/
 
 /**

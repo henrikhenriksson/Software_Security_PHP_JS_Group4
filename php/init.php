@@ -1,14 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 /*******************************************************************************
- * laboration 4, Kurs: DT161G
- * File: util.php
- * Desc: Util file for laboration 4
- *
- * Fredrik Helgesson
- * frhe0300
- * frhe0300@student.miun.se
+ * Project Group 4 DT167G
+ * File: init.php
  ******************************************************************************/
+
 
 session_start();  // Make session global
 
@@ -23,12 +21,12 @@ function resetSession()
     }
 }
 
-require_once __DIR__.'/vendor/autoload.php';  // Let composer handle autoloads
-require_once __DIR__.'/functions/strings.php';
-require_once __DIR__.'/globals.php';
+require_once __DIR__ . '/vendor/autoload.php';  // Let composer handle autoloads
+require_once __DIR__ . '/functions/strings.php';
+require_once __DIR__ . '/globals.php';
 
 if (getConfig()->useDebugMode()) {
-    require_once __DIR__.'/functions/debug.php';
+    require_once __DIR__ . '/functions/debug.php';
     error_reporting(E_ALL);
     ini_set('display_errors', 'On');
 }
