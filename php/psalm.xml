@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="7"
+    resolveFromConfigFile="true"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+    <projectFiles>
+        <file name="aside-login.php" />
+        <file name="aside-menu.php" />
+        <file name="aside-search.php" />
+        <file name="config.php" />
+        <file name="globals.php" />
+        <file name="guestbook.php" />
+        <file name="helloworld.php" />
+        <file name="index.php" />
+        <file name="init.php" />
+        <file name="login.php" />
+        <file name="logout.php" />
+        <file name="members.php" />
+        <file name="search.php" />
+        <file name="testMember.php" />
+        <directory name="classes" />
+        <directory name="functions" />
+        <ignoreFiles>
+            <directory name="vendor" />
+        </ignoreFiles>
+    </projectFiles>
+</psalm>
