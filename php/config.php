@@ -1,13 +1,9 @@
 <?php
 
 /*******************************************************************************
- * laboration 4, Kurs: DT161G
+ * Project Group 4 DT167G
  * File: config.php
- * Desc: Config file for laboration 4
- *
- * Fredrik Helgesson
- * frhe0300
- * frhe0300@student.miun.se
+ * Holds global config settings for the project.
  ******************************************************************************/
 
 $server_config = [

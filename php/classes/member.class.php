@@ -1,7 +1,14 @@
-<?php declare(strict_types=1);
+<?php
 
-require_once __DIR__.'/../functions/strings.php';
-require_once __DIR__.'/../functions/sql.php';
+declare(strict_types=1);
+
+/*******************************************************************************
+ * Project Group 4 DT167G
+ * File: member.class.php
+ ******************************************************************************/
+
+require_once __DIR__ . '/../functions/strings.php';
+require_once __DIR__ . '/../functions/sql.php';
 
 use \ParagonIE\EasyDB\EasyDB;
 use \Latitude\QueryBuilder as Q;

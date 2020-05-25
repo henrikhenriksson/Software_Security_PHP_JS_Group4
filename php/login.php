@@ -1,14 +1,13 @@
 <?PHP
 
+declare(strict_types=1);
+
 /*******************************************************************************
- * laboration 4, Kurs: DT161G
+ * Project Group 4 DT167G
  * File: login.php
- * Desc: Login page for laboration 4
- *
- * Fredrik Helgesson
- * frhe0300
- * frhe0300@student.miun.se
+ * Handles login requests.
  ******************************************************************************/
+
 
 require_once 'init.php';
 
@@ -26,17 +25,16 @@ if (!isset($_POST["token"]) || !isset($_POST["TS"])) {
 
         // Set response data
         $responseText["isValidLogin"] = !$member->error();
-        if( is_null( $member->errorMessage() ) )
-        {
+        if (is_null($member->errorMessage())) {
             $responseText['msg'] = "";
-        }else{
+        } else {
             $responseText['msg'] = $member->errorMessage();
         }
-    }else{
+    } else {
         ///@todo decide invalid token message
         $responseText['msg'] = "Invalid token";
     }
-// Send back response
+    // Send back response
 }
 header('Content-Type: application/json');
 echo json_encode($responseText);

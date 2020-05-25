@@ -1,14 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*******************************************************************************
- * laboration 4, Kurs: DT161G
+ * Project Group 4 DT167G
  * File: index.php
- * Desc: Start page for laboration 4
- *
- * Fredrik Helgesson
- * frhe0300
- * frhe0300@student.miun.se
+ * Main index of the app.
  ******************************************************************************/
+
 $title = "DT167G - Group 4";
 require_once 'init.php';
 

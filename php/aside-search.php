@@ -1,3 +1,8 @@
+<!-- /*******************************************************************************
+* Project Group 4 DT167G
+* File: config.class.php
+******************************************************************************/ -->
+
 <h2>SEARCH POSTS</h2>
 <form id="search-form" action="search.php" method="GET">
     <input id="search-user" type="radio" name="search-type" value="username" checked>
