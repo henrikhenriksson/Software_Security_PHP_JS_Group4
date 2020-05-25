@@ -15,6 +15,7 @@ $server_config = [
     /***** DATABASE CONNECTION *****/
     'host' => '172.17.0.1',    // Database host
     'port' => '5432',
+    'schema' => 'dt167g',
     'dbname' => 'grupp4',
     'user' => 'grupp4',
     'password' => 'test',
@@ -29,10 +30,11 @@ $local_config = [
     /***** DATABASE CONNECTION *****/
     'host' => '127.0.0.1',    // Database host
     'port' => '15432',
+    'schema' => 'dt167g',
     'dbname' => 'grupp4',
     'user' => 'grupp4',
     'password' => 'test',
-    'connect_timeout' => 5,
+    'connect_timeout' => 1,
 
     /***** UTILITY ******/
     'debug' => true

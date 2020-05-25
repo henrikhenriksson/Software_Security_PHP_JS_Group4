@@ -25,13 +25,16 @@ function getEasyDB(): EasyDB
     if ($db == null) {
         $db = DBFactory::fromArray([
             $cfg->getDbDsn(),
-            $cfg->getDBUser(),
-            $cfg->getDBPass(),
+            $cfg->get('user'),
+            $cfg->get('password'),
             [ // Options
                 \PDO::ATTR_TIMEOUT => $cfg->get('connect_timeout'),
 
             ]
         ]);
+        $schema = $cfg->get('schema');
+        $db->run("SET search_path TO {$schema};");
+        $db->run("SET application_name TO 'Webserver';");
     }
     return $db;
 }
@@ -43,13 +46,17 @@ function getLocalEasyDB(): EasyDB
     if ($db == null) {
         $db = DBFactory::fromArray([
             $cfg->getLocalDbDsn(),
-            $cfg->getDBUser(),
-            $cfg->getDBPass(),
+            $cfg->getLocal('user'),
+            $cfg->getLocal('password'),
             [ // Options
                 \PDO::ATTR_TIMEOUT => $cfg->getLocal('connect_timeout'),
 
             ]
         ]);
+        $schema = $cfg->getLocal('schema');
+        $db->run("SET search_path TO {$schema};");
+        $db->run("SET application_name TO 'Unit tests';");
+        echo "Created new database instance\n";
     }
     return $db;
 }
