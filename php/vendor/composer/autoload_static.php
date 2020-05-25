@@ -43,7 +43,11 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
         'Member' => __DIR__ . '/../..' . '/classes/member.class.php',
         'Post' => __DIR__ . '/../..' . '/classes/post.class.php',
         'Role' => __DIR__ . '/../..' . '/classes/role.class.php',
+        'Session' => __DIR__ . '/../..' . '/classes/session.class.php',
+        'SessionAdapter' => __DIR__ . '/../..' . '/classes/session.class.php',
+        'TestSession' => __DIR__ . '/../..' . '/classes/session.class.php',
         'Token' => __DIR__ . '/../..' . '/classes/token.class.php',
+        'WebSession' => __DIR__ . '/../..' . '/classes/session.class.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

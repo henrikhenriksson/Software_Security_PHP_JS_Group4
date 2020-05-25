@@ -11,5 +11,9 @@ return array(
     'Member' => $baseDir . '/classes/member.class.php',
     'Post' => $baseDir . '/classes/post.class.php',
     'Role' => $baseDir . '/classes/role.class.php',
+    'Session' => $baseDir . '/classes/session.class.php',
+    'SessionAdapter' => $baseDir . '/classes/session.class.php',
+    'TestSession' => $baseDir . '/classes/session.class.php',
     'Token' => $baseDir . '/classes/token.class.php',
+    'WebSession' => $baseDir . '/classes/session.class.php',
 );
