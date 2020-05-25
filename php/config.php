@@ -10,7 +10,7 @@
  * frhe0300@student.miun.se
  ******************************************************************************/
 
-$config = [
+$server_config = [
 
     /***** DATABASE CONNECTION *****/
     'host' => '172.17.0.1',    // Database host

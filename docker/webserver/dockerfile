@@ -4,7 +4,6 @@ FROM php:7.4-apache
 # Documentation purpose only
 EXPOSE 80
 EXPOSE 443
-# Mount this at run-time
 
 RUN apt-get update
 
