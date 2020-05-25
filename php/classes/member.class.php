@@ -24,7 +24,7 @@ class Member
 
     /**
      * Summary. Initializing constructor.
-     * @param DB $db the DB instance to use for queries.
+     * @param EasyDB $db the EasyDB instance to use for queries.
      * @param string $id Member id.
      */
     public function __construct(EasyDB $db = null)
@@ -75,7 +75,7 @@ class Member
     /**
      * Logs in a new user
      */
-    public static function login(string $uname, string $pass, DB $db = null): Member
+    public static function login(string $uname, string $pass, EasyDB $db = null): Member
     {
         $factory = makeQueryFactory();
         $query = $factory
@@ -103,7 +103,7 @@ class Member
     /**
      * Fetches the user logged into this session.
      */
-    public static function fromSession(DB $db = null): Member
+    public static function fromSession(EasyDB $db = null): Member
     {
         if (!isset($_SESSION['user'])) {
             return static::memberError("No user in current session!");
@@ -144,7 +144,6 @@ class Member
 
     private function setError(string $msg)
     {
-        $this->error = true;
         $this->error_message = $msg;
     }
 
@@ -164,6 +163,7 @@ class Member
     }
 
     // TODO save new user
+    // TODO get(username)
     // TODO update (password)
     // TODO delete
 

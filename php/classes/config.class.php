@@ -37,7 +37,7 @@ class Config
         return $this->makeDsn(
             $this->get('host'),
             $this->get('dbname'),
-            $this->get('port'),
+            $this->get('port')
         );
     }
 
@@ -46,7 +46,7 @@ class Config
         return $this->makeDsn(
             $this->getLocal('host'),
             $this->getLocal('dbname'),
-            $this->getLocal('port'),
+            $this->getLocal('port')
         );
     }
 
