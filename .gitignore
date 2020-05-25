@@ -4,8 +4,13 @@
 .DS_Store
 *.cache
 config.php
+
 # Vagrant
 .vagrant/
-/*.log
+*.log
+
+# Test files
+php/tests/coverage/*
+!php/tests/coverage/.gitkeep
 
 
