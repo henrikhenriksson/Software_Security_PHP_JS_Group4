@@ -217,4 +217,79 @@ final class MemberTest extends TestCase
         $member = Member::fromSession(self::$db);
         $this->assertTrue($member->error());
     }
+
+    public function testCanUpdatePassword(): void
+    {
+        $member = new Member(self::$db);
+        $member->setUsername('abc');
+        static::$addedUsers[] = $member->username();
+
+        $this->assertTrue($member->save('pass'), "Could not insert new member");
+        $this->assertTrue($member->changePassword('newPass'), $member->errorMessage());
+
+        $member = Member::login('abc', 'newPass', self::$db);
+        $this->assertFalse($member->error(), $member->errorMessage());
+        $this->assertTrue(
+            Member::loggedIn(),
+            "Member was not logged in with new password"
+        );
+    }
+
+    public function testCannotUpdatePasswordOfUserNotInDatabase(): void
+    {
+        $member = new Member(self::$db);
+        $member->setUsername('abc');
+        static::$addedUsers[] = $member->username();
+
+        $this->assertFalse(
+            $member->changePassword('newPass'),
+            "Could change password of user not in database"
+        );
+
+        $member = Member::login('abc', 'newPass', self::$db);
+        $this->assertTrue($member->error());
+        $this->assertFalse(
+            Member::loggedIn(),
+            "Member not on database was logged in with new password"
+        );
+    }
+
+    public function testCannotUpdatePasswordIfLongerThan64(): void
+    {
+        $member = new Member(self::$db);
+        $member->setUsername('abc');
+        static::$addedUsers[] = $member->username();
+
+        $this->assertTrue($member->save('pass'), "Could not insert new member");
+        $this->assertFalse(
+            $member->changePassword(str_repeat('a', 65)),
+            "Could change to too long password"
+        );
+
+        $member = Member::login('abc', 'newPass', self::$db);
+        $this->assertTrue($member->error());
+        $this->assertFalse(
+            Member::loggedIn(),
+            "Member not on database was logged in with new password"
+        );
+    }
+
+    public function testCanDeleteMember(): void
+    {
+        $member = new Member(self::$db);
+        $member->setUsername('abc');
+
+        $this->assertTrue($member->save('pass'), "Could not insert new member");
+        $this->assertTrue($member->usernameExists(), "Member was never created");
+
+        $this->assertTrue($member->remove(), $member->errorMessage());
+        $this->assertFalse($member->usernameExists(), "Member existed after delete");
+    }
+
+    public function testCannotDeleteMemberNotFetchedFromDatabase(): void
+    {
+        $member = new Member(self::$db);
+        $member->setUsername('abc');
+        $this->assertFalse($member->remove(), "Could delete member not from database");
+    }
 }

@@ -65,10 +65,48 @@ class Member
 
     private static function fetchByUsername(string $username, EasyDB $db = null): Member
     {
+        if ($db == null) {
+            $db = getEasyDB();  // @codeCoverageIgnore
+        }
+
+        if (!empty(trim($username))) {
+            return static::memberError("Username was empty", $db);
+        }
+
+        $factory = makeQueryFactory();
+        $query = $factory
+            ->select('id', 'username')
+            ->from('users')
+            ->where(Q\field('username')->eq($username))
+            ->compile();
+        $row = $db->row($query->sql(), $query->params()[0]);
+        if (empty($row)) {
+            return static::memberError(
+                "Invalid username: " . escape($username),
+                $db
+            );
+        }
+        return static::fromRow($db, $row);
     }
 
     private static function fetchById(int $id, EasyDB $db = null): Member
     {
+        if ($db == null) {
+            $db = getEasyDB();  // @codeCoverageIgnore
+        }
+
+        $factory = makeQueryFactory();
+        $query = $factory
+            ->select('id', 'username')
+            ->from('dt167g.users')
+            ->where(Q\field('id')->eq(Session::get('userid')))
+            ->compile();
+
+        $row = $db->row($query->sql(), $query->params()[0]);
+        if (empty($row)) {
+            return static::memberError("Invalid user id: " . $id, $db);
+        }
+        return static::fromRow($db, $row);
     }
 
     /**
@@ -117,29 +155,15 @@ class Member
      */
     public static function fromSession(EasyDB $db = null): Member
     {
-        if (!self::loggedIn()) {
-            return static::memberError("No user in current session!", $db);
-        }
-
         if ($db == null) {
             $db = getEasyDB();  // @codeCoverageIgnore
         }
 
-        $factory = makeQueryFactory();
-        $query = $factory
-            ->select('id', 'username')
-            ->from('dt167g.users')
-            ->where(Q\field('id')->eq(Session::get('userid')))
-            ->compile();
-
-        $row = $db->row($query->sql(), $query->params()[0]);
-        if (empty($row)) {
-            return static::memberError(
-                "Invalid user id: " . Session::get('userid'),
-                $db
-            );
+        if (!self::loggedIn()) {
+            return static::memberError("No user in current session!", $db);
         }
-        return static::fromRow($db, $row);
+
+        return static::fetchById((int) Session::get('userid'), $db);
     }
 
     private static function memberError(string $error_msg, EasyDB $db): Member
@@ -162,6 +186,9 @@ class Member
         $this->username = $username;
     }
 
+    /**
+     * Returns an escaped, XSS-safe string of the members username.
+     */
     public function username(): string
     {
         return escape($this->username);
@@ -187,7 +214,7 @@ class Member
             $this->setError("Must set username before saving member");
             return false;
         }
-        if (strlen($password) > static::MAX_PASSWORD_LENGTH) {
+        if (self::passwordTooLong($password)) {
             $this->setError("Maximum password length is 64 characters");
             return false;
         }
@@ -237,20 +264,73 @@ class Member
         }// @codeCoverageIgnoreEnd
     }
 
-    // TODO update (password)
     public function changePassword(string $newPassword): bool
+    {
+        // Only allow change of password id member has been fetched from
+        // the database. This is true if any of the static factory methods
+        // have been used, or if this user was just inserted.
+        if ($this->id === -1) {
+            $this->setError("User must be fetched from database to change password");
+            return false;
+        }
+
+        if (self::passwordTooLong($newPassword)) {
+            $this->setError("Maximum password length is 64 characters");
+            return false;
+        }
+
+        if (!$this->updatePassword($newPassword)) {
+            // @codeCoverageIgnoreStart
+            $this->setError("Something went wrong when updating the password");
+            return false;
+            // @codeCoverageIgnoreEnd
+        }
+
+        $this->clearError();
+        return true;
+    }
+
+    private function updatePassword(string $newPassword): bool
+    {
+        try {
+            return $this->db->update(
+                'users',
+                [ 'password' => password_hash($newPassword, PASSWORD_DEFAULT) ],
+                [ 'id' => $this->id ]
+            ) === 1;
+        } catch (\Exception $e) { // @codeCoverageIgnoreStart
+            $this->setError("Something went wrong when updating password: "
+                            . $e->getMessage());
+            return false;
+        } // @codeCoverageIgnoreEnd
+    }
+
+    public function remove(): bool
     {
         if ($this->id === -1) {
             $this->setError("User must be fetched from database to change password");
             return false;
         }
+        if (!$this->idExists()) {  // @codeCoverageIgnoreStart
+            $this->setError("User with id {$this->id} does not exist in database");
+            return false;  // @codeCoverageIgnoreEnd
+        }
+        if (!$this->delete()) {
+            return false;  // @codeCoverageIgnore
+        }
         $this->clearError();
         return true;
     }
 
-    // TODO delete
-    public function remove(): bool
+    private function delete(): bool
     {
+        try {
+            return $this->db->delete('users', [ 'id' => $this->id]) === 1;
+        } catch (\Exception $e) { // @codeCoverageIgnoreStart
+            $this->setError("Something went wrong when updating password: "
+                            . $e->getMessage());
+            return false;
+        } // @codeCoverageIgnoreEnd
     }
 
     private function setError(string $msg)
@@ -271,5 +351,13 @@ class Member
     private function clearError(): void
     {
         $this->error_message = "";
+    }
+
+    /*
+     * Helper methods
+     */
+    public static function passwordTooLong(string $password): bool
+    {
+        return strlen($password) > static::MAX_PASSWORD_LENGTH;
     }
 }
