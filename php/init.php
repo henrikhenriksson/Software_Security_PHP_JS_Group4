@@ -10,8 +10,9 @@
  * frhe0300@student.miun.se
  ******************************************************************************/
 
-session_start();  // Make session global
-
+require_once __DIR__.'/vendor/autoload.php';  // Let composer handle autoloads
+session_start();
+Session::init(new WebSession());  // Init a static session klass
 
 function resetSession()
 {
@@ -23,7 +24,6 @@ function resetSession()
     }
 }
 
-require_once __DIR__.'/vendor/autoload.php';  // Let composer handle autoloads
 require_once __DIR__.'/functions/strings.php';
 require_once __DIR__.'/globals.php';
 
