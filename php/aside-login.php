@@ -1,13 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 /*******************************************************************************
- * laboration 4, Kurs: DT161G
- * File: aside-login.php
- * Desc: Start page for laboration 4
- *
- * Fredrik Helgesson
- * frhe0300
- * frhe0300@student.miun.se
+ * Project Group 4 DT167G
+ * File: aside-login-php
  ******************************************************************************/
 
 $loginClass = Member::loggedIn() ? "hide" : "";
@@ -17,8 +14,8 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
 <div id="login" class="<?php echo $loginClass; ?>">
     <h2>LOGIN</h2>
     <form id="loginForm">
-        <input type="hidden" id="token" value="<?php echo Token::generateToken('login');?>">
-        <input type="hidden" id="TS" value="<?php echo Token::generateTs();?>">
+        <input type="hidden" id="token" value="<?php echo Token::generateToken('login'); ?>">
+        <input type="hidden" id="TS" value="<?php echo Token::generateTs(); ?>">
         <label><b>Username</b></label>
         <input type="text" placeholder="m" name="uname" id="uname" required maxlength="10" value="m" autocomplete="off">
         <label><b>Password</b></label>
