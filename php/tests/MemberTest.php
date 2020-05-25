@@ -37,6 +37,7 @@ final class MemberTest extends TestCase
                 static::$db->delete('users', ['username' => $username]);
             }
         }
+        static::$addedUsers = [];
     }
 
     public function testCanCreateMemberWithLocalDB(): void
@@ -67,40 +68,55 @@ final class MemberTest extends TestCase
     {
         $member = new Member(static::$db);
         $member->setUsername('abc');
+        static::$addedUsers[] = $member->username();
+
+        $this->assertTrue($member->save('abc'), $member->errorMessage());
+        $this->assertTrue($member->usernameExists());
+        $this->assertTrue($member->idExists());
+    }
+
+    public function testInsertedMemberRetrievesNewId(): void
+    {
+        $member = new Member(static::$db);
+        $member->setUsername('abc');
+        static::$addedUsers[] = $member->username();
+
         $this->assertTrue($member->save('abc'), $member->errorMessage());
         $this->assertNotEquals(-1, $member->id());
-        static::$addedUsers[] = $member->username();
     }
 
     public function testCantInsertSameMemberTwice(): void
     {
         $member = new Member(static::$db);
         $member->setUsername('abc');
+        static::$addedUsers[] = $member->username();
+
         $this->assertTrue($member->save('abc'), $member->errorMessage());
         $this->assertFalse($member->save('abc'), "Inserted same member twice?");
         $this->assertNotEquals(-1, $member->id());
-        static::$addedUsers[] = $member->username();
     }
 
     public function testCantInsertMemberWithoutusername(): void
     {
         $member = new Member(static::$db);
+        static::$addedUsers[] = $member->username();
+
         $this->assertFalse(
             $member->save('abc'),
             "Could insert member without username"
         );
-        static::$addedUsers[] = $member->username();
     }
 
     public function testCantUsePasswordLongerThan64Characters(): void
     {
         $member = new Member(static::$db);
         $member->setUsername('abc');
+        static::$addedUsers[] = $member->username();
+
         $this->assertFalse(
             $member->save(\str_repeat('a', 65)),
             "Could insert member with password length > 64"
         );
-        static::$addedUsers[] = $member->username();
     }
 
     public function testCanGetAllMembersFromDatabase(): void
@@ -141,33 +157,37 @@ final class MemberTest extends TestCase
     public function testCantLoginWithEmptyUsername(): void
     {
         $member = Member::login(' ', 'a', static::$db);
+        static::$addedUsers[] = $member->username();
+
         $this->assertTrue($member->error());
         $this->assertFalse(Session::has('userid'));
-        static::$addedUsers[] = $member->username();
     }
 
     public function testCantLoginWithEmptyPassword(): void
     {
         $member = Member::login('a', ' ', static::$db);
+        static::$addedUsers[] = $member->username();
+
         $this->assertTrue($member->error());
         $this->assertFalse(Session::has('userid'));
-        static::$addedUsers[] = $member->username();
     }
 
     public function testCantLoginWithInvalidPassword(): void
     {
         $member = Member::login('a', 'z', static::$db);
+        static::$addedUsers[] = $member->username();
+
         $this->assertTrue($member->error());
         $this->assertFalse(Session::has('userid'));
-        static::$addedUsers[] = $member->username();
     }
 
     public function testCantLoginWithInvalidUsername(): void
     {
         $member = Member::login('z', 'a', static::$db);
+        static::$addedUsers[] = $member->username();
+
         $this->assertTrue($member->error());
         $this->assertFalse(Session::has('userid'));
-        static::$addedUsers[] = $member->username();
     }
 
     public function testCanCheckIfUserIsLoggedIn(): void

@@ -14,7 +14,7 @@ use \Latitude\QueryBuilder as Q;
 class Member
 {
     private EasyDB $db;
-    private int $id;
+    private int $id = -1;
     // No password storage
     private string $username = "";
     private array $roles = [];
@@ -61,6 +61,14 @@ class Member
             $members[] = static::fromRow($db, $row);
         }
         return $members;
+    }
+
+    private static function fetchByUsername(string $username, EasyDB $db = null): Member
+    {
+    }
+
+    private static function fetchById(int $id, EasyDB $db = null): Member
+    {
     }
 
     /**
@@ -149,11 +157,6 @@ class Member
         return $member;
     }
 
-    private function setError(string $msg)
-    {
-        $this->error_message = $msg;
-    }
-
     public function setUsername(string $username): void
     {
         $this->username = $username;
@@ -174,7 +177,7 @@ class Member
      *
      * If the member could not be inserted an error message is generated.
      *
-     * @param string $password the password to insert for the member
+     * @param string $password the user entered password
      *
      * @return bool true if member was inserted successfully, false otherwise
      */
@@ -188,14 +191,15 @@ class Member
             $this->setError("Maximum password length is 64 characters");
             return false;
         }
-        if ($this->exists()) {
+        if ($this->usernameExists()) {
             $this->setError("User ".$this->username()." already exists");
             return false;
         }
+        $this->clearError();
         return $this->insert($password);
     }
 
-    public function exists(): bool
+    public function usernameExists(): bool
     {
         $factory = makeQueryFactory();
         $query = $factory
@@ -206,6 +210,17 @@ class Member
         return $this->db->single($query->sql(), $query->params()) != false;
     }
 
+    public function idExists(): bool
+    {
+        $factory = makeQueryFactory();
+        $query = $factory
+            ->select(Q\func('COUNT', 'id'))
+            ->from('users')
+            ->where(Q\field('id')->eq($this->id))
+            ->compile();
+        return $this->db->single($query->sql(), $query->params()) !== false;
+    }
+
     private function insert(string $password): bool
     {
         try {
@@ -213,6 +228,7 @@ class Member
                 'username' => $this->username,
                 'password' => password_hash($password, PASSWORD_DEFAULT)
             ], 'id');
+            $this->clearError();
             return true;
         } catch (\Exception $e) { // @codeCoverageIgnoreStart
             $this->setError($e->getMessage());
@@ -221,9 +237,26 @@ class Member
         }// @codeCoverageIgnoreEnd
     }
 
-    // TODO get(username)
     // TODO update (password)
+    public function changePassword(string $newPassword): bool
+    {
+        if ($this->id === -1) {
+            $this->setError("User must be fetched from database to change password");
+            return false;
+        }
+        $this->clearError();
+        return true;
+    }
+
     // TODO delete
+    public function remove(): bool
+    {
+    }
+
+    private function setError(string $msg)
+    {
+        $this->error_message = $msg;
+    }
 
     public function error(): bool
     {
@@ -233,5 +266,10 @@ class Member
     public function errorMessage(): string
     {
         return $this->error_message;
+    }
+
+    private function clearError(): void
+    {
+        $this->error_message = "";
     }
 }
