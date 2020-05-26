@@ -1,12 +1,11 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 /*******************************************************************************
  * Project Group 4 DT167G
  * File: member.class.php
  ******************************************************************************/
 
+require_once __DIR__.'/../globals.php';
 require_once __DIR__ . '/../functions/strings.php';
 require_once __DIR__ . '/../functions/sql.php';
 
