@@ -1,4 +1,4 @@
-<?PHP
+<?php
 
 /*******************************************************************************
  * Projekt, Kurs: DT167G
@@ -7,18 +7,16 @@
  *
  * Gang of Five
  ******************************************************************************/
-$title = "laboration 4";
+require_once __DIR__ . '/init.php';
 
-require_once 'util.php';
-session_start();
+$title = "laboration 4";
 
 $posts = null;
 
 if (isset($_GET["search-type"]) && isset($_GET["search-field"])) {
-
     if ($_GET["search-type"] == "username") {
         $posts = DatabaseHandler::getInstance()->searchUserPosts($_GET["search-field"]);
-    } else if ($_GET["search-type"] == "keyword") {
+    } elseif ($_GET["search-type"] == "keyword") {
         $posts = DatabaseHandler::getInstance()->searchKeywordPosts($_GET["search-field"]);
     }
 }

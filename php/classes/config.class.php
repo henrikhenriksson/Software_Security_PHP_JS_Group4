@@ -14,6 +14,7 @@ class Config
 {
     private $config;
     private $local_config;
+    private $server_config;
 
     /**
      * Summary. Default constructor loading settings from config.php.
