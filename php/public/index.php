@@ -9,7 +9,7 @@ declare(strict_types=1);
  ******************************************************************************/
 
 $title = "DT167G - Group 4";
-require_once 'init.php';
+require_once __DIR__ . '/../resources/init.php';
 
 // Usage example of DB class.
 $posts = [];  // Use posts class to retrieve
@@ -36,9 +36,9 @@ $posts = [];  // Use posts class to retrieve
     </header>
     <main>
         <aside>
-            <?php require 'aside-login.php'; ?>
-            <?php require 'aside-menu.php'; ?>
-            <?php require 'aside-search.php'; ?>
+            <?php require '../resources/views/aside-login.php'; ?>
+            <?php require '../resources/views/aside-menu.php'; ?>
+            <?php require '../resources/views/aside-search.php'; ?>
         </aside>
         <section>
             <h2>Welcome!

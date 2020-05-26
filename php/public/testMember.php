@@ -1,10 +1,11 @@
 <?php declare(strict_types=1);
 
+require_once __DIR__ . '/../resources/init.php';
+
 /**
  * Test Member class on server (in browser)
  */
 
-require_once 'init.php';
 
 /**
  * Try login existing user.

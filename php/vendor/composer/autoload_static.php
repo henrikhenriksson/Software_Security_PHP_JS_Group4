@@ -16,6 +16,8 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
         'dc51568953534d6c54b08731e61104e2' => __DIR__ . '/..' . '/vimeo/psalm/src/functions.php',
         '8e4171839e12546525126d38dac3dafa' => __DIR__ . '/..' . '/vimeo/psalm/src/spl_object_id.php',
         '094883ee9da9e6fabd95b86a5ef61b72' => __DIR__ . '/..' . '/latitude/latitude/src/functions.php',
+        'c8c93a72f62de193f7644671de10d207' => __DIR__ . '/../..' . '/resources/globals.php',
+        '749e644416863dbba76b7a8e21d06e15' => __DIR__ . '/../..' . '/resources/functions/strings.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -185,10 +187,10 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
     );
 
     public static $classMap = array (
-        'Config' => __DIR__ . '/../..' . '/classes/config.class.php',
+        'Config' => __DIR__ . '/../..' . '/resources/classes/config.class.php',
         'JsonException' => __DIR__ . '/..' . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
-        'Member' => __DIR__ . '/../..' . '/classes/member.class.php',
-        'Post' => __DIR__ . '/../..' . '/classes/post.class.php',
+        'Member' => __DIR__ . '/../..' . '/resources/classes/member.class.php',
+        'Post' => __DIR__ . '/../..' . '/resources/classes/post.class.php',
         'SebastianBergmann\\Diff\\Chunk' => __DIR__ . '/..' . '/sebastian/diff/src/Chunk.php',
         'SebastianBergmann\\Diff\\ConfigurationException' => __DIR__ . '/..' . '/sebastian/diff/src/Exception/ConfigurationException.php',
         'SebastianBergmann\\Diff\\Diff' => __DIR__ . '/..' . '/sebastian/diff/src/Diff.php',
@@ -205,11 +207,11 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
         'SebastianBergmann\\Diff\\Output\\UnifiedDiffOutputBuilder' => __DIR__ . '/..' . '/sebastian/diff/src/Output/UnifiedDiffOutputBuilder.php',
         'SebastianBergmann\\Diff\\Parser' => __DIR__ . '/..' . '/sebastian/diff/src/Parser.php',
         'SebastianBergmann\\Diff\\TimeEfficientLongestCommonSubsequenceCalculator' => __DIR__ . '/..' . '/sebastian/diff/src/TimeEfficientLongestCommonSubsequenceCalculator.php',
-        'Session' => __DIR__ . '/../..' . '/classes/session.class.php',
-        'SessionAdapter' => __DIR__ . '/../..' . '/classes/session.class.php',
-        'TestSession' => __DIR__ . '/../..' . '/classes/session.class.php',
-        'Token' => __DIR__ . '/../..' . '/classes/token.class.php',
-        'WebSession' => __DIR__ . '/../..' . '/classes/session.class.php',
+        'Session' => __DIR__ . '/../..' . '/resources/classes/session.class.php',
+        'SessionAdapter' => __DIR__ . '/../..' . '/resources/classes/session.class.php',
+        'TestSession' => __DIR__ . '/../..' . '/resources/classes/session.class.php',
+        'Token' => __DIR__ . '/../..' . '/resources/classes/token.class.php',
+        'WebSession' => __DIR__ . '/../..' . '/resources/classes/session.class.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

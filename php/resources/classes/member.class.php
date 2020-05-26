@@ -5,8 +5,6 @@
  * File: member.class.php
  ******************************************************************************/
 
-require_once __DIR__.'/../globals.php';
-require_once __DIR__ . '/../functions/strings.php';
 require_once __DIR__ . '/../functions/sql.php';
 
 use \ParagonIE\EasyDB\EasyDB;

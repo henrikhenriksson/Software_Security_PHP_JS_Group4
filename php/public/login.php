@@ -1,4 +1,4 @@
-<?PHP
+<?php
 
 declare(strict_types=1);
 
@@ -8,8 +8,7 @@ declare(strict_types=1);
  * Handles login requests.
  ******************************************************************************/
 
-
-require_once 'init.php';
+require_once __DIR__ . '/../resources/init.php';
 
 $responseText = [];
 
@@ -20,7 +19,6 @@ if (!isset($_POST["token"]) || !isset($_POST["TS"])) {
     $responseText["msg"] = "Required login data not provided";
 } else {
     if (Token::validateToken("login", $_POST["TS"], $_POST["token"])) {
-
         $member = Member::login($_POST["uname"], $_POST['psw']);
 
         // Set response data

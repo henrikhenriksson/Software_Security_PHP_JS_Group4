@@ -3,7 +3,6 @@
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__.'/../vendor/autoload.php';  // Let composer handle autoloads
-require_once __DIR__.'/../globals.php';
 
 final class MemberTest extends TestCase
 {

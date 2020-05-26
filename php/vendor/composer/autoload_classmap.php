@@ -6,10 +6,10 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Config' => $baseDir . '/classes/config.class.php',
+    'Config' => $baseDir . '/resources/classes/config.class.php',
     'JsonException' => $vendorDir . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
-    'Member' => $baseDir . '/classes/member.class.php',
-    'Post' => $baseDir . '/classes/post.class.php',
+    'Member' => $baseDir . '/resources/classes/member.class.php',
+    'Post' => $baseDir . '/resources/classes/post.class.php',
     'SebastianBergmann\\Diff\\Chunk' => $vendorDir . '/sebastian/diff/src/Chunk.php',
     'SebastianBergmann\\Diff\\ConfigurationException' => $vendorDir . '/sebastian/diff/src/Exception/ConfigurationException.php',
     'SebastianBergmann\\Diff\\Diff' => $vendorDir . '/sebastian/diff/src/Diff.php',
@@ -26,9 +26,9 @@ return array(
     'SebastianBergmann\\Diff\\Output\\UnifiedDiffOutputBuilder' => $vendorDir . '/sebastian/diff/src/Output/UnifiedDiffOutputBuilder.php',
     'SebastianBergmann\\Diff\\Parser' => $vendorDir . '/sebastian/diff/src/Parser.php',
     'SebastianBergmann\\Diff\\TimeEfficientLongestCommonSubsequenceCalculator' => $vendorDir . '/sebastian/diff/src/TimeEfficientLongestCommonSubsequenceCalculator.php',
-    'Session' => $baseDir . '/classes/session.class.php',
-    'SessionAdapter' => $baseDir . '/classes/session.class.php',
-    'TestSession' => $baseDir . '/classes/session.class.php',
-    'Token' => $baseDir . '/classes/token.class.php',
-    'WebSession' => $baseDir . '/classes/session.class.php',
+    'Session' => $baseDir . '/resources/classes/session.class.php',
+    'SessionAdapter' => $baseDir . '/resources/classes/session.class.php',
+    'TestSession' => $baseDir . '/resources/classes/session.class.php',
+    'Token' => $baseDir . '/resources/classes/token.class.php',
+    'WebSession' => $baseDir . '/resources/classes/session.class.php',
 );

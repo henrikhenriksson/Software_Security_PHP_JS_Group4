@@ -15,4 +15,6 @@ return array(
     'dc51568953534d6c54b08731e61104e2' => $vendorDir . '/vimeo/psalm/src/functions.php',
     '8e4171839e12546525126d38dac3dafa' => $vendorDir . '/vimeo/psalm/src/spl_object_id.php',
     '094883ee9da9e6fabd95b86a5ef61b72' => $vendorDir . '/latitude/latitude/src/functions.php',
+    'c8c93a72f62de193f7644671de10d207' => $baseDir . '/resources/globals.php',
+    '749e644416863dbba76b7a8e21d06e15' => $baseDir . '/resources/functions/strings.php',
 );
