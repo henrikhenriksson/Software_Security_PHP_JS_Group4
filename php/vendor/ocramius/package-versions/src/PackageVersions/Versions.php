@@ -52,7 +52,7 @@ final class Versions
   'webmozart/assert' => '1.8.0@ab2cb0b3b559010b75981b1bdce728da3ee90ad6',
   'webmozart/glob' => '4.1.0@3cbf63d4973cf9d780b93d2da8eec7e4a9e63bbe',
   'webmozart/path-util' => '2.3.0@d939f7edc24c9a1bb9c0dee5cb05d8e859490725',
-  '__root__' => 'dev-composer-packages@3b9b07ddb8a1f6296e6646ec804cb35c23380929',
+  '__root__' => 'dev-member-crud@0db09336cd1ffd97198bd000577a1de48cef6b03',
 );
 
     private function __construct()

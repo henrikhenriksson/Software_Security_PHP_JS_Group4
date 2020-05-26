@@ -187,10 +187,8 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
     public static $classMap = array (
         'Config' => __DIR__ . '/../..' . '/classes/config.class.php',
         'JsonException' => __DIR__ . '/..' . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
-        'Login' => __DIR__ . '/../..' . '/classes/login.class.php',
         'Member' => __DIR__ . '/../..' . '/classes/member.class.php',
         'Post' => __DIR__ . '/../..' . '/classes/post.class.php',
-        'Role' => __DIR__ . '/../..' . '/classes/role.class.php',
         'SebastianBergmann\\Diff\\Chunk' => __DIR__ . '/..' . '/sebastian/diff/src/Chunk.php',
         'SebastianBergmann\\Diff\\ConfigurationException' => __DIR__ . '/..' . '/sebastian/diff/src/Exception/ConfigurationException.php',
         'SebastianBergmann\\Diff\\Diff' => __DIR__ . '/..' . '/sebastian/diff/src/Diff.php',
@@ -207,7 +205,11 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
         'SebastianBergmann\\Diff\\Output\\UnifiedDiffOutputBuilder' => __DIR__ . '/..' . '/sebastian/diff/src/Output/UnifiedDiffOutputBuilder.php',
         'SebastianBergmann\\Diff\\Parser' => __DIR__ . '/..' . '/sebastian/diff/src/Parser.php',
         'SebastianBergmann\\Diff\\TimeEfficientLongestCommonSubsequenceCalculator' => __DIR__ . '/..' . '/sebastian/diff/src/TimeEfficientLongestCommonSubsequenceCalculator.php',
+        'Session' => __DIR__ . '/../..' . '/classes/session.class.php',
+        'SessionAdapter' => __DIR__ . '/../..' . '/classes/session.class.php',
+        'TestSession' => __DIR__ . '/../..' . '/classes/session.class.php',
         'Token' => __DIR__ . '/../..' . '/classes/token.class.php',
+        'WebSession' => __DIR__ . '/../..' . '/classes/session.class.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

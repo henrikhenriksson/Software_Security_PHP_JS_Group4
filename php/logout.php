@@ -16,8 +16,7 @@ require_once 'init.php';
 $responseText = [];
 $responseText["hasPosted"] = isset($_COOKIE["MIUN_GUESTBOOK"]);
 
-resetSession();
-
+Member::logout();
 
 $responseText["msg"] = "You are logged out and the session cookie has been destroyed";
 //$responseText["links"] = $link_array;

@@ -52,16 +52,6 @@ class Config
         return "pgsql:host={$host};dbname={$name};port={$port}";
     }
 
-    public function getDBUser(): string
-    {
-        return $this->get('user');
-    }
-
-    public function getDBPass(): string
-    {
-        return $this->get('password');
-    }
-
     public function get(string $key)
     {
         return $this->server_config[$key];
