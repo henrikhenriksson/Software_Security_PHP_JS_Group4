@@ -154,7 +154,14 @@ class Member
         }
 
         Session::set('userid', $row['id']);
+        session_regenerate_id();
         return static::fromRow($db, $row);
+    }
+
+    public static function logout(): void
+    {
+        Session:unset('userid');
+        session_regenerate_id();
     }
 
     /**
