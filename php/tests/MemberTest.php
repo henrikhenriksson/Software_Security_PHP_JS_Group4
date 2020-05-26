@@ -60,8 +60,8 @@ final class MemberTest extends TestCase
         $member = new Member(static::$db);
         $dangerous = "<script>alert('xss attack');</script>";
         $member->setUsername($dangerous);
-        $this->assertFalse(\strpos("<", $member->username()));
-        $this->assertFalse(\strpos(">", $member->username()));
+        $this->assertFalse(\strpos($member->username(), "<"));
+        $this->assertFalse(\strpos($member->username(), ">"));
     }
 
     public function testCanInsertMemberInDatabase(): void
