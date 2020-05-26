@@ -1,20 +1,12 @@
 <?php
 
-/*******************************************************************************
- * laboration 4, Kurs: DT161G
- * File: logout.php
- * Desc: Logout page for laboration 4
- *
- * Fredrik Helgesson
- * frhe0300
- * frhe0300@student.miun.se
- ******************************************************************************/
+declare(strict_types=1);
 
-// This array holds the links to be displayed when a user has logged out
-//$link_array = [
-//    "Hem" => "index.php",
-//    "Gästbok" => "guestbook.php",
-//];
+/*******************************************************************************
+ * Project Group 4 DT167G
+ * File: aside-login-php
+ * Provides access methods for global, single instances.
+ ******************************************************************************/
 
 // Initialize the session.
 require_once 'init.php';

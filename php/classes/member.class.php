@@ -1,8 +1,13 @@
 <?php declare(strict_types=1);
 
+/*******************************************************************************
+ * Project Group 4 DT167G
+ * File: member.class.php
+ ******************************************************************************/
+
 require_once __DIR__.'/../globals.php';
-require_once __DIR__.'/../functions/strings.php';
-require_once __DIR__.'/../functions/sql.php';
+require_once __DIR__ . '/../functions/strings.php';
+require_once __DIR__ . '/../functions/sql.php';
 
 use \ParagonIE\EasyDB\EasyDB;
 use function Latitude\QueryBuilder\field;

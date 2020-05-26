@@ -1,7 +1,12 @@
 <?php
-/**
+
+declare(strict_types=1);
+
+/*******************************************************************************
+ * Project Group 4 DT167G
+ * File: aside-login-php
  * Provides access methods for global, single instances.
- */
+ ******************************************************************************/
 
 use \ParagonIE\EasyDB\EasyDB;
 use \ParagonIE\EasyDB\Factory as DBFactory;
@@ -13,7 +18,7 @@ function getConfig(): Config
 {
     static $cfg = null;
     if (!$cfg) {
-        $cfg = new Config(__DIR__.'/config.php');
+        $cfg = new Config(__DIR__ . '/config.php');
     }
     return $cfg;
 }
