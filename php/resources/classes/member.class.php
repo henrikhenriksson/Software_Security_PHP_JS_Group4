@@ -36,6 +36,8 @@ class Member
         $this->db = ($db != null) ? $db : getEasyDB();
     }
 
+    /* ===================== Static factory methods ===================== */
+
     /**
      * Fetch all members in the database.
      *
@@ -72,11 +74,9 @@ class Member
         if ($db == null) {
             $db = getEasyDB();  // @codeCoverageIgnore
         }
-
         if (!empty(trim($username))) {
             return static::memberError("Username was empty", $db);
         }
-
         $factory = makeQueryFactory();
         $query = $factory
             ->select('id', 'username')
@@ -98,7 +98,6 @@ class Member
         if ($db == null) {
             $db = getEasyDB();  // @codeCoverageIgnore
         }
-
         $factory = makeQueryFactory();
         $query = $factory
             ->select('id', 'username')
@@ -113,14 +112,6 @@ class Member
         return static::fromRow($db, $row);
     }
 
-    /**
-     * Returns true if a user is logged into this session
-     */
-    public static function loggedIn(): bool
-    {
-        //valid user id TODO check that id in session is an existing id in database.
-        return Session::has('userid');
-    }
 
     /**
      * Logs in a new user
@@ -130,18 +121,15 @@ class Member
         if ($db == null) {
             $db = getEasyDB();  // @codeCoverageIgnore
         }
-
         if (empty(trim($uname)) || empty(trim($pass))) {
             return static::memberError("Invalid credentials!", $db);
         }
-
         $factory = makeQueryFactory();
         $query = $factory
             ->select('id', 'username', 'password')
             ->from('dt167g.users')
             ->where(Q\field('username')->eq($uname))
             ->compile();
-
         $row = $db->row($query->sql(), $query->params()[0]);
         if (empty($row) || !password_verify($pass, $row['password'])) {
             // The only error information sent back is if the combination of
@@ -149,16 +137,10 @@ class Member
             // username or password exists individually.
             return static::memberError("Invalid credentials!", $db);
         }
-
         Session::set('userid', $row['id']);
         return static::fromRow($db, $row);
     }
 
-    public static function logout(): void
-    {
-        Session::unset('userid');
-        \session_regenerate_id();
-    }
 
     /**
      * Fetches the user logged into this session.
@@ -168,19 +150,10 @@ class Member
         if ($db == null) {
             $db = getEasyDB();  // @codeCoverageIgnore
         }
-
         if (!self::loggedIn()) {
             return static::memberError("No user in current session!", $db);
         }
-
         return static::fetchById((int) Session::get('userid'), $db);
-    }
-
-    private static function memberError(string $error_msg, EasyDB $db): Member
-    {
-        $user = new Member($db);
-        $user->setError($error_msg);
-        return $user;
     }
 
     private static function fromRow(EasyDB $db, array $row): Member
@@ -190,6 +163,36 @@ class Member
         $member->setUsername($row['username']);
         return $member;
     }
+
+
+
+    /* ================= Static status functions ========================== */
+
+
+    /**
+     * Returns true if a user is logged into this session
+     */
+    public static function loggedIn(): bool
+    {
+        //valid user id TODO check that id in session is an existing id in database.
+        return Session::has('userid');
+    }
+
+    public static function logout(): void
+    {
+        Session::unset('userid');
+        \session_regenerate_id();
+    }
+
+    private static function memberError(string $error_msg, EasyDB $db): Member
+    {
+        $user = new Member($db);
+        $user->setError($error_msg);
+        return $user;
+    }
+
+
+    /* ======================= Instance methods =========================== */
 
     public function setUsername(string $username): void
     {
@@ -224,12 +227,11 @@ class Member
             $this->setError("Must set username before saving member");
             return false;
         }
-        if (self::passwordTooLong($password)) {
-            $this->setError("Maximum password length is 64 characters");
-            return false;
-        }
         if ($this->usernameExists()) {
             $this->setError("User ".$this->username()." already exists");
+            return false;
+        }
+        if (!$this->validPasswordFormat($password)) {
             return false;
         }
         $this->clearError();
@@ -283,19 +285,15 @@ class Member
             $this->setError("User must be fetched from database to change password");
             return false;
         }
-
-        if (self::passwordTooLong($newPassword)) {
-            $this->setError("Maximum password length is 64 characters");
+        if (!$this->validPasswordFormat($newPassword)) {
             return false;
         }
-
         if (!$this->updatePassword($newPassword)) {
             // @codeCoverageIgnoreStart
             $this->setError("Something went wrong when updating the password");
             return false;
             // @codeCoverageIgnoreEnd
         }
-
         $this->clearError();
         return true;
     }
@@ -366,6 +364,19 @@ class Member
     /*
      * Helper methods
      */
+    public function validPasswordFormat(string $password): bool
+    {
+        if (empty($password)) {
+            $this->setError("Password must not be empty");
+            return false;
+        }
+        if (self::passwordTooLong($password)) {
+            $this->setError("Maximum password length is 64 characters");
+            return false;
+        }
+        return true;
+    }
+
     public static function passwordTooLong(string $password): bool
     {
         return strlen($password) > static::MAX_PASSWORD_LENGTH;
