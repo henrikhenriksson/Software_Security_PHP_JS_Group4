@@ -13,12 +13,12 @@ require_once __DIR__ . '/../resources/init.php';
 // if no token is present, or if token validation failed.
 if (!isset($_POST["su_token"]) || !isset($_POST["su_ts"]) || !Token::validateToken("signup", $_POST["su_ts"], $_POST['su_token'])) {
     // Cross reference protection not provided
+    // @TODO register invalid request once that class has been merged.
     ajax_respond([
         'msg' => 'An error occured. Your data could not be validated.'
     ]);
 }
-$member = new Member();
-$member->setUsername(trim(escape($_POST['user_name'])));
+
 
 // check if member is already logged in.
 if ($member->loggedIn()) {
@@ -27,18 +27,18 @@ if ($member->loggedIn()) {
     ]);
 }
 
-$inputPassword = trim(escape($_POST['password1']));
-$passwordValidation = trim(escape($_POST['password2']));
-
 // validate password input:
-if (!isValidPasswordInput($inputPassword, $passwordValidation)) {
+if (!isValidPasswordInput($_POST['password1'], $_POST['password2'])) {
     ajax_respond([
         'msg' => 'The passwords you entered does not match!'
     ]);
 }
 
+$member = new Member();
+$member->setUsername($_POST['user_name']);
+
 // check if save was successfull
-if (!$member->save($inputPassword)) {
+if (!$member->save($_POST['password1'])) {
     ajax_respond([
         'msg' => $member->errorMessage()
     ]);
