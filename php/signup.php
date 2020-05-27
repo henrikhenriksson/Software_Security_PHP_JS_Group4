@@ -12,6 +12,7 @@ require_once 'init.php';
 
 $responseText = [];
 
+
 if (!isset($_POST["su_token"]) || !isset($_POST["su_ts"])) {
     // Cross reference protection not provided
     ///@todo decide action
