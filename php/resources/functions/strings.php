@@ -15,7 +15,7 @@ declare(strict_types=1);
 /**
  * Escape a string ta make it XSS-safe when used in html.
  */
-function escape(string $unsafe): string
+function escape(string $unsafe, string $encoding = "UTF-8"): string
 {
-    return htmlspecialchars($unsafe, ENT_QUOTES);
+    return htmlspecialchars($unsafe, ENT_QUOTES|ENT_HTML5, $encoding);
 }
