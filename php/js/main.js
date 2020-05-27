@@ -21,7 +21,13 @@ function byId(id) {
 function main() {
   byId('loginButton').addEventListener('click', doLogin, false);
   byId('logoutButton').addEventListener('click', doLogout, false);
-  byId('sign_up_button').addEventListener('click', doSignup, false);
+
+  const CURRENT_PAGE = window.location.pathname;
+
+  // Add event listener to upload button, if the userpage is active.
+  if (CURRENT_PAGE.includes('signupForm.php') && byId('sign_up_button')) {
+    byId('sign_up_button').addEventListener('click', doSignup, false);
+  }
 
   // Stöd för IE7+, Firefox, Chrome, Opera, Safari
   try {
