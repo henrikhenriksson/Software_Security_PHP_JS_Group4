@@ -139,7 +139,7 @@ function processLogin() {
   }
 }
 /*******************************************************************************
- * Function doLogin
+ * Function processSignup
  ******************************************************************************/
 function processSignup() {
   if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
