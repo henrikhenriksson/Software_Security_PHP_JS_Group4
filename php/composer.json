@@ -1,6 +1,7 @@
 {
     "autoload": {
-        "classmap": ["classes/"]
+        "classmap": ["resources/classes/"],
+        "files": ["resources/globals.php", "resources/functions/strings.php"]
     },
     "require": {
         "paragonie/easydb": "^2",

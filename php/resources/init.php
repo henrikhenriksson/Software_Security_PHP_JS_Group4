@@ -5,12 +5,18 @@
  * File: init.php
  ******************************************************************************/
 
-require_once __DIR__.'/vendor/autoload.php';  // Let composer handle autoloads
-session_start();
+require_once __DIR__.'/../vendor/autoload.php';  // Let composer handle autoloads
+
+// Both these options are forced by the server now, but why "trust" the server
+// Reduces risk of common XSS attacks (if the browser enforces it).
+session_start([
+    'cookie_httponly' => true,  // Only allow server to read session cookie
+                                // i.e don't show it to javascript
+    'cookie_secure' => true     // Only send cookie over https
+]);
+
 Session::init(new WebSession());  // Init a static session klass
 
-require_once __DIR__.'/functions/strings.php';
-require_once __DIR__.'/globals.php';
 
 if (getConfig()->useDebugMode()) {
     require_once __DIR__ . '/functions/debug.php';

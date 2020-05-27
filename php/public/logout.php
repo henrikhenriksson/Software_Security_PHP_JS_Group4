@@ -9,8 +9,7 @@ declare(strict_types=1);
  ******************************************************************************/
 
 // Initialize the session.
-require_once 'init.php';
-
+require_once __DIR__ . '/../resources/init.php';
 
 // Check if user has previously posted and thus have a set cookie
 $responseText = [];
