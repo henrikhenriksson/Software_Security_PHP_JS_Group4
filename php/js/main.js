@@ -21,6 +21,7 @@ function byId(id) {
 function main() {
   byId('loginButton').addEventListener('click', doLogin, false);
   byId('logoutButton').addEventListener('click', doLogout, false);
+  byId('sign_up_button').addEventListener('click', doSignup, false);
 
   // Stöd för IE7+, Firefox, Chrome, Opera, Safari
   try {
@@ -61,6 +62,31 @@ function doLogin() {
     //xhr.open("GET", `login.php?uname=${UNAME}&psw=${PSW}`, true);
     xhr.open('POST', `login.php`, true);
     xhr.send(data);
+  }
+}
+/*******************************************************************************
+ * Function doSignup
+ ******************************************************************************/
+function doSignup() {
+  const userName = byId('userName').value;
+  const password1 = byId('password1').value;
+  const password2 = byId('password2').value;
+  const token = byId('su_token').value;
+  const timeStamp = byId('su_ts').value;
+
+  if (userName != '' && password1 != '') {
+    xhr.addEventListener('readystatechange', processSignup, false);
+    let data = new FormData();
+    data.append('user_name', userName);
+    data.append('password1', password1);
+    data.append('password2', password2);
+    data.append('su_token', token);
+    data.append('su_ts', timeStamp);
+    xhr.open('POST', 'signup.php', true);
+    xhr.send(data);
+  } else {
+    byId('signup_message').innerHTML =
+      'Username and/or password can not be empty!';
   }
 }
 
@@ -104,6 +130,17 @@ function processLogin() {
 
     // Show information about the login
     byId('loginMsg').innerHTML = myResponse['msg'];
+  }
+}
+/*******************************************************************************
+ * Function doLogin
+ ******************************************************************************/
+function processSignup() {
+  if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+    xhr.removeEventListener('readystatechange', processSignup, false);
+    console.log(this.responseText);
+    let myResponse = JSON.parse(this.responseText);
+    byId('signup_message').innerHTML = myResponse['msg'];
   }
 }
 
