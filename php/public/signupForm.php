@@ -32,7 +32,6 @@ require_once __DIR__ . '/../resources/init.php';
     <main>
         <aside>
             <?php require '../resources/views/aside-login.php'; ?>
-            <?php require '../resources/views/aside-menu.php'; ?>
             <?php require '../resources/views/aside-search.php'; ?>
         </aside>
         <section>
