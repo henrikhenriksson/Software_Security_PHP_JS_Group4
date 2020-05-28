@@ -10,15 +10,19 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../resources/init.php';
 
-/*
+function _sendInvalidMessageResponse($msg):void
+{
+    $responseText = ['isValidLogin'=> false, 'msg'=>$msg];
 
+    sendResponse($responseText);
+}
 
-$member = Member::login($_POST["uname"], $_POST['psw']);
-ajax_respond([
-    "isValidLogin" => !$member->error(),
-    'msg' => $member->errorMessage()
-]);
- */
+function _sendValidMessageResponse($msg):void
+{
+    $responseText = ['isValidLogin'=> true, 'msg'=>$msg];
+
+    sendResponse($responseText);
+}
 
 function sendResponse($responseText)
 {
@@ -26,10 +30,8 @@ function sendResponse($responseText)
     echo json_encode($responseText);
 }
 
-$responseText = [];
-
 if (!InvReq::validIpCurUser()) {
-    sendResponse('Ip blocked');
+    _sendInvalidMessageResponse('Ip blocked');
     exit;
 }
 
@@ -37,27 +39,28 @@ if (!InvReq::validIpCurUser()) {
 if (!isset($_POST["token"]) || !isset($_POST["TS"])) {
     // Cross reference protection not provided
     ///@todo decide action
-    InvReq::addInvalidRequest('login');
-    sendResponse("Required login data not provided");
+    InvReq::addInvalidRequest('invalidTsLogin', 'na');
+    _sendInvalidMessageResponse("Required login data not provided");
     exit;
 }
 
 if (!Token::validateToken("login", $_POST["TS"], $_POST["token"])) {
-    InvReq::addInvalidRequest('login');
-    sendResponse("Invalid token");
+    InvReq::addInvalidRequest('invalidTokenLogin', 'na');
+    _sendInvalidMessageResponse("Invalid token");
     exit;
 }
 
 $member = Member::login($_POST["uname"], $_POST['psw']);
 
 // Set response data
-$responseText["isValidLogin"] = !$member->error();
-if (!is_null($member->errorMessage())) {
-    $responseText['msg'] = "";
-} else {
-    $responseText['msg'] = $member->errorMessage();
+if( $member->error() )
+{
+    InvReq::addInvalidRequest('invalidLoginCredentials', $member->username());
+    _sendInvalidMessageResponse($member->errorMessage());
+    exit;
 }
-sendResponse($responseText);
+
+_sendValidMessageResponse('valid login');
 
 
 
