@@ -10,6 +10,16 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../resources/init.php';
 
+/*
+
+
+$member = Member::login($_POST["uname"], $_POST['psw']);
+ajax_respond([
+    "isValidLogin" => !$member->error(),
+    'msg' => $member->errorMessage()
+]);
+ */
+
 function sendResponse($responseText)
 {
     header('Content-Type: application/json');
@@ -27,11 +37,13 @@ if (!InvReq::validIpCurUser()) {
 if (!isset($_POST["token"]) || !isset($_POST["TS"])) {
     // Cross reference protection not provided
     ///@todo decide action
+    InvReq::addInvalidRequest('login');
     sendResponse("Required login data not provided");
     exit;
 }
 
 if (!Token::validateToken("login", $_POST["TS"], $_POST["token"])) {
+    InvReq::addInvalidRequest('login');
     sendResponse("Invalid token");
     exit;
 }
