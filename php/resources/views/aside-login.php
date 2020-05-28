@@ -26,6 +26,7 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
         <input type="password" placeholder="Enter Password" name="psw" id="psw" required>
         <br>
         <button type="button" id="loginButton">Login</button>
+        <span id="loginMsg" class="red"></span>
     </form>
     <h3>Not A Member?</h3>
     <p>
@@ -36,4 +37,3 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
     <h2>LOGOUT</h2>
     <button type="button" id="logoutButton">Logout</button>
 </div>
-<p id="loginMsg"></p>
