@@ -20,7 +20,7 @@ use function preg_match;
 use Psalm\Internal\Analyzer\ProjectAnalyzer;
 use Psalm\Internal\Analyzer\Statements\Block\ForeachAnalyzer;
 use Psalm\Internal\Analyzer\TypeAnalyzer;
-use Psalm\Internal\Codebase\CallMap;
+use Psalm\Internal\Codebase\InternalCallMapHandler;
 use Psalm\Internal\Provider\ClassLikeStorageProvider;
 use Psalm\Internal\Provider\FileProvider;
 use Psalm\Internal\Provider\FileReferenceProvider;
@@ -851,6 +851,8 @@ class Codebase
     /**
      * Given a function id, return the function like storage for
      * a method, closure, or function.
+     *
+     * @param non-empty-string $function_id
      */
     public function getFunctionLikeStorage(
         StatementsAnalyzer $statements_analyzer,
@@ -1032,7 +1034,7 @@ class Codebase
     public function getSymbolInformation(string $file_path, string $symbol)
     {
         if (\is_numeric($symbol[0])) {
-            return \preg_replace('/[^:]*:/', '', $symbol);
+            return \preg_replace('/^[^:]*:/', '', $symbol);
         }
 
         try {
@@ -1236,7 +1238,7 @@ class Codebase
     }
 
     /**
-     * @return array{0: string, 1: int, 2: Range}|null
+     * @return array{0: non-empty-string, 1: int, 2: Range}|null
      */
     public function getFunctionArgumentAtPosition(string $file_path, Position $position)
     {
@@ -1290,7 +1292,7 @@ class Codebase
     }
 
     /**
-     * @param  string $function_symbol
+     * @param  non-empty-string $function_symbol
      */
     public function getSignatureInformation(string $function_symbol) : ?\LanguageServerProtocol\SignatureInformation
     {
@@ -1311,8 +1313,8 @@ class Codebase
 
                 $params = $function_storage->params;
             } catch (\Exception $exception) {
-                if (CallMap::inCallMap($function_symbol)) {
-                    $callables = CallMap::getCallablesFromCallMap($function_symbol);
+                if (InternalCallMapHandler::inCallMap($function_symbol)) {
+                    $callables = InternalCallMapHandler::getCallablesFromCallMap($function_symbol);
 
                     if (!$callables || !$callables[0]->params) {
                         return null;
