@@ -139,3 +139,7 @@ footer {
 .hide {
   display: none;
 }
+
+#signup_message {
+  font-weight: bold;
+}
