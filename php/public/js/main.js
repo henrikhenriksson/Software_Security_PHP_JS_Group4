@@ -80,20 +80,27 @@ function doSignup() {
   const token = byId('su_token').value;
   const timeStamp = byId('su_ts').value;
 
-  if (userName != '' && password1 != '') {
-    xhr.addEventListener('readystatechange', processSignup, false);
-    let data = new FormData();
-    data.append('user_name', userName);
-    data.append('password1', password1);
-    data.append('password2', password2);
-    data.append('su_token', token);
-    data.append('su_ts', timeStamp);
-    xhr.open('POST', 'signup.php', true);
-    xhr.send(data);
-  } else {
-    byId('signup_message').innerHTML =
-      'Username and/or password can not be empty!';
+  if (!userName || userName.trim() == '') {
+    byId('signup_message').innerHTML = 'Username can not be empty!';
+    return;
   }
+
+  if (!password1 || password1.trim() === '') {
+    byId('signup_message').innerHTML =
+      'Password can not be empty or contain only whitespace characters.';
+    return;
+  }
+
+  // if username is not empty and password has any value (not null);
+  xhr.addEventListener('readystatechange', processSignup, false);
+  let data = new FormData();
+  data.append('user_name', userName);
+  data.append('password1', password1);
+  data.append('password2', password2);
+  data.append('su_token', token);
+  data.append('su_ts', timeStamp);
+  xhr.open('POST', 'signup.php', true);
+  xhr.send(data);
 }
 
 /*******************************************************************************
