@@ -16,10 +16,15 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
     <form id="loginForm">
         <input type="hidden" id="token" value="<?php echo Token::generateToken('login'); ?>">
         <input type="hidden" id="TS" value="<?php echo Token::generateTs(); ?>">
-        <label><b>Username</b></label>
+        <label>
+            <p><b>Username</b></p>
+        </label>
         <input type="text" placeholder="m" name="uname" id="uname" required maxlength="10" value="m" autocomplete="off">
-        <label><b>Password</b></label>
+        <label>
+            <p><b>Password</b></p>
+        </label>
         <input type="password" placeholder="Enter Password" name="psw" id="psw" required>
+        <br>
         <button type="button" id="loginButton">Login</button>
     </form>
     <h3>Not A Member?</h3>
