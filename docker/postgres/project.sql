@@ -33,7 +33,7 @@ INSERT INTO dt167g.users (username, password) VALUES
 ('h','$2y$10$anKsft7OO5YbjYzJC9CU8.GVMwhv5hfDMiqLQza4Wh5iNgNF9g2re');
 
 
-DROP TABLE IF EXISTS dt167g.posts;
+DROP TABLE IF EXISTS dt167g.posts CASCADE;
 
 CREATE TABLE dt167g.posts (
   id        SERIAL PRIMARY KEY,
@@ -44,7 +44,7 @@ CREATE TABLE dt167g.posts (
 )
 WITHOUT OIDS;
 
-DROP TABLE IF EXISTS dt167g.likes;
+DROP TABLE IF EXISTS dt167g.likes CASCADE;
 
 CREATE TABLE dt167g.likes(
       postId     INTEGER     NOT NULL,
@@ -107,11 +107,13 @@ WITHOUT OIDS;
 -- First we create a change log table for our user table
 -- ##############################################
 
-DROP TABLE IF EXISTS dt167g.user_changelog;
+DROP TABLE IF EXISTS dt167g.user_changelog CASCADE;
 
 CREATE TABLE dt167g.user_changelog (
   id          SERIAL PRIMARY KEY,
-  user_id   integer REFERENCES dt167g.users (id),
+  user_id   integer REFERENCES dt167g.users (id)
+                                ON DELETE SET NULL
+                                ON UPDATE NO ACTION,
   username    text,
   password    text,
   time_change timestamp without time zone DEFAULT now()
@@ -136,7 +138,7 @@ WITHOUT OIDS;
 CREATE EXTENSION IF NOT EXISTS plpgsql;
 
 -- When we have created required language we can create our function
-DROP FUNCTION IF EXISTS dt167g.save_user_change();
+DROP FUNCTION IF EXISTS dt167g.save_user_change() CASCADE;
 
 CREATE OR REPLACE FUNCTION dt167g.save_user_change()
   RETURNS trigger
