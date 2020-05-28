@@ -33,7 +33,7 @@ INSERT INTO dt167g.users (username, password) VALUES
 ('h','$2y$10$anKsft7OO5YbjYzJC9CU8.GVMwhv5hfDMiqLQza4Wh5iNgNF9g2re');
 
 
-DROP TABLE IF EXISTS dt167g.posts CASCADE;
+DROP TABLE IF EXISTS dt167g.posts;
 
 CREATE TABLE dt167g.posts (
   id        SERIAL PRIMARY KEY,
@@ -44,11 +44,12 @@ CREATE TABLE dt167g.posts (
 )
 WITHOUT OIDS;
 
-DROP TABLE IF EXISTS dt167g.likes CASCADE;
+DROP TABLE IF EXISTS dt167g.likes;
 
 CREATE TABLE dt167g.likes(
       postId     INTEGER     NOT NULL,
       userId        INTEGER     NOT NULL,
+      rating_action VARCHAR(20) NOT NULL,
       UNIQUE( postId, userId),
       FOREIGN KEY(postId) REFERENCES dt167g.posts(id) ON DELETE CASCADE,
       FOREIGN KEY(userId) REFERENCES dt167g.users(id) ON DELETE CASCADE
@@ -106,13 +107,11 @@ WITHOUT OIDS;
 -- First we create a change log table for our user table
 -- ##############################################
 
-DROP TABLE IF EXISTS dt167g.user_changelog CASCADE;
+DROP TABLE IF EXISTS dt167g.user_changelog;
 
 CREATE TABLE dt167g.user_changelog (
   id          SERIAL PRIMARY KEY,
-  user_id   integer REFERENCES dt167g.users (id)
-                                ON DELETE SET NULL
-                                ON UPDATE NO ACTION,
+  user_id   integer REFERENCES dt167g.users (id),
   username    text,
   password    text,
   time_change timestamp without time zone DEFAULT now()
@@ -137,7 +136,7 @@ WITHOUT OIDS;
 CREATE EXTENSION IF NOT EXISTS plpgsql;
 
 -- When we have created required language we can create our function
-DROP FUNCTION IF EXISTS dt167g.save_user_change() CASCADE;
+DROP FUNCTION IF EXISTS dt167g.save_user_change();
 
 CREATE OR REPLACE FUNCTION dt167g.save_user_change()
   RETURNS trigger
