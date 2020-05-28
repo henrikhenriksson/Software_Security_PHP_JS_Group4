@@ -53,9 +53,9 @@ if (!empty($_POST)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title ?></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <link rel="stylesheet" href="css/all.min.css">
     <link rel="stylesheet" href="css/style.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="js/jquery-3.5.1.min.js"></script>
     <script src="js/main.js"></script>
 </head>
 
@@ -66,8 +66,8 @@ if (!empty($_POST)) {
     </header>
     <main>
         <aside>
-            <?php require 'aside-login.php'; ?>
-            <?php require 'aside-search.php'; ?>
+            <?php require __DIR__ . '/../resources/views/aside-login.php'; ?>
+            <?php require __DIR__ . '/../resources/views/aside-search.php'; ?>
         </aside>
         <section>
             <div id="gb-form" class="<?php echo $formClass ?>">
