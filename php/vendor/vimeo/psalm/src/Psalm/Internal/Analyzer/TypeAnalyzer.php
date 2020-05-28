@@ -3,9 +3,7 @@ namespace Psalm\Internal\Analyzer;
 
 use Psalm\Internal\Analyzer\Statements\ExpressionAnalyzer;
 use Psalm\Codebase;
-use Psalm\Internal\Codebase\CallMap;
-use Psalm\Internal\Codebase\Methods;
-use Psalm\Internal\Type\TemplateResult;
+use Psalm\Internal\Codebase\InternalCallMapHandler;
 use Psalm\Type;
 use Psalm\Type\Atomic\ObjectLike;
 use Psalm\Type\Atomic\TObjectWithProperties;
@@ -57,7 +55,6 @@ use function array_values;
 use function count;
 use function is_string;
 use function array_fill;
-use function array_search;
 use function array_keys;
 use function array_reduce;
 use function end;
@@ -878,22 +875,44 @@ class TypeAnalyzer
             return false;
         }
 
-        if ($input_type_part instanceof Type\Atomic\TLowercaseString
+        if (($input_type_part instanceof Type\Atomic\TLowercaseString
+                || $input_type_part instanceof Type\Atomic\TNonEmptyLowercaseString)
             && get_class($container_type_part) === TString::class
         ) {
             return true;
         }
 
-        if ($container_type_part instanceof Type\Atomic\TLowercaseString
+        if (($container_type_part instanceof Type\Atomic\TLowercaseString
+                || $container_type_part instanceof Type\Atomic\TNonEmptyLowercaseString)
             && $input_type_part instanceof TString
         ) {
-            if ($input_type_part instanceof Type\Atomic\TLowercaseString) {
+            if (($input_type_part instanceof Type\Atomic\TLowercaseString
+                    && $container_type_part instanceof Type\Atomic\TLowercaseString)
+                || ($input_type_part instanceof Type\Atomic\TNonEmptyLowercaseString
+                    && $container_type_part instanceof Type\Atomic\TNonEmptyLowercaseString)
+            ) {
                 return true;
+            }
+
+            if ($input_type_part instanceof Type\Atomic\TNonEmptyLowercaseString
+                && $container_type_part instanceof Type\Atomic\TLowercaseString
+            ) {
+                return true;
+            }
+
+            if ($input_type_part instanceof Type\Atomic\TLowercaseString
+                && $container_type_part instanceof Type\Atomic\TNonEmptyLowercaseString
+            ) {
+                if ($atomic_comparison_result) {
+                    $atomic_comparison_result->type_coerced = true;
+                }
+
+                return false;
             }
 
             if ($input_type_part instanceof TLiteralString) {
                 if (strtolower($input_type_part->value) === $input_type_part->value) {
-                    return true;
+                    return $input_type_part->value || $container_type_part instanceof Type\Atomic\TLowercaseString;
                 }
 
                 return false;
@@ -1427,11 +1446,14 @@ class TypeAnalyzer
             return false;
         }
 
-        if ($input_type_part instanceof Type\Atomic\TLowercaseString
+        if (($input_type_part instanceof Type\Atomic\TLowercaseString
+                || $input_type_part instanceof Type\Atomic\TNonEmptyLowercaseString)
             && $container_type_part instanceof TLiteralString
             && strtolower($container_type_part->value) === $container_type_part->value
         ) {
-            if ($atomic_comparison_result) {
+            if ($atomic_comparison_result
+                && ($container_type_part->value || $input_type_part instanceof Type\Atomic\TLowercaseString)
+            ) {
                 $atomic_comparison_result->type_coerced = true;
                 $atomic_comparison_result->type_coerced_from_scalar = true;
             }
@@ -1541,6 +1563,14 @@ class TypeAnalyzer
             && ($input_type_part instanceof TNumericString
                 || $input_type_part instanceof THtmlEscapedString)
         ) {
+            if ($container_type_part instanceof TLiteralString) {
+                if (\is_numeric($container_type_part->value) && $atomic_comparison_result) {
+                    $atomic_comparison_result->type_coerced = true;
+                }
+
+                return false;
+            }
+
             return true;
         }
 
@@ -1899,7 +1929,7 @@ class TypeAnalyzer
         ?TCallable $container_type_part = null,
         ?StatementsAnalyzer $statements_analyzer = null
     ) : ?TCallable {
-        if ($input_type_part instanceof TLiteralString) {
+        if ($input_type_part instanceof TLiteralString && $input_type_part->value) {
             try {
                 $function_storage = $codebase->functions->getStorage(
                     $statements_analyzer,
@@ -1913,7 +1943,7 @@ class TypeAnalyzer
                     $function_storage->pure
                 );
             } catch (\UnexpectedValueException $e) {
-                if (CallMap::inCallMap($input_type_part->value)) {
+                if (InternalCallMapHandler::inCallMap($input_type_part->value)) {
                     $args = [];
 
                     $nodes = new \Psalm\Internal\Provider\NodeDataProvider();
@@ -1932,7 +1962,7 @@ class TypeAnalyzer
                         }
                     }
 
-                    $matching_callable = \Psalm\Internal\Codebase\CallMap::getCallableFromCallMapById(
+                    $matching_callable = \Psalm\Internal\Codebase\InternalCallMapHandler::getCallableFromCallMapById(
                         $codebase,
                         $input_type_part->value,
                         $args,

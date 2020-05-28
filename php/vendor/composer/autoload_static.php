@@ -43,7 +43,6 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
         array (
             'Psr\\Log\\' => 8,
             'Psr\\Container\\' => 14,
-            'Psalm\\Plugin\\' => 13,
             'Psalm\\' => 6,
             'PhpParser\\' => 10,
             'ParagonIE\\EasyDB\\' => 17,
@@ -115,10 +114,6 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
         ),
-        'Psalm\\Plugin\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/vimeo/psalm/src/Psalm/Plugin',
-        ),
         'Psalm\\' => 
         array (
             0 => __DIR__ . '/..' . '/vimeo/psalm/src/Psalm',
@@ -188,6 +183,7 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
 
     public static $classMap = array (
         'Config' => __DIR__ . '/../..' . '/resources/classes/config.class.php',
+        'InvReq' => __DIR__ . '/../..' . '/resources/classes/invreq.class.php',
         'JsonException' => __DIR__ . '/..' . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
         'Member' => __DIR__ . '/../..' . '/resources/classes/member.class.php',
         'Post' => __DIR__ . '/../..' . '/resources/classes/post.class.php',
