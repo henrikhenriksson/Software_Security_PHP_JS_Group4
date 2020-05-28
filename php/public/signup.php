@@ -18,7 +18,8 @@ if (!isset($_POST["su_token"]) || !isset($_POST["su_ts"]) || !Token::validateTok
         'msg' => 'An error occured. Your data could not be validated.'
     ]);
 }
-
+$member = new Member();
+$member->setUsername($_POST['user_name']);
 
 // check if member is already logged in.
 if ($member->loggedIn()) {
@@ -34,8 +35,7 @@ if (!isValidPasswordInput($_POST['password1'], $_POST['password2'])) {
     ]);
 }
 
-$member = new Member();
-$member->setUsername($_POST['user_name']);
+
 
 // check if save was successfull
 if (!$member->save($_POST['password1'])) {
