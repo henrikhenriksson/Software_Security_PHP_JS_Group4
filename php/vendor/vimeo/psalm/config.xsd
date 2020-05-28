@@ -10,6 +10,7 @@
     <xs:complexType name="PsalmType">
         <xs:choice maxOccurs="unbounded">
             <xs:element name="projectFiles" type="ProjectFilesType" minOccurs="1" maxOccurs="1" />
+            <xs:element name="taintAnalysis" type="TaintAnalysisType" minOccurs="0" maxOccurs="1" />
             <xs:element name="fileExtensions" type="FileExtensionsType" minOccurs="0" maxOccurs="1" />
             <xs:element name="mockClasses" type="MockClassesType" minOccurs="0" maxOccurs="1" />
             <xs:element name="stubs" type="StubsType" minOccurs="0" maxOccurs="1" />
@@ -75,6 +76,12 @@
         <xs:choice maxOccurs="unbounded">
             <xs:element name="directory" minOccurs="0" maxOccurs="unbounded" type="ProjectDirectoryAttributeType" />
             <xs:element name="file" minOccurs="0" maxOccurs="unbounded" type="NameAttributeType" />
+            <xs:element name="ignoreFiles" minOccurs="0" maxOccurs="1" type="IgnoreFilesType" />
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="TaintAnalysisType">
+        <xs:choice maxOccurs="unbounded">
             <xs:element name="ignoreFiles" minOccurs="0" maxOccurs="1" type="IgnoreFilesType" />
         </xs:choice>
     </xs:complexType>
@@ -259,6 +266,7 @@
             <xs:element name="MixedArrayOffset" type="IssueHandlerType" minOccurs="0" />
             <xs:element name="MixedArrayTypeCoercion" type="IssueHandlerType" minOccurs="0" />
             <xs:element name="MixedAssignment" type="IssueHandlerType" minOccurs="0" />
+            <xs:element name="MixedClone" type="ArgumentIssueHandlerType" minOccurs="0" />
             <xs:element name="MixedFunctionCall" type="IssueHandlerType" minOccurs="0" />
             <xs:element name="MixedInferredReturnType" type="IssueHandlerType" minOccurs="0" />
             <xs:element name="MixedMethodCall" type="IssueHandlerType" minOccurs="0" />
@@ -301,6 +309,7 @@
             <xs:element name="PossiblyInvalidArrayAssignment" type="IssueHandlerType" minOccurs="0" />
             <xs:element name="PossiblyInvalidArrayOffset" type="IssueHandlerType" minOccurs="0" />
             <xs:element name="PossiblyInvalidCast" type="IssueHandlerType" minOccurs="0" />
+            <xs:element name="PossiblyInvalidClone" type="IssueHandlerType" minOccurs="0" />
             <xs:element name="PossiblyInvalidFunctionCall" type="IssueHandlerType" minOccurs="0" />
             <xs:element name="PossiblyInvalidIterator" type="IssueHandlerType" minOccurs="0" />
             <xs:element name="PossiblyInvalidMethodCall" type="IssueHandlerType" minOccurs="0" />
