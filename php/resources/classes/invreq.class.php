@@ -20,9 +20,14 @@ use \Latitude\QueryBuilder as Q;
 class InvReq
 {
 
-    public static function addInvalidRequest(string $action)
+    /**
+     * overloaded version of addInvalidRequestWIp that users internal function to get the ip address
+     * @param string $action
+     * @param $userName
+     */
+    public static function addInvalidRequest(string $action, $userName)
     {
-        self::addInvalidRequestWIp($action, self::getUserIpAddress());
+        self::addInvalidRequestWIp($action, self::getUserIpAddress(), $userName);
     }
 
     /**
@@ -33,10 +38,11 @@ class InvReq
      *
      * @param string $action In which are were the invalid request detected.
      * @param string $ip The ip address of the user.
+     * @param string $userName The username of the logged in user, if available
      */
-    public static function addInvalidRequestWIp(string $action, string $ip):void
+    public static function addInvalidRequestWIp(string $action, string $ip, $userName):void
     {
-        $data = array('iplog'=>$ip, 'reqpage'=>'testreqpage', 'username'=>'testusername');
+        $data = array('iplog'=>$ip, 'reqpage'=>$action, 'username'=>$userName);
 
         $db = getEasyDB();
         $db->setAllowSeparators(true);
