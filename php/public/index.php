@@ -198,7 +198,7 @@ function member_owns_post(string $postname): bool
     </main>
 
     <footer>
-        Footer
+        <?php require_once __DIR__ . '/../resources/views/footer.php'; ?>
     </footer>
 </body>
 

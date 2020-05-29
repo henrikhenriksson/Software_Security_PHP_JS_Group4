@@ -120,7 +120,7 @@ if (isset($_GET["search-type"]) && isset($_GET["search-field"])) {
         </section>
     </main>
     <footer>
-        Footer
+        <?php require_once __DIR__ . '/../resources/views/footer.php'; ?>
     </footer>
 </body>
 
