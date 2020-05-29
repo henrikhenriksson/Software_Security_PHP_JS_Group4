@@ -322,7 +322,6 @@ class AntiCSRF
             empty($this->post[$this->formToken])
         ) {
             // User must transmit a complete index/token pair
-            echo "User must transmit a complete index/token pair";
             return false;
         }
 
@@ -332,13 +331,11 @@ class AntiCSRF
         /** @var string $token */
         $token = $this->post[$this->formToken];
         if (!\is_string($index) || !\is_string($token)) {
-            echo "no string token";
             return false;
         }
 
         if (!isset($sess[$index])) {
             // CSRF Token not found
-            echo "CSRF Token not found";
             return false;
         }
 
@@ -369,7 +366,6 @@ class AntiCSRF
 
         if (!\hash_equals($lockTo, (string) $stored['lockTo'])) {
             // Form target did not match the request this token is locked to!
-            echo "invalid lock to $lockTo";
             return false;
         }
 

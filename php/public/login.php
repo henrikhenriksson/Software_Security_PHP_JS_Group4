@@ -39,7 +39,7 @@ if (!InvReq::validIpCurUser()) {
 }
 
 
-if (!isset($_POST["token"]) || !isset($_POST["TS"])) {
+if (!isset($_POST["_CSRF_TOKEN"]) || !isset($_POST["_CSRF_INDEX"])) {
     // Cross reference protection not provided
     ///@todo decide action
     InvReq::addInvalidRequest('missing Token data', 'na');
@@ -47,7 +47,7 @@ if (!isset($_POST["token"]) || !isset($_POST["TS"])) {
     exit;
 }
 
-if (! $token-> ) {
+if (! $token->validateRequest() ) {
     InvReq::addInvalidRequest('invalidTokenLogin', 'na');
     _sendInvalidMessageResponse("Invalid token");
     exit;
@@ -60,6 +60,7 @@ if( $member->error() )
 {
     InvReq::addInvalidRequest('invalidLoginCredentials', $member->username());
     _sendInvalidMessageResponse($member->errorMessage());
+    ///@todo regenerate_session_id() and Send new token back to user, must only be sent when the first token is valid
     exit;
 }
 
