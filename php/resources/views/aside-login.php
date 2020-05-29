@@ -43,3 +43,4 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
     <h2>LOGOUT</h2>
     <button type="button" id="logoutButton">Logout</button>
 </div>
+<p id="loginMsg"></p>
