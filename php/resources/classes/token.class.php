@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Project Group 4 DT167G
  * File: token.class.php
  ******************************************************************************/
-
+///@todo replace wiht AntiCSRf
 class Token
 {
     public static function generateToken(string $action)

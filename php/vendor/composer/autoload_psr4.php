@@ -6,7 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'phpDocumentor\\Reflection\\' => array($vendorDir . '/phpdocumentor/reflection-common/src', $vendorDir . '/phpdocumentor/type-resolver/src', $vendorDir . '/phpdocumentor/reflection-docblock/src'),
+    'phpDocumentor\\Reflection\\' => array($vendorDir . '/phpdocumentor/reflection-common/src', $vendorDir . '/phpdocumentor/reflection-docblock/src', $vendorDir . '/phpdocumentor/type-resolver/src'),
     'Webmozart\\PathUtil\\' => array($vendorDir . '/webmozart/path-util/src'),
     'Webmozart\\Glob\\' => array($vendorDir . '/webmozart/glob/src'),
     'Webmozart\\Assert\\' => array($vendorDir . '/webmozart/assert/src'),
@@ -22,6 +22,7 @@ return array(
     'ParagonIE\\EasyDB\\' => array($vendorDir . '/paragonie/easydb/src'),
     'ParagonIE\\Corner\\' => array($vendorDir . '/paragonie/corner/src'),
     'ParagonIE\\ConstantTime\\' => array($vendorDir . '/paragonie/constant_time_encoding/src'),
+    'ParagonIE\\CSPBuilder\\' => array($vendorDir . '/paragonie/csp-builder/src'),
     'ParagonIE\\AntiCSRF\\' => array($vendorDir . '/paragonie/anti-csrf/src'),
     'PackageVersions\\' => array($vendorDir . '/ocramius/package-versions/src/PackageVersions'),
     'Latitude\\QueryBuilder\\' => array($vendorDir . '/latitude/latitude/src'),
