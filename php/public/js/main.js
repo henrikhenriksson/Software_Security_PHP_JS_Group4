@@ -53,16 +53,16 @@ window.addEventListener('load', main, false);
 function doLogin() {
   const UNAME = byId('uname').value;
   const PSW = byId('psw').value;
-  const TOKEN = byId('token').value;
-  const TS = byId('TS').value;
+  const _CSRF_TOKEN = byId('_CSRF_TOKEN').value;
+  const _CSRF_INDEX = byId('_CSRF_INDEX').value;
 
   if (UNAME !== '' && PSW !== '') {
     xhr.addEventListener('readystatechange', processLogin, false);
     let data = new FormData();
     data.append('uname', UNAME);
     data.append('psw', PSW);
-    data.append('token', TOKEN);
-    data.append('TS', TS);
+    data.append('_CSRF_TOKEN', _CSRF_TOKEN);
+    data.append('_CSRF_INDEX', _CSRF_INDEX);
 
     // Send formdata with URL to login.php
     //xhr.open("GET", `login.php?uname=${UNAME}&psw=${PSW}`, true);

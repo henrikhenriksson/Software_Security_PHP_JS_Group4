@@ -9,16 +9,23 @@ declare(strict_types=1);
  ******************************************************************************/
 
 require_once __DIR__ . '/../resources/init.php';
+use \ParagonIE\AntiCSRF\AntiCSRF as Token;
+
+$token = new Token();
 
 $responseText = [];
 
-if (!isset($_POST["token"]) || !isset($_POST["TS"])) {
+$responseText['debug'] = $_POST;
+
+//if (!isset($_POST["token"]) || !isset($_POST["TS"])) {
+if( $token->validateRequest())
+{
     // Cross reference protection not provided
     ///@todo decide action
 
     $responseText["msg"] = "Required login data not provided";
 } else {
-    if (Token::validateToken("login", $_POST["TS"], $_POST["token"])) {
+    if ($token->validateRequest()) {
         $member = Member::login($_POST["uname"], $_POST['psw']);
 
         // Set response data
