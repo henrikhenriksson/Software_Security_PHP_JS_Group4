@@ -10,6 +10,13 @@ declare(strict_types=1);
 $title = "DT167G - Group 4";
 
 require_once __DIR__ . '/../resources/init.php';
+
+
+if (Member::loggedIn()) {
+    header('Location: /');
+    exit;
+}
+
 ?>
 
 
