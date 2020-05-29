@@ -125,6 +125,16 @@ td {
 
 footer {
   border-top: 1px solid black;
+  text-align: center;
+}
+
+address {
+  display: inline-block;
+}
+
+.mail-links {
+  margin: 0px;
+  color: black;
 }
 
 .logo {
