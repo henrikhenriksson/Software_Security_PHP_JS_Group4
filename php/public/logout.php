@@ -13,7 +13,8 @@ require_once __DIR__ . '/../resources/init.php';
 
 Member::logout();
 
-$responseText["msg"] = "You are logged out";
+// $responseText["msg"] = "You are logged out";
+$responseText["msg"] = "";
 
 // Send back response
 header('Content-Type: application/json');
