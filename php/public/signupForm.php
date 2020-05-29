@@ -1,4 +1,4 @@
-<?PHP
+<?php
 
 declare(strict_types=1);
 
@@ -10,6 +10,13 @@ declare(strict_types=1);
 $title = "DT167G - Group 4";
 
 require_once __DIR__ . '/../resources/init.php';
+
+
+if (Member::loggedIn()) {
+    header('Location: /');
+    exit;
+}
+
 ?>
 
 
@@ -20,7 +27,9 @@ require_once __DIR__ . '/../resources/init.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DT161G-<?php echo $title ?></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css" />
+    <script src="js/jquery-3.5.1.min.js"></script>
     <script src="js/main.js"></script>
 </head>
 
@@ -34,7 +43,7 @@ require_once __DIR__ . '/../resources/init.php';
             <?php require '../resources/views/aside-login.php'; ?>
             <?php require '../resources/views/aside-search.php'; ?>
         </aside>
-        <section>
+        <section class="content-wrapper">
             <div id="new_member">
 
                 <h2 class>Sign up To Use the Website</h2>

@@ -54,7 +54,11 @@ final class Versions
   'webmozart/assert' => '1.8.0@ab2cb0b3b559010b75981b1bdce728da3ee90ad6',
   'webmozart/glob' => '4.1.0@3cbf63d4973cf9d780b93d2da8eec7e4a9e63bbe',
   'webmozart/path-util' => '2.3.0@d939f7edc24c9a1bb9c0dee5cb05d8e859490725',
+<<<<<<< HEAD
   '__root__' => 'dev-content-security-headers@c91b770a5ce9b1996179f5b5110209271f98663a',
+=======
+  '__root__' => 'dev-update-posts-format@6d4798672c5e5fc9ed61ada893b1b58bfe63fe7e',
+>>>>>>> origin
 );
 
     private function __construct()

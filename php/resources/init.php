@@ -1,11 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*******************************************************************************
  * Project Group 4 DT167G
  * File: init.php
  ******************************************************************************/
 
-require_once __DIR__.'/../vendor/autoload.php';  // Let composer handle autoloads
+require_once __DIR__ . '/../vendor/autoload.php';  // Let composer handle autoloads
 
 use ParagonIE\CSPBuilder\CSPBuilder;
 
@@ -13,7 +15,7 @@ use ParagonIE\CSPBuilder\CSPBuilder;
 // Reduces risk of common XSS attacks (if the browser enforces it).
 session_start([
     'cookie_httponly' => true,  // Only allow server to read session cookie
-                                // i.e don't show it to javascript
+    // i.e don't show it to javascript
     'cookie_secure' => true     // Only send cookie over https
 ]);
 
