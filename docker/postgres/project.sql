@@ -119,7 +119,16 @@ CREATE TABLE dt167g.user_changelog (
 )
 WITHOUT OIDS;
 
+DROP TABLE IF EXISTS dt167g.invalid_requests CASCADE;
 
+CREATE TABLE dt167g.invalid_requests (
+    id          SERIAL PRIMARY KEY,
+    iplog       inet      NOT NULL CHECK (iplog <> inet '0.0.0.0'),
+    req_page    text    NOT NULL,
+    user_name   text    NOT NULL,
+    timelog     timestamp default now()
+
+);
 
 -- ##############################################
 -- Last we insert some values

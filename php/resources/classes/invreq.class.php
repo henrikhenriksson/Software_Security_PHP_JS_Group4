@@ -42,12 +42,12 @@ class InvReq
      */
     public static function addInvalidRequestWIp(string $action, string $ip, $userName):void
     {
-        $data = array('iplog'=>$ip, 'reqpage'=>$action, 'username'=>$userName);
+        $data = array('iplog'=>$ip, 'req_page'=>$action, 'user_name'=>$userName);
 
         $db = getEasyDB();
         $db->setAllowSeparators(true);
 
-        $db->insert('invalidrequests', $data);
+        $db->insert('invalid_requests', $data);
 
 //        prettyprint( $data );
 //        $sql = $db->buildInsertQuery('dt167g.invalidRequests', [
@@ -89,7 +89,7 @@ class InvReq
 //        $factory = makeQueryFactory();
 
         $count = $db->cell(
-            "SELECT count(*) FROM dt167g.invalidRequests where iplog = ? and timelog > ?",
+            "SELECT count(*) FROM dt167g.invalid_requests where iplog = ? and timelog > ?",
             $checkIp,
             $time
         );
