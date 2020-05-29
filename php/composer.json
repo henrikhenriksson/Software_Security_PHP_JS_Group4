@@ -7,6 +7,7 @@
         "paragonie/easydb": "^2",
         "latitude/latitude": "^4.1",
         "roave/security-advisories": "dev-master",
-        "vimeo/psalm": "^3.11"
+        "vimeo/psalm": "^3.11",
+        "paragonie/anti-csrf": "^2.2"
     }
 }
