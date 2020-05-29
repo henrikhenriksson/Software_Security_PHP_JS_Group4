@@ -53,40 +53,54 @@ class Member
      */
     public static function fetchMembers(int $lim = 0, int $off = 0, EasyDB $db = null): array
     {
-        $factory = makeQueryFactory();
-        $query = $factory
-            ->select('id', 'username')
-            ->from('dt167g.users')
-            ->limit($lim > 0 ? $lim : null)  // LIMIT 0 will return 0 rows
-            ->offset($off)
-            ->compile();
-        if ($db == null) {
-            $db = getEasyDB();  // @codeCoverageIgnore
-        }
-        foreach ($db->run($query->sql()) as $row) {
-            $members[] = static::fromRow($db, $row);
+        try {
+            $factory = makeQueryFactory();
+            $query = $factory
+                ->select('id', 'username')
+                ->from('users')
+                ->limit($lim > 0 ? $lim : null)  // LIMIT 0 will return 0 rows
+                ->offset($off)
+                ->compile();
+            if ($db == null) {
+                $db = getEasyDB();  // @codeCoverageIgnore
+            }
+
+            $members = [];
+            foreach ($db->run($query->sql()) as $row) {
+                $members[] = static::fromRow($db, $row);
+            }
+        } catch (\Exception $e) {
+            throw new \Exception("Something went wrong...");
         }
         return $members;
     }
 
     private static function fetchByUsername(string $username, EasyDB $db = null): Member
     {
-        if ($db == null) {
-            $db = getEasyDB();  // @codeCoverageIgnore
-        }
-        if (!empty(trim($username))) {
-            return static::memberError("Username was empty", $db);
-        }
-        $factory = makeQueryFactory();
-        $query = $factory
-            ->select('id', 'username')
-            ->from('users')
-            ->where(Q\field('username')->eq($username))
-            ->compile();
-        $row = $db->row($query->sql(), $query->params()[0]);
-        if (empty($row)) {
+        try {
+            if ($db == null) {
+                $db = getEasyDB();  // @codeCoverageIgnore
+            }
+            if (!empty(trim($username))) {
+                return static::memberError("Username was empty", $db);
+            }
+            $factory = makeQueryFactory();
+            $query = $factory
+                ->select('id', 'username')
+                ->from('users')
+                ->where(Q\field('username')->eq($username))
+                ->compile();
+
+            $row = $db->row($query->sql(), $query->params()[0]);
+            if (empty($row)) {
+                return static::memberError(
+                    "Invalid username: " . escape($username),
+                    $db
+                );
+            }
+        } catch (\Exception $e) {
             return static::memberError(
-                "Invalid username: " . escape($username),
+                "Something went wrong when fetching member",
                 $db
             );
         }
@@ -95,21 +109,28 @@ class Member
 
     private static function fetchById(int $id, EasyDB $db = null): Member
     {
-        if ($db == null) {
-            $db = getEasyDB();  // @codeCoverageIgnore
-        }
-        $factory = makeQueryFactory();
-        $query = $factory
-            ->select('id', 'username')
-            ->from('dt167g.users')
-            ->where(Q\field('id')->eq(Session::get('userid')))
-            ->compile();
+        try {
+            if ($db == null) {
+                $db = getEasyDB();  // @codeCoverageIgnore
+            }
+            $factory = makeQueryFactory();
+            $query = $factory
+                ->select('id', 'username')
+                ->from('users')
+                ->where(Q\field('id')->eq(Session::get('userid')))
+                ->compile();
 
-        $row = $db->row($query->sql(), $query->params()[0]);
-        if (empty($row)) {
-            return static::memberError("Invalid user id: " . $id, $db);
+            $row = $db->row($query->sql(), $query->params()[0]);
+            if (empty($row)) {
+                return static::memberError("Invalid user id: " . $id, $db);
+            }
+            return static::fromRow($db, $row);
+        } catch (\Exception $e) {
+            return static::memberError(
+                "Something went wrong when fetching member",
+                $db
+            );
         }
-        return static::fromRow($db, $row);
     }
 
 
@@ -118,27 +139,37 @@ class Member
      */
     public static function login(string $uname, string $pass, EasyDB $db = null): Member
     {
-        if ($db == null) {
-            $db = getEasyDB();  // @codeCoverageIgnore
+        try {
+            if ($db == null) {
+                $db = getEasyDB();  // @codeCoverageIgnore
+            }
+            if (empty(trim($uname)) || empty(trim($pass))) {
+                return static::memberError("Invalid credentials!", $db);
+            }
+            $factory = makeQueryFactory();
+            $query = $factory
+                ->select('id', 'username', 'password')
+                ->from('users')
+                ->where(Q\field('username')->eq($uname))
+                ->compile();
+            $row = $db->row($query->sql(), $query->params()[0]);
+            if (empty($row)) {
+                // No valid username
+                // Do a hash to make response times similar.
+                password_hash($pass, PASSWORD_DEFAULT);
+                return static::memberError("Invalid credentials!", $db);
+            }
+            if (!password_verify($pass, $row['password'])) {
+                // The only error information sent back is if the combination of
+                // username and password was correct. No hints about if the
+                // username or password exists individually.
+                return static::memberError("Invalid credentials!", $db);
+            }
+            Session::set('userid', $row['id']);
+            return static::fromRow($db, $row);
+        } catch (\Exception $e) {
+            return static::memberError("Something went wrong when logging in", $db);
         }
-        if (empty(trim($uname)) || empty(trim($pass))) {
-            return static::memberError("Invalid credentials!", $db);
-        }
-        $factory = makeQueryFactory();
-        $query = $factory
-            ->select('id', 'username', 'password')
-            ->from('dt167g.users')
-            ->where(Q\field('username')->eq($uname))
-            ->compile();
-        $row = $db->row($query->sql(), $query->params()[0]);
-        if (empty($row) || !password_verify($pass, $row['password'])) {
-            // The only error information sent back is if the combination of
-            // username and password was correct. No hints about if the
-            // username or password exists individually.
-            return static::memberError("Invalid credentials!", $db);
-        }
-        Session::set('userid', $row['id']);
-        return static::fromRow($db, $row);
     }
 
 
@@ -240,24 +271,34 @@ class Member
 
     public function usernameExists(): bool
     {
-        $factory = makeQueryFactory();
-        $query = $factory
-            ->select(Q\func('COUNT', 'id'))
-            ->from('users')
-            ->where(Q\field('username')->eq($this->username))  // uses raw username
-            ->compile();
-        return $this->db->single($query->sql(), $query->params()) != false;
+        try {
+            $factory = makeQueryFactory();
+            $query = $factory
+                ->select(Q\func('COUNT', 'id'))
+                ->from('users')
+                ->where(Q\field('username')->eq($this->username))  // uses raw username
+                ->compile();
+            return $this->db->single($query->sql(), $query->params()) != false;
+        } catch (\Exception $e) {
+            $this->setError("Something went wrong....");
+            return false;
+        }
     }
 
     public function idExists(): bool
     {
-        $factory = makeQueryFactory();
-        $query = $factory
-            ->select(Q\func('COUNT', 'id'))
-            ->from('users')
-            ->where(Q\field('id')->eq($this->id))
-            ->compile();
-        return $this->db->single($query->sql(), $query->params()) !== false;
+        try {
+            $factory = makeQueryFactory();
+            $query = $factory
+                ->select(Q\func('COUNT', 'id'))
+                ->from('users')
+                ->where(Q\field('id')->eq($this->id))
+                ->compile();
+            return $this->db->single($query->sql(), $query->params()) !== false;
+        } catch (\Exception $e) {
+            $this->setError("Something went wrong....");
+            return false;
+        }
     }
 
     private function insert(string $password): bool
@@ -270,7 +311,7 @@ class Member
             $this->clearError();
             return true;
         } catch (\Exception $e) { // @codeCoverageIgnoreStart
-            $this->setError($e->getMessage());
+            $this->setError("Something went wrong when adding new member!");
             $this->id = -1;
             return false;
         }// @codeCoverageIgnoreEnd
