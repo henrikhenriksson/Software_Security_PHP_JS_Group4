@@ -50,40 +50,6 @@ if ($member && isset($_POST)) {
     }
 }
 
-function like_btn_class(int $postid): string
-{
-    global $member;
-    if ($member && member_has_liked($postid, $member->id())) {
-        return "fas fa-thumbs-up like-btn";
-    }
-    return "far fa-thumbs-up like-btn";
-}
-
-function dislike_btn_class(int $postid): string
-{
-    global $member;
-    if ($member && member_has_disliked($postid, $member->id())) {
-        return "fas fa-thumbs-down dislike-btn";
-    }
-    return "far fa-thumbs-down dislike-btn";
-}
-
-function member_has_liked(int $postid, int $memberid): bool
-{
-    return Post::isRatedByUser($postid, $memberid, 'like');
-}
-
-function member_has_disliked(int $postid, int $memberid): bool
-{
-    return Post::isRatedByUser($postid, $memberid, 'dislike');
-}
-
-function member_owns_post(string $postname): bool
-{
-    global $member;
-    return $member && $member->username() === $postname;
-}
-
 /*******************************************************************************
  * HTML section starts here
  ******************************************************************************/
@@ -153,41 +119,7 @@ function member_owns_post(string $postname): bool
                 <h2>Guestbook posts</h2>
             <!-- Print out the posts, latest post first. -->
                 <?php foreach (array_reverse($posts) as $post) : ?>
-                <article class="post">
-                    <div class="post-header">
-                        <h4><?=  $post->getName() ?> wrote:</h4>
-                        <p class="time">At: <?=  $post->getTimeLog() ?></p>
-                    </div>
-                    <p class="content"><?=  $post->getMessage() ?></p>
-                    <footer>
-                        <div class="post-stats">
-                            <!-- like btn -->
-                            <i data-id="<?=  $post->getId() ?>"
-                                class="<?=  like_btn_class($post->getId()) ?>">
-                            </i>
-                            <!-- Get the number of likes for current post. -->
-                            <span class="likes"><?=  Post::getRatingCount($post->getId(), 'like') ?>
-                            </span>
-
-                            <!-- dislike btn -->
-                            <i data-id="<?=  $post->getId() ?>"
-                                class="<?=  dislike_btn_class($post->getId()) ?>">
-                            </i>
-                            <!-- Get the number of likes for current post. -->
-                            <span class="dislikes"><?=  Post::getRatingCount($post->getId(), 'dislike') ?>
-                            </span>
-                        </div>
-
-                        <?php if (member_owns_post($post->getName())): ?>
-                        <div class="delete-post">
-                            <i class="far fa-trash-alt delete-post"
-                                data-id="<?=  $post->getId() ?>">
-                            </i>
-                        </div>
-                        <?php endif; ?>
-
-                    </footer>
-                </article>
+                    <?php require __DIR__ . '/../resources/views/post.php'; ?>
                 <?php endforeach; ?>
                 <!-- Security token / timestamp submitted when liking , disliking and deleting posts -->
                 <input type="hidden" id="gb-token" value="<?=  Token::generateToken('delete-post') ?>">
