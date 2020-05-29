@@ -12,6 +12,9 @@ use Psalm\Internal\Scanner\ClassLikeDocblockComment;
 use Psalm\Internal\Scanner\FunctionDocblockComment;
 use Psalm\Internal\Scanner\VarDocblockComment;
 use Psalm\Internal\Type\ParseTree;
+use Psalm\Internal\Type\TypeAlias;
+use Psalm\Internal\Type\TypeParser;
+use Psalm\Internal\Type\TypeTokenizer;
 use Psalm\Type;
 use function trim;
 use function substr_count;
@@ -44,7 +47,7 @@ class CommentAnalyzer
 
     /**
      * @param  array<string, array<string, array{Type\Union}>>|null   $template_type_map
-     * @param  array<string, array<int, array{0: string, 1: int}>> $type_aliases
+     * @param  array<string, TypeAlias> $type_aliases
      *
      * @throws DocblockParseException if there was a problem parsing the docblock
      *
@@ -71,7 +74,7 @@ class CommentAnalyzer
 
     /**
      * @param  array<string, array<string, array{Type\Union}>>|null   $template_type_map
-     * @param  array<string, array<int, array{0: string, 1: int}>> $type_aliases
+     * @param  array<string, TypeAlias> $type_aliases
      * @param array{description:string, specials:array<string, array<int, string>>} $parsed_docblock
      *
      * @return VarDocblockComment[]
@@ -130,7 +133,7 @@ class CommentAnalyzer
                     }
 
                     try {
-                        $var_type_tokens = Type::fixUpLocalType(
+                        $var_type_tokens = TypeTokenizer::getFullyQualifiedTokens(
                             $line_parts[0],
                             $aliases,
                             $template_type_map,
@@ -154,7 +157,12 @@ class CommentAnalyzer
                 }
 
                 try {
-                    $defined_type = Type::parseTokens($var_type_tokens, null, $template_type_map ?: []);
+                    $defined_type = TypeParser::parseTokens(
+                        $var_type_tokens,
+                        null,
+                        $template_type_map ?: [],
+                        $type_aliases ?: []
+                    );
                 } catch (TypeParseTreeException $e) {
                     throw new DocblockParseException(
                         $line_parts[0] .
@@ -184,7 +192,12 @@ class CommentAnalyzer
                 $var_comment->allow_private_mutation
                     = isset($parsed_docblock['specials']['psalm-allow-private-mutation'])
                     || isset($parsed_docblock['specials']['psalm-readonly-allow-private-mutation']);
-                $var_comment->remove_taint = isset($parsed_docblock['specials']['psalm-remove-taint']);
+                if (isset($parsed_docblock['specials']['psalm-taint-remove'])) {
+                    foreach ($parsed_docblock['specials']['psalm-taint-remove'] as $param) {
+                        $param = trim($param);
+                        $var_comment->removed_taints[] = $param;
+                    }
+                }
 
                 if (isset($parsed_docblock['specials']['psalm-internal'])) {
                     $psalm_internal = reset($parsed_docblock['specials']['psalm-internal']);
@@ -210,7 +223,7 @@ class CommentAnalyzer
                 || isset($parsed_docblock['specials']['readonly'])
                 || isset($parsed_docblock['specials']['psalm-readonly'])
                 || isset($parsed_docblock['specials']['psalm-readonly-allow-private-mutation'])
-                || isset($parsed_docblock['specials']['psalm-remove-taint']))
+                || isset($parsed_docblock['specials']['psalm-taint-remove']))
         ) {
             $var_comment = new VarDocblockComment();
             $var_comment->deprecated = isset($parsed_docblock['specials']['deprecated']);
@@ -221,7 +234,13 @@ class CommentAnalyzer
             $var_comment->allow_private_mutation
                 = isset($parsed_docblock['specials']['psalm-allow-private-mutation'])
                 || isset($parsed_docblock['specials']['psalm-readonly-allow-private-mutation']);
-            $var_comment->remove_taint = isset($parsed_docblock['specials']['psalm-remove-taint']);
+
+            if (isset($parsed_docblock['specials']['psalm-taint-remove'])) {
+                foreach ($parsed_docblock['specials']['psalm-taint-remove'] as $param) {
+                    $param = trim($param);
+                    $var_comment->removed_taints[] = $param;
+                }
+            }
 
             $var_comments[] = $var_comment;
         }
@@ -238,11 +257,11 @@ class CommentAnalyzer
 
     /**
      * @param  Aliases          $aliases
-     * @param  array<string, array<int, array{0: string, 1: int}>> $type_aliases
+     * @param  array<string, TypeAlias> $type_aliases
      *
      * @throws DocblockParseException if there was a problem parsing the docblock
      *
-     * @return array<string, list<array{0: string, 1: int}>>
+     * @return array<string, TypeAlias\InlineTypeAlias>
      */
     public static function getTypeAliasesFromComment(
         PhpParser\Comment\Doc $comment,
@@ -265,11 +284,11 @@ class CommentAnalyzer
     /**
      * @param  array<string>    $type_alias_comment_lines
      * @param  Aliases          $aliases
-     * @param  array<string, array<int, array{0: string, 1: int}>> $type_aliases
+     * @param  array<string, TypeAlias> $type_aliases
      *
      * @throws DocblockParseException if there was a problem parsing the docblock
      *
-     * @return array<string, list<array{0: string, 1: int}>>
+     * @return array<string, TypeAlias\InlineTypeAlias>
      */
     private static function getTypeAliasesFromCommentLines(
         array $type_alias_comment_lines,
@@ -323,7 +342,7 @@ class CommentAnalyzer
             $type_string = preg_replace('/\}[^>^\}]*$/', '}', $type_string);
 
             try {
-                $type_tokens = Type::fixUpLocalType(
+                $type_tokens = TypeTokenizer::getFullyQualifiedTokens(
                     $type_string,
                     $aliases,
                     null,
@@ -333,7 +352,7 @@ class CommentAnalyzer
                 throw new DocblockParseException($type_string . ' is not a valid type');
             }
 
-            $type_alias_tokens[$type_alias] = $type_tokens;
+            $type_alias_tokens[$type_alias] = new TypeAlias\InlineTypeAlias($type_tokens);
         }
 
         return $type_alias_tokens;
@@ -469,11 +488,32 @@ class CommentAnalyzer
             }
         }
 
+        if (isset($parsed_docblock['specials']['psalm-flow'])) {
+            $flow = trim(reset($parsed_docblock['specials']['psalm-flow']));
+            $info->flow = $flow;
+        }
+
         if (isset($parsed_docblock['specials']['psalm-taint-sink'])) {
             foreach ($parsed_docblock['specials']['psalm-taint-sink'] as $param) {
-                $param = trim($param);
+                $param_parts = preg_split('/\s+/', trim($param));
 
-                $info->taint_sink_params[] = ['name' => $param];
+                if (count($param_parts) === 2) {
+                    $info->taint_sink_params[] = ['name' => trim($param_parts[1]), 'taint' => trim($param_parts[0])];
+                }
+            }
+        }
+
+        if (isset($parsed_docblock['specials']['psalm-taint-add'])) {
+            foreach ($parsed_docblock['specials']['psalm-taint-add'] as $param) {
+                $param = trim($param);
+                $info->added_taints[] = $param;
+            }
+        }
+
+        if (isset($parsed_docblock['specials']['psalm-taint-remove'])) {
+            foreach ($parsed_docblock['specials']['psalm-taint-remove'] as $param) {
+                $param = trim($param);
+                $info->removed_taints[] = $param;
             }
         }
 
@@ -483,6 +523,10 @@ class CommentAnalyzer
 
                 $info->assert_untainted_params[] = ['name' => $param];
             }
+        }
+
+        if (isset($parsed_docblock['specials']['psalm-taint-specialize'])) {
+            $info->specialize_call = true;
         }
 
         if (isset($parsed_docblock['specials']['global'])) {
@@ -540,10 +584,6 @@ class CommentAnalyzer
             if (! $info->internal) {
                 throw new DocblockParseException('@psalm-internal annotation used without @internal');
             }
-        }
-
-        if (isset($parsed_docblock['specials']['psalm-remove-taint'])) {
-            $info->remove_taint = true;
         }
 
         if (isset($parsed_docblock['specials']['psalm-suppress'])) {
@@ -944,6 +984,13 @@ class CommentAnalyzer
             }
         }
 
+        if (isset($parsed_docblock['specials']['psalm-import-type'])) {
+            foreach ($parsed_docblock['specials']['psalm-import-type'] as $imported_type_entry) {
+                /** @psalm-suppress InvalidPropertyAssignmentValue */
+                $info->imported_types[] = preg_split('/[\s]+/', $imported_type_entry);
+            }
+        }
+
         if (isset($parsed_docblock['specials']['method']) || isset($parsed_docblock['specials']['psalm-method'])) {
             $all_methods
                 = (isset($parsed_docblock['specials']['method'])
@@ -997,7 +1044,7 @@ class CommentAnalyzer
 
                 try {
                     $method_tree = ParseTree::createFromTokens(
-                        Type::fixUpLocalType(
+                        TypeTokenizer::getFullyQualifiedTokens(
                             $method_entry,
                             $aliases,
                             null
@@ -1013,7 +1060,7 @@ class CommentAnalyzer
                 }
 
                 if ($method_tree instanceof ParseTree\MethodWithReturnTypeTree) {
-                    $docblock_lines[] = '@return ' . Type::getTypeFromTree(
+                    $docblock_lines[] = '@return ' . TypeParser::getTypeFromTree(
                         $method_tree->children[1],
                         $codebase
                     );
@@ -1038,7 +1085,13 @@ class CommentAnalyzer
 
 
                     if ($method_tree_child->children) {
-                        $param_type = Type::getTypeFromTree($method_tree_child->children[0], $codebase);
+                        try {
+                            $param_type = TypeParser::getTypeFromTree($method_tree_child->children[0], $codebase);
+                        } catch (\Exception $e) {
+                            throw new DocblockParseException(
+                                'Badly-formatted @method string ' . $method_entry . ' - ' . $e
+                            );
+                        }
                         $docblock_lines[] = '@param \\' . $param_type . ' '
                             . ($method_tree_child->variadic ? '...' : '')
                             . $method_tree_child->name;

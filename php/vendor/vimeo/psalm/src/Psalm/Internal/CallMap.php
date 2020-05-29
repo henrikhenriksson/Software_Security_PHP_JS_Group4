@@ -3,7 +3,7 @@ namespace Phan\Language\Internal;
 
 /**
  * CURRENT PHP TARGET VERSION: 7.4
- * The version above have to match Psalm\Internal\Codebase\CallMap::PHP_(MAJOR|MINOR)_VERSION
+ * The version above has to match Psalm\Internal\Codebase\InternalCallMapHandler::PHP_(MAJOR|MINOR)_VERSION
  *
  * Format
  *
@@ -3659,7 +3659,7 @@ return [
 'getservbyname' => ['int|false', 'service'=>'string', 'protocol'=>'string'],
 'getservbyport' => ['string|false', 'port'=>'int', 'protocol'=>'string'],
 'gettext' => ['string', 'msgid'=>'string'],
-'gettimeofday' => ['array'],
+'gettimeofday' => ['array<string, int>'],
 'gettimeofday\'1' => ['float', 'get_as_float='=>'true'],
 'gettype' => ['string', 'var'=>'mixed'],
 'glob' => ['list<string>|false', 'pattern'=>'string', 'flags='=>'int'],
@@ -10427,13 +10427,14 @@ return [
 'rd_kafka_errno2err' => ['int', 'errnox'=>'int'],
 'rd_kafka_offset_tail' => ['int', 'cnt'=>'int'],
 'RdKafka::addBrokers' => ['int', 'broker_list'=>'string'],
+'RdKafka::flush' => ['int', 'timeout_ms'=>'int'],
 'RdKafka::getMetadata' => ['RdKafka\Metadata', 'all_topics'=>'bool', 'only_topic='=>'RdKafka\Topic', 'timeout_ms'=>'int'],
 'RdKafka::getOutQLen' => ['int'],
 'RdKafka::newQueue' => ['RdKafka\Queue'],
 'RdKafka::newTopic' => ['RdKafka\Topic', 'topic_name'=>'string', 'topic_conf='=>'?RdKafka\TopicConf'],
 'RdKafka::poll' => ['void', 'timeout_ms'=>'int'],
 'RdKafka::setLogLevel' => ['void', 'level'=>'int'],
-'RdKafka\Conf::dump' => ['array'],
+'RdKafka\Conf::dump' => ['array<string, string>'],
 'RdKafka\Conf::set' => ['void', 'name'=>'string', 'value'=>'string'],
 'RdKafka\Conf::setDefaultTopicConf' => ['void', 'topic_conf'=>'RdKafka\TopicConf'],
 'RdKafka\Conf::setDrMsgCb' => ['void', 'callback'=>'callable'],
@@ -10456,10 +10457,10 @@ return [
 'RdKafka\ConsumerTopic::getName' => ['string'],
 'RdKafka\ConsumerTopic::offsetStore' => ['void', 'partition'=>'int', 'offset'=>'int'],
 'RdKafka\KafkaConsumer::__construct' => ['void', 'conf'=>'RdKafka\Conf'],
-'RdKafka\KafkaConsumer::assign' => ['void', 'topic_partitions='=>'RdKafka\TopicPartition[]'],
+'RdKafka\KafkaConsumer::assign' => ['void', 'topic_partitions='=>'RdKafka\TopicPartition[]|null'],
 'RdKafka\KafkaConsumer::commit' => ['void', 'message_or_offsets='=>'RdKafka\Message|RdKafka\TopicPartition[]|null'],
 'RdKafka\KafkaConsumer::commitAsync' => ['void', 'message_or_offsets='=>'string'],
-'RdKafka\KafkaConsumer::consume' => ['RdKafka\Message', 'timeout_ms'=>'string'],
+'RdKafka\KafkaConsumer::consume' => ['RdKafka\Message', 'timeout_ms'=>'int'],
 'RdKafka\KafkaConsumer::getAssignment' => ['RdKafka\TopicPartition[]'],
 'RdKafka\KafkaConsumer::getMetadata' => ['RdKafka\Metadata', 'all_topics'=>'bool', 'only_topic='=>'RdKafka\KafkaConsumerTopic', 'timeout_ms'=>'int'],
 'RdKafka\KafkaConsumer::getSubscription' => ['array'],
@@ -10501,7 +10502,7 @@ return [
 'RdKafka\Queue::__construct' => ['void'],
 'RdKafka\Queue::consume' => ['?RdKafka\Message', 'timeout_ms'=>'string'],
 'RdKafka\Topic::getName' => ['string'],
-'RdKafka\TopicConf::dump' => ['array'],
+'RdKafka\TopicConf::dump' => ['array<string, string>'],
 'RdKafka\TopicConf::set' => ['void', 'name'=>'string', 'value'=>'string'],
 'RdKafka\TopicConf::setPartitioner' => ['void', 'partitioner'=>'int'],
 'RdKafka\TopicPartition::__construct' => ['void', 'topic'=>'string', 'partition'=>'int', 'offset='=>'int'],
@@ -13782,7 +13783,7 @@ return [
 'strstr' => ['string|false', 'haystack'=>'string', 'needle'=>'mixed', 'before_needle='=>'bool'],
 'strtok' => ['string|false', 'str'=>'string', 'token'=>'string'],
 'strtok\'1' => ['string|false', 'token'=>'string'],
-'strtolower' => ['lowercase-string', 'str'=>'string'],
+'strtolower' => ['string', 'str'=>'string'],
 'strtotime' => ['int|false', 'time'=>'string', 'now='=>'int'],
 'strtoupper' => ['string', 'str'=>'string'],
 'strtr' => ['string', 'str'=>'string', 'from'=>'string', 'to'=>'string'],

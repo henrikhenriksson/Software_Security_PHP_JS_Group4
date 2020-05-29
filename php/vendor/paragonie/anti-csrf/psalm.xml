@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<psalm
+    useDocblockTypes="true"
+    totallyTyped="true"
+>
+    <projectFiles>
+        <directory name="src" />
+    </projectFiles>
+    <issueHandlers>
+        <MixedArgument errorLevel="info" />
+        <MixedArrayAccess errorLevel="info" />
+        <MoreSpecificImplementedParamType errorLevel="info" />
+        <RedundantCondition errorLevel="suppress" />
+        <RedundantConditionGivenDocblockType errorLevel="suppress" />
+    </issueHandlers>
+</psalm>
