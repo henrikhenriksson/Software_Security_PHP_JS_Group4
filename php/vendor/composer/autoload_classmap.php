@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Config' => $baseDir . '/resources/classes/config.class.php',
+    'InvReq' => $baseDir . '/resources/classes/invreq.class.php',
     'JsonException' => $vendorDir . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
     'Member' => $baseDir . '/resources/classes/member.class.php',
     'Post' => $baseDir . '/resources/classes/post.class.php',
