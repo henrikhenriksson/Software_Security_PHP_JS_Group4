@@ -2,7 +2,6 @@
 * Project Group 4 DT167G
 * File: footer.php
 ******************************************************************************/ -->
-<br>
 <address>
     <span class="mail-links">&copy; 2020 Group 4 - </span>
     <i class="far fa-envelope"></i>
