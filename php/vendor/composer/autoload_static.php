@@ -48,6 +48,8 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
             'PhpParser\\' => 10,
             'ParagonIE\\EasyDB\\' => 17,
             'ParagonIE\\Corner\\' => 17,
+            'ParagonIE\\ConstantTime\\' => 23,
+            'ParagonIE\\CSPBuilder\\' => 21,
             'PackageVersions\\' => 16,
         ),
         'L' => 
@@ -134,6 +136,14 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
         'ParagonIE\\Corner\\' => 
         array (
             0 => __DIR__ . '/..' . '/paragonie/corner/src',
+        ),
+        'ParagonIE\\ConstantTime\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
+        ),
+        'ParagonIE\\CSPBuilder\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/csp-builder/src',
         ),
         'PackageVersions\\' => 
         array (

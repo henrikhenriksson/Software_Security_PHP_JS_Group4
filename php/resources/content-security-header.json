@@ -1,0 +1,42 @@
+{
+    "report-only": false,
+    "report-to": "",
+    "report-uri": "",
+    "base-uri": [],
+    "default-src": ["self"],
+    "child-src": {
+        "allow": [
+            "https://www.youtube.com",
+            "https://www.youtube-nocookie.com"
+        ],
+        "self": false
+    },
+    "connect-src": [],
+    "font-src": {
+        "self": true
+    },
+    "form-action": {
+        "allow": [],
+        "self": true
+    },
+    "frame-ancestors": [],
+    "img-src": {
+        "blob": true,
+        "self": true,
+        "data": true
+    },
+    "media-src": [],
+    "object-src": [],
+    "plugin-types": [],
+    "script-src": {
+        "allow": ["https://www.google.com/recaptcha/*"],
+        "self": true,
+        "unsafe-inline": false,
+        "unsafe-eval": false
+    },
+    "style-src": {
+        "allow": ["https://cdnjs.cloudflare.com/ajax/libs/font-awesome/*"],
+        "self": true
+    },
+    "upgrade-insecure-requests": true
+}

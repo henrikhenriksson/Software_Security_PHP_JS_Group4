@@ -34,7 +34,9 @@ final class Versions
   'nikic/php-parser' => 'v4.4.0@bd43ec7152eaaab3bd8c6d0aa95ceeb1df8ee120',
   'ocramius/package-versions' => '1.8.0@421679846270a5772534828013a93be709fb13df',
   'openlss/lib-array2xml' => '1.0.0@a91f18a8dfc69ffabe5f9b068bc39bb202c81d90',
+  'paragonie/constant_time_encoding' => 'v2.3.0@47a1cedd2e4d52688eb8c96469c05ebc8fd28fa2',
   'paragonie/corner' => 'v2.0.1@f222adc1da32547e20a3c5007f4a711b0cf633d0',
+  'paragonie/csp-builder' => 'v2.4.0@3e63cd5ad62a6fc74561306c0798ae600c81794b',
   'paragonie/easydb' => 'v2.11.0@38cfac4bbd96960628ca3237ed98f3f344ffdd7b',
   'phpdocumentor/reflection-common' => '2.1.0@6568f4687e5b41b054365f9ae03fcb1ed5f2069b',
   'phpdocumentor/reflection-docblock' => '5.1.0@cd72d394ca794d3466a3b2fc09d5a6c1dc86b47e',
@@ -52,7 +54,7 @@ final class Versions
   'webmozart/assert' => '1.8.0@ab2cb0b3b559010b75981b1bdce728da3ee90ad6',
   'webmozart/glob' => '4.1.0@3cbf63d4973cf9d780b93d2da8eec7e4a9e63bbe',
   'webmozart/path-util' => '2.3.0@d939f7edc24c9a1bb9c0dee5cb05d8e859490725',
-  '__root__' => 'dev-master@82285abd277c4ddfd7e2b301420ab61543b81490',
+  '__root__' => 'dev-content-security-headers@c91b770a5ce9b1996179f5b5110209271f98663a',
 );
 
     private function __construct()

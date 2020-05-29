@@ -1,0 +1,45 @@
+{
+    "name":         "paragonie/csp-builder",
+    "description":  "Easily add and update Content-Security-Policy headers for your project",
+    "keywords": [
+        "content-security-policy",
+        "csp",
+        "http",
+        "headers",
+        "security",
+        "xss"
+    ],
+    "license":      "MIT",
+    "type":         "library",
+    "authors": [
+        {
+            "name":     "Paragon Initiative Enterprises",
+            "email":    "security@paragonie.com",
+            "homepage": "https://paragonie.com",
+            "role":     "Owner"
+        }
+    ],
+    "support": {
+        "issues":   "https://github.com/paragonie/csp-builder/issues",
+        "email":    "info@paragonie.com",
+        "source":   "https://github.com/paragonie/csp-builder"
+    },
+    "autoload": {
+        "psr-4": {
+            "ParagonIE\\CSPBuilder\\": "src"
+        }
+    },
+    "require": {
+        "php": "^7",
+        "paragonie/constant_time_encoding": "^2"
+    },
+    "require-dev": {
+        "psr/http-message": "^1",
+        "phpunit/phpunit": "4.*|5.*",
+        "squizlabs/php_codesniffer": "^3",
+        "vimeo/psalm": "^3"
+    },
+    "suggest": {
+        "psr/http-message": "For CSPBuilder::injectCSPHeader()"
+    }
+}
