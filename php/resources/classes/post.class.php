@@ -185,7 +185,8 @@ class Post
             $this->id = $db->insertGet('dt167g.posts', [
                 'name' => $this->name,
                 'message' => $this->message,
-                'iplog' => $_SERVER['REMOTE_ADDR']
+                'iplog' => empty($this->iplog) ? $_SERVER['REMOTE_ADDR'] : $this->iplog,
+                'timelog' => empty($this->timelog) ? date("Y-m-d H:i:s") : $this->timelog
             ], 'id');
             $this->clearError();
             return true;
