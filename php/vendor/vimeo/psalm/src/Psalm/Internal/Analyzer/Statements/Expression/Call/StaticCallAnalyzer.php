@@ -33,25 +33,18 @@ use function strpos;
 use function is_string;
 use function strlen;
 use function substr;
-use Psalm\Internal\Taint\Source;
+use Psalm\Internal\Taint\TaintNode;
 
 /**
  * @internal
  */
 class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAnalyzer
 {
-    /**
-     * @param   StatementsAnalyzer               $statements_analyzer
-     * @param   PhpParser\Node\Expr\StaticCall  $stmt
-     * @param   Context                         $context
-     *
-     * @return  false|null
-     */
     public static function analyze(
         StatementsAnalyzer $statements_analyzer,
         PhpParser\Node\Expr\StaticCall $stmt,
         Context $context
-    ) {
+    ) : bool {
         $method_id = null;
         $cased_method_id = null;
 
@@ -89,7 +82,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                             return false;
                         }
 
-                        return;
+                        return true;
                     }
 
                     $fq_class_name = $class_storage->parent_class;
@@ -115,11 +108,11 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                         return false;
                     }
 
-                    return;
+                    return true;
                 }
 
                 if ($context->isPhantomClass($fq_class_name)) {
-                    return null;
+                    return true;
                 }
             } elseif ($context->check_classes) {
                 $aliases = $statements_analyzer->getAliases();
@@ -139,7 +132,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                 );
 
                 if ($context->isPhantomClass($fq_class_name)) {
-                    return null;
+                    return true;
                 }
 
                 $does_class_exist = false;
@@ -176,7 +169,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                 }
 
                 if (!$does_class_exist) {
-                    return $does_class_exist;
+                    return $does_class_exist !== false;
                 }
             }
 
@@ -201,7 +194,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
         }
 
         if (!$lhs_type) {
-            if (self::checkFunctionArguments(
+            if (ArgumentsAnalyzer::analyze(
                 $statements_analyzer,
                 $stmt->args,
                 null,
@@ -211,7 +204,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                 return false;
             }
 
-            return null;
+            return true;
         }
 
         $has_mock = false;
@@ -491,10 +484,10 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                             }
 
                             if ($pseudo_method_storage->return_type) {
-                                return;
+                                return true;
                             }
                         } else {
-                            if (self::checkFunctionArguments(
+                            if (ArgumentsAnalyzer::analyze(
                                 $statements_analyzer,
                                 $args,
                                 null,
@@ -544,12 +537,12 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                         }
 
                         if ($pseudo_method_storage->return_type) {
-                            return;
+                            return true;
                         }
                     }
 
                     if (!$context->check_methods) {
-                        if (self::checkFunctionArguments(
+                        if (ArgumentsAnalyzer::analyze(
                             $statements_analyzer,
                             $stmt->args,
                             null,
@@ -559,7 +552,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                             return false;
                         }
 
-                        return null;
+                        return true;
                     }
                 }
 
@@ -572,7 +565,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                 );
 
                 if (!$does_method_exist) {
-                    if (self::checkFunctionArguments(
+                    if (ArgumentsAnalyzer::analyze(
                         $statements_analyzer,
                         $stmt->args,
                         null,
@@ -592,7 +585,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                         );
                     }
 
-                    return;
+                    return true;
                 }
 
                 $class_storage = $codebase->classlike_storage_provider->get($fq_class_name);
@@ -615,7 +608,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                             //
                         }
 
-                        return;
+                        return true;
                     }
 
                     $appearing_method_class_name = $appearing_method_id->fq_class_name;
@@ -717,7 +710,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                     }
                 }
 
-                if (MethodVisibilityAnalyzer::analyze(
+                if (Method\MethodVisibilityAnalyzer::analyze(
                     $method_id,
                     $context,
                     $statements_analyzer->getSource(),
@@ -781,11 +774,11 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                             $statements_analyzer->node_data->setType($stmt, $fake_method_call_type);
                         }
 
-                        return null;
+                        return true;
                     }
                 }
 
-                if (MethodCallProhibitionAnalyzer::analyze(
+                if (Method\MethodCallProhibitionAnalyzer::analyze(
                     $codebase,
                     $context,
                     $method_id,
@@ -798,7 +791,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                 $found_generic_params = ClassTemplateParamCollector::collect(
                     $codebase,
                     $class_storage,
-                    $fq_class_name,
+                    $class_storage,
                     $method_name_lc,
                     $lhs_type_part,
                     null
@@ -918,7 +911,10 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                                 )) {
                                     if ($template_type->param_name === 'TFunctionArgCount') {
                                         $template_result->upper_bounds[$template_type->param_name] = [
-                                            'fn-' . $method_id => [Type::getInt(false, count($stmt->args)), 0]
+                                            'fn-' . strtolower((string) $method_id) => [
+                                                Type::getInt(false, count($stmt->args)),
+                                                0
+                                            ]
                                         ];
                                     } else {
                                         $template_result->upper_bounds[$template_type->param_name] = [
@@ -1022,7 +1018,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                             // fall through
                         }
 
-                        return;
+                        return true;
                     }
 
                     if (!$context->inside_throw) {
@@ -1156,28 +1152,29 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                 }
 
                 if ($return_type_candidate) {
-                    if ($codebase->taint) {
-                        if ($method_storage && $method_storage->pure) {
-                            $code_location = new CodeLocation($statements_analyzer->getSource(), $stmt);
+                    if ($codebase->taint
+                        && $codebase->config->trackTaintsInPath($statements_analyzer->getFilePath())
+                    ) {
+                        $code_location = new CodeLocation($statements_analyzer->getSource(), $stmt);
 
-                            $method_source = new Source(
-                                strtolower(
-                                    $method_id
-                                        . '-' . $code_location->file_name
-                                        . ':' . $code_location->raw_file_start
-                                ),
+                        if ($method_storage && $method_storage->pure) {
+                            $method_source = TaintNode::getForMethodReturn(
+                                (string) $method_id,
                                 $cased_method_id,
-                                new CodeLocation($source, $stmt->name)
+                                $code_location,
+                                $code_location
                             );
                         } else {
-                            $method_source = new Source(
-                                strtolower((string) $method_id),
+                            $method_source = TaintNode::getForMethodReturn(
+                                (string) $method_id,
                                 $cased_method_id,
-                                new CodeLocation($source, $stmt->name)
+                                $code_location
                             );
                         }
 
-                        $return_type_candidate->sources = [$method_source];
+                        $codebase->taint->addTaintNode($method_source);
+
+                        $return_type_candidate->parent_nodes = [$method_source];
                     }
 
                     if ($stmt_type = $statements_analyzer->node_data->getType($stmt)) {
@@ -1201,7 +1198,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                     );
                 }
 
-                if (self::checkFunctionArguments(
+                if (ArgumentsAnalyzer::analyze(
                     $statements_analyzer,
                     $stmt->args,
                     null,
@@ -1273,6 +1270,8 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
         if (!$statements_analyzer->node_data->getType($stmt)) {
             $statements_analyzer->node_data->setType($stmt, Type::getMixed());
         }
+
+        return true;
     }
 
     /**
@@ -1289,7 +1288,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
         \Psalm\Storage\MethodStorage $pseudo_method_storage,
         Context $context
     ) {
-        if (self::checkFunctionArguments(
+        if (ArgumentsAnalyzer::analyze(
             $statements_analyzer,
             $args,
             $pseudo_method_storage->params,
@@ -1299,7 +1298,7 @@ class StaticCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
             return false;
         }
 
-        if (self::checkFunctionLikeArgumentsMatch(
+        if (ArgumentsAnalyzer::checkArgumentsMatch(
             $statements_analyzer,
             $args,
             null,

@@ -2,6 +2,7 @@
 namespace Psalm\Internal\FileManipulation;
 
 use PhpParser;
+use function array_shift;
 use function count;
 use function ltrim;
 use PhpParser\Node\Expr\ArrowFunction;
@@ -325,6 +326,8 @@ class FunctionDocblockManipulator
             $parsed_docblock = ['description' => '', 'specials' => []];
         }
 
+        $modified_docblock = false;
+
         foreach ($this->new_phpdoc_param_types as $param_name => $phpdoc_type) {
             $found_in_params = false;
             $new_param_block = $phpdoc_type . ' ' . '$' . $param_name;
@@ -334,6 +337,10 @@ class FunctionDocblockManipulator
                     $doc_parts = CommentAnalyzer::splitDocLine($param_block);
 
                     if (($doc_parts[1] ?? null) === '$' . $param_name) {
+                        if ($param_block !== $new_param_block) {
+                            $modified_docblock = true;
+                        }
+
                         $param_block = $new_param_block;
                         $found_in_params = true;
                         break;
@@ -342,23 +349,45 @@ class FunctionDocblockManipulator
             }
 
             if (!$found_in_params) {
+                $modified_docblock = true;
                 $parsed_docblock['specials']['param'][] = $new_param_block;
             }
         }
 
-        if ($this->new_phpdoc_return_type) {
+        $old_phpdoc_return_type = null;
+        if (isset($parsed_docblock['specials']['return'])) {
+            $old_phpdoc_return_type = array_shift($parsed_docblock['specials']['return']);
+        }
+
+        if ($this->new_phpdoc_return_type
+            && $this->new_phpdoc_return_type !== $old_phpdoc_return_type
+        ) {
+            $modified_docblock = true;
             $parsed_docblock['specials']['return'] = [
                 $this->new_phpdoc_return_type
                     . ($this->return_type_description ? (' ' . $this->return_type_description) : ''),
             ];
         }
 
-        if ($this->new_phpdoc_return_type !== $this->new_psalm_return_type && $this->new_psalm_return_type) {
+        $old_psalm_return_type = null;
+        if (isset($parsed_docblock['specials']['psalm-return'])) {
+            $old_psalm_return_type = array_shift($parsed_docblock['specials']['psalm-return']);
+        }
+
+        if ($this->new_psalm_return_type
+            && $this->new_phpdoc_return_type !== $this->new_psalm_return_type
+            && $this->new_psalm_return_type !== $old_psalm_return_type
+        ) {
+            $modified_docblock = true;
             $parsed_docblock['specials']['psalm-return'] = [$this->new_psalm_return_type];
         }
 
         if (!$parsed_docblock['specials'] && !$parsed_docblock['description']) {
             return '';
+        }
+
+        if (!$modified_docblock) {
+            return (string)$docblock . "\n" . $this->indentation;
         }
 
         return DocComment::render($parsed_docblock, $this->indentation);

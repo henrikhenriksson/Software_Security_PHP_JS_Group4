@@ -43,11 +43,12 @@ class ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4
         array (
             'Psr\\Log\\' => 8,
             'Psr\\Container\\' => 14,
-            'Psalm\\Plugin\\' => 13,
             'Psalm\\' => 6,
             'PhpParser\\' => 10,
             'ParagonIE\\EasyDB\\' => 17,
             'ParagonIE\\Corner\\' => 17,
+            'ParagonIE\\ConstantTime\\' => 23,
+            'ParagonIE\\AntiCSRF\\' => 19,
             'PackageVersions\\' => 16,
         ),
         'L' => 
@@ -115,10 +116,6 @@ class ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
         ),
-        'Psalm\\Plugin\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/vimeo/psalm/src/Psalm/Plugin',
-        ),
         'Psalm\\' => 
         array (
             0 => __DIR__ . '/..' . '/vimeo/psalm/src/Psalm',
@@ -134,6 +131,14 @@ class ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4
         'ParagonIE\\Corner\\' => 
         array (
             0 => __DIR__ . '/..' . '/paragonie/corner/src',
+        ),
+        'ParagonIE\\ConstantTime\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
+        ),
+        'ParagonIE\\AntiCSRF\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/anti-csrf/src',
         ),
         'PackageVersions\\' => 
         array (
