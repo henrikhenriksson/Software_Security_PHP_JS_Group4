@@ -19,7 +19,6 @@ session_start([
 
 // TODO look at https://github.com/paragonie/csp-builder
 // Only allow scripts from this domain to run
-header("Content-Security-Policy: script-src 'self' https://link.to.font.awesome/*");
 
 // Only send full referrer information (where the request came from) to this site
 // over https, and only domain name to other sites over https. Any http request

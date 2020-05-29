@@ -61,7 +61,7 @@ class Post
     }
     /**
      * Fetch all posts in the database.
-     * 
+     *
      * Convenience method for fetchPosts without limit or offset
      */
     public static function fetchAll(EasyDB $db = null)
@@ -250,11 +250,11 @@ class Post
     }
     /**
      * Summary. Gets timestamp of when the post was created.
-     * @return string Timestamp of when the post was created. 
+     * @return string Timestamp of when the post was created.
      */
     public function getTimelog()
     {
-        return $this->timelog;
+        return \substr($this->timelog, 0, 19);
     }
 
     public static function setRating(Int $post_id, Int $user_id, String $rating_action): void
