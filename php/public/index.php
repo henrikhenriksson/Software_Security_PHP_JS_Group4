@@ -174,7 +174,7 @@ function member_owns_post(string $postname): bool
                                 class="<?=  dislike_btn_class($post->getId()) ?>">
                             </i>
                             <!-- Get the number of likes for current post. -->
-                            <span class="likes"><?=  Post::getRatingCount($post->getId(), 'dislike') ?>
+                            <span class="dislikes"><?=  Post::getRatingCount($post->getId(), 'dislike') ?>
                             </span>
                         </div>
 
