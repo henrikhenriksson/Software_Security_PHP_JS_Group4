@@ -1,4 +1,4 @@
-<?PHP
+<?php
 
 declare(strict_types=1);
 
@@ -36,7 +36,7 @@ require_once __DIR__ . '/../resources/init.php';
             <?php require '../resources/views/aside-login.php'; ?>
             <?php require '../resources/views/aside-search.php'; ?>
         </aside>
-        <section>
+        <section class="content-wrapper">
             <div id="new_member">
 
                 <h2 class>Sign up To Use the Website</h2>
