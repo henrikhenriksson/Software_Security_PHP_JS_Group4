@@ -7,7 +7,6 @@ use Psalm\Internal\Analyzer\FunctionLikeAnalyzer;
 use Psalm\Internal\Analyzer\NamespaceAnalyzer;
 use Psalm\Internal\Analyzer\Statements\ExpressionAnalyzer;
 use Psalm\Internal\Analyzer\Statements\Expression\CallAnalyzer;
-use Psalm\Internal\Analyzer\Statements\Expression\ExpressionIdentifier;
 use Psalm\Internal\Analyzer\StatementsAnalyzer;
 use Psalm\Internal\FileManipulation\FileManipulationBuffer;
 use Psalm\Internal\Type\TemplateResult;
@@ -40,21 +39,29 @@ use Psalm\Type\Atomic\TObjectWithProperties;
 use function strtolower;
 use function array_values;
 use function in_array;
+use function array_reverse;
 use function array_keys;
 use function count;
 use function explode;
-use Psalm\Internal\Taint\TaintNode;
+use Psalm\Internal\Taint\Source;
 
 /**
  * @internal
  */
 class PropertyFetchAnalyzer
 {
+    /**
+     * @param   StatementsAnalyzer                   $statements_analyzer
+     * @param   PhpParser\Node\Expr\PropertyFetch   $stmt
+     * @param   Context                             $context
+     *
+     * @return  false|null
+     */
     public static function analyzeInstance(
         StatementsAnalyzer $statements_analyzer,
         PhpParser\Node\Expr\PropertyFetch $stmt,
         Context $context
-    ) : bool {
+    ) {
         if (!$stmt->name instanceof PhpParser\Node\Identifier) {
             if (ExpressionAnalyzer::analyze($statements_analyzer, $stmt->name, $context) === false) {
                 return false;
@@ -77,13 +84,13 @@ class PropertyFetchAnalyzer
 
         $codebase = $statements_analyzer->getCodebase();
 
-        $stmt_var_id = ExpressionIdentifier::getArrayVarId(
+        $stmt_var_id = ExpressionAnalyzer::getArrayVarId(
             $stmt->var,
             $statements_analyzer->getFQCLN(),
             $statements_analyzer
         );
 
-        $var_id = ExpressionIdentifier::getArrayVarId(
+        $var_id = ExpressionAnalyzer::getArrayVarId(
             $stmt,
             $statements_analyzer->getFQCLN(),
             $statements_analyzer
@@ -207,7 +214,7 @@ class PropertyFetchAnalyzer
                 }
             }
 
-            return true;
+            return null;
         }
 
         if ($stmt_var_id && $context->hasVariable($stmt_var_id, $statements_analyzer)) {
@@ -217,7 +224,7 @@ class PropertyFetchAnalyzer
         }
 
         if (!$stmt_var_type) {
-            return true;
+            return null;
         }
 
         if ($stmt_var_type->isNull()) {
@@ -231,7 +238,7 @@ class PropertyFetchAnalyzer
                 return false;
             }
 
-            return true;
+            return null;
         }
 
         if ($stmt_var_type->isEmpty()) {
@@ -245,7 +252,7 @@ class PropertyFetchAnalyzer
                 return false;
             }
 
-            return true;
+            return null;
         }
 
         if ($stmt_var_type->hasMixed()) {
@@ -328,7 +335,7 @@ class PropertyFetchAnalyzer
                 }
             }
 
-            return true;
+            return null;
         }
 
         $invalid_fetch_types = [];
@@ -441,11 +448,11 @@ class PropertyFetchAnalyzer
                             ),
                             $statements_analyzer->getSuppressedIssues()
                         )) {
-                            return true;
+                            return null;
                         }
 
                         if (!$codebase->methodExists($fq_class_name . '::__set')) {
-                            return true;
+                            return null;
                         }
                     }
                 }
@@ -475,7 +482,7 @@ class PropertyFetchAnalyzer
                         }
                     }
 
-                    return true;
+                    return null;
                 }
             } else {
                 $class_exists = true;
@@ -499,24 +506,16 @@ class PropertyFetchAnalyzer
                 && $class_storage->mixin instanceof Type\Atomic\TNamedObject
             ) {
                 $new_property_id = $class_storage->mixin->value . '::$' . $prop_name;
+                $new_class_storage = $codebase->classlike_storage_provider->get($class_storage->mixin->value);
 
-                try {
-                    $new_class_storage = $codebase->classlike_storage_provider->get($class_storage->mixin->value);
-                } catch (\InvalidArgumentException $e) {
-                    $new_class_storage = null;
-                }
-
-                if ($new_class_storage
-                    && ($codebase->properties->propertyExists(
-                        $new_property_id,
-                        true,
-                        $statements_analyzer,
-                        $context,
-                        $codebase->collect_locations
-                            ? new CodeLocation($statements_analyzer->getSource(), $stmt)
-                            : null
-                    )
-                        || isset($new_class_storage->pseudo_property_get_types['$' . $prop_name]))
+                if ($codebase->properties->propertyExists(
+                    $new_property_id,
+                    true,
+                    $statements_analyzer,
+                    $context,
+                    $codebase->collect_locations ? new CodeLocation($statements_analyzer->getSource(), $stmt) : null
+                )
+                    || isset($new_class_storage->pseudo_property_get_types['$' . $prop_name])
                 ) {
                     $fq_class_name = $class_storage->mixin->value;
                     $lhs_type_part = clone $class_storage->mixin;
@@ -530,7 +529,8 @@ class PropertyFetchAnalyzer
                 }
             }
 
-            if ((!$naive_property_exists
+            if ($codebase->methods->methodExists($get_method_id)
+                && (!$naive_property_exists
                     || ($stmt_var_id !== '$this'
                         && $fq_class_name !== $context->self
                         && ClassLikeAnalyzer::checkPropertyVisibility(
@@ -541,18 +541,6 @@ class PropertyFetchAnalyzer
                             $statements_analyzer->getSuppressedIssues(),
                             false
                         ) !== true)
-                )
-                && $codebase->methods->methodExists(
-                    $get_method_id,
-                    $context->calling_method_id,
-                    $codebase->collect_locations
-                        ? new CodeLocation($statements_analyzer->getSource(), $stmt)
-                        : null,
-                    !$context->collect_initializations
-                        && !$context->collect_mutations
-                        ? $statements_analyzer
-                        : null,
-                    $statements_analyzer->getFilePath()
                 )
             ) {
                 $has_magic_getter = true;
@@ -686,7 +674,7 @@ class PropertyFetchAnalyzer
                     $property_id = $context->self . '::$' . $prop_name;
                 } else {
                     if ($context->inside_isset || $context->collect_initializations) {
-                        return true;
+                        return;
                     }
 
                     if ($stmt_var_id === '$this') {
@@ -734,7 +722,7 @@ class PropertyFetchAnalyzer
                         $context->vars_in_scope[$var_id] = $stmt_type;
                     }
 
-                    return true;
+                    return;
                 }
             }
 
@@ -961,8 +949,6 @@ class PropertyFetchAnalyzer
         if ($var_id) {
             $context->vars_in_scope[$var_id] = $statements_analyzer->node_data->getType($stmt) ?: Type::getMixed();
         }
-
-        return true;
     }
 
     public static function localizePropertyType(
@@ -1046,30 +1032,19 @@ class PropertyFetchAnalyzer
     ) : void {
         $codebase = $statements_analyzer->getCodebase();
 
-        if ($codebase->taint && $codebase->config->trackTaintsInPath($statements_analyzer->getFilePath())) {
-            $code_location = new CodeLocation($statements_analyzer, $stmt->name);
-
-            $localized_property_node = new TaintNode(
-                $property_id . '-' . $code_location->file_name . ':' . $code_location->raw_file_start,
+        if ($codebase->taint) {
+            $method_source = new Source(
                 $property_id,
-                $code_location,
-                null
+                $property_id,
+                new CodeLocation($statements_analyzer, $stmt->name)
             );
 
-            $codebase->taint->addTaintNode($localized_property_node);
+            $type->sources = [$method_source];
 
-            $property_node = new TaintNode(
-                $property_id,
-                $property_id,
-                null,
-                null
-            );
-
-            $codebase->taint->addTaintNode($property_node);
-
-            $codebase->taint->addPath($property_node, $localized_property_node);
-
-            $type->parent_nodes = [$localized_property_node];
+            if ($tainted_source = $codebase->taint->hasPreviousSource($method_source)) {
+                $type->tainted = $tainted_source->taint;
+                $method_source->taint = $type->tainted;
+            }
         }
     }
 
@@ -1077,17 +1052,19 @@ class PropertyFetchAnalyzer
      * @param   StatementsAnalyzer                       $statements_analyzer
      * @param   PhpParser\Node\Expr\StaticPropertyFetch $stmt
      * @param   Context                                 $context
+     *
+     * @return  null|false
      */
     public static function analyzeStatic(
         StatementsAnalyzer $statements_analyzer,
         PhpParser\Node\Expr\StaticPropertyFetch $stmt,
         Context $context
-    ) : bool {
+    ) {
         if ($stmt->class instanceof PhpParser\Node\Expr\Variable ||
             $stmt->class instanceof PhpParser\Node\Expr\ArrayDimFetch
         ) {
             // @todo check this
-            return true;
+            return null;
         }
 
         $fq_class_name = null;
@@ -1112,14 +1089,14 @@ class PropertyFetchAnalyzer
                             return false;
                         }
 
-                        return true;
+                        return;
                     }
                 } else {
                     $fq_class_name = (string)$context->self;
                 }
 
                 if ($context->isPhantomClass($fq_class_name)) {
-                    return true;
+                    return null;
                 }
             } else {
                 $aliases = $statements_analyzer->getAliases();
@@ -1139,7 +1116,7 @@ class PropertyFetchAnalyzer
                 );
 
                 if ($context->isPhantomClass($fq_class_name)) {
-                    return true;
+                    return null;
                 }
 
                 if ($context->check_classes) {
@@ -1199,7 +1176,7 @@ class PropertyFetchAnalyzer
                 );
             }
 
-            return true;
+            return null;
         }
 
         if (!$fq_class_name
@@ -1207,10 +1184,10 @@ class PropertyFetchAnalyzer
             || !$context->check_variables
             || ExpressionAnalyzer::isMock($fq_class_name)
         ) {
-            return true;
+            return null;
         }
 
-        $var_id = ExpressionIdentifier::getVarId(
+        $var_id = ExpressionAnalyzer::getVarId(
             $stmt,
             $context->self ?: $statements_analyzer->getFQCLN(),
             $statements_analyzer
@@ -1272,7 +1249,7 @@ class PropertyFetchAnalyzer
                 );
             }
 
-            return true;
+            return null;
         }
 
         if (!$codebase->properties->propertyExists(
@@ -1285,10 +1262,6 @@ class PropertyFetchAnalyzer
                 : null
         )
         ) {
-            if ($context->inside_isset) {
-                return true;
-            }
-
             if (IssueBuffer::accepts(
                 new UndefinedPropertyFetch(
                     'Static property ' . $property_id . ' is not defined',
@@ -1300,7 +1273,7 @@ class PropertyFetchAnalyzer
                 // fall through
             }
 
-            return true;
+            return;
         }
 
         if (ClassLikeAnalyzer::checkPropertyVisibility(
@@ -1401,6 +1374,6 @@ class PropertyFetchAnalyzer
             $statements_analyzer->node_data->setType($stmt, Type::getMixed());
         }
 
-        return true;
+        return null;
     }
 }

@@ -96,9 +96,4 @@ class ClassLikeDocblockComment
      * @var array<int, string>
      */
     public $suppressed_issues = [];
-
-    /**
-     * @var list<list<string>>
-     */
-    public $imported_types = [];
 }

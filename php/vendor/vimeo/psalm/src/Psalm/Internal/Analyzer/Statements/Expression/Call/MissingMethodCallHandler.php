@@ -1,8 +1,9 @@
 <?php
-namespace Psalm\Internal\Analyzer\Statements\Expression\Call\Method;
+namespace Psalm\Internal\Analyzer\Statements\Expression\Call;
 
 use PhpParser;
-use Psalm\Internal\Analyzer\Statements\Expression\Call\ArgumentsAnalyzer;
+use Psalm\Internal\Analyzer\Statements\ExpressionAnalyzer;
+use Psalm\Internal\Analyzer\Statements\Expression\CallAnalyzer;
 use Psalm\Internal\Analyzer\StatementsAnalyzer;
 use Psalm\Codebase;
 use Psalm\CodeLocation;
@@ -32,7 +33,7 @@ class MissingMethodCallHandler
 
             $pseudo_method_storage = $class_storage->pseudo_methods[$method_name_lc];
 
-            ArgumentsAnalyzer::analyze(
+            CallAnalyzer::checkFunctionArguments(
                 $statements_analyzer,
                 $stmt->args,
                 $pseudo_method_storage->params,
@@ -40,7 +41,7 @@ class MissingMethodCallHandler
                 $context
             );
 
-            ArgumentsAnalyzer::checkArgumentsMatch(
+            CallAnalyzer::checkFunctionLikeArgumentsMatch(
                 $statements_analyzer,
                 $stmt->args,
                 null,
@@ -84,7 +85,7 @@ class MissingMethodCallHandler
                 return null;
             }
         } else {
-            ArgumentsAnalyzer::analyze(
+            CallAnalyzer::checkFunctionArguments(
                 $statements_analyzer,
                 $stmt->args,
                 null,
@@ -152,7 +153,7 @@ class MissingMethodCallHandler
 
             $pseudo_method_storage = $class_storage->pseudo_methods[$method_name_lc];
 
-            if (ArgumentsAnalyzer::analyze(
+            if (CallAnalyzer::checkFunctionArguments(
                 $statements_analyzer,
                 $stmt->args,
                 $pseudo_method_storage->params,
@@ -162,7 +163,7 @@ class MissingMethodCallHandler
                 return;
             }
 
-            if (ArgumentsAnalyzer::checkArgumentsMatch(
+            if (CallAnalyzer::checkFunctionLikeArgumentsMatch(
                 $statements_analyzer,
                 $stmt->args,
                 null,
@@ -201,7 +202,7 @@ class MissingMethodCallHandler
             return;
         }
 
-        if (ArgumentsAnalyzer::analyze(
+        if (CallAnalyzer::checkFunctionArguments(
             $statements_analyzer,
             $stmt->args,
             null,

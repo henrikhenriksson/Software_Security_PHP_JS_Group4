@@ -26,11 +26,6 @@ class ReportOptions
     public $format = REPORT::TYPE_CONSOLE;
 
     /**
-     * @var bool
-     */
-    public $pretty = false;
-
-    /**
      * @var ?string
      */
     public $output_path;

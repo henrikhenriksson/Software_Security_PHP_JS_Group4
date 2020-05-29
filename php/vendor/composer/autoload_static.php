@@ -4,17 +4,17 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
+class ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
-        'e8aa6e4b5a1db2f56ae794f1505391a8' => __DIR__ . '/..' . '/amphp/amp/lib/functions.php',
-        '76cd0796156622033397994f25b0d8fc' => __DIR__ . '/..' . '/amphp/amp/lib/Internal/functions.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
-        '6cd5651c4fef5ed6b63e8d8b8ffbf3cc' => __DIR__ . '/..' . '/amphp/byte-stream/lib/functions.php',
         'dc51568953534d6c54b08731e61104e2' => __DIR__ . '/..' . '/vimeo/psalm/src/functions.php',
         '8e4171839e12546525126d38dac3dafa' => __DIR__ . '/..' . '/vimeo/psalm/src/spl_object_id.php',
+        'e8aa6e4b5a1db2f56ae794f1505391a8' => __DIR__ . '/..' . '/amphp/amp/lib/functions.php',
+        '76cd0796156622033397994f25b0d8fc' => __DIR__ . '/..' . '/amphp/amp/lib/Internal/functions.php',
+        '6cd5651c4fef5ed6b63e8d8b8ffbf3cc' => __DIR__ . '/..' . '/amphp/byte-stream/lib/functions.php',
         '094883ee9da9e6fabd95b86a5ef61b72' => __DIR__ . '/..' . '/latitude/latitude/src/functions.php',
         'c8c93a72f62de193f7644671de10d207' => __DIR__ . '/../..' . '/resources/globals.php',
         '749e644416863dbba76b7a8e21d06e15' => __DIR__ . '/../..' . '/resources/functions/strings.php',
@@ -43,6 +43,7 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
         array (
             'Psr\\Log\\' => 8,
             'Psr\\Container\\' => 14,
+            'Psalm\\Plugin\\' => 13,
             'Psalm\\' => 6,
             'PhpParser\\' => 10,
             'ParagonIE\\EasyDB\\' => 17,
@@ -71,8 +72,8 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
         'phpDocumentor\\Reflection\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
-            1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
-            2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+            1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+            2 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
         ),
         'Webmozart\\PathUtil\\' => 
         array (
@@ -113,6 +114,10 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
         'Psr\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
+        ),
+        'Psalm\\Plugin\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/vimeo/psalm/src/Psalm/Plugin',
         ),
         'Psalm\\' => 
         array (
@@ -213,10 +218,10 @@ class ComposerStaticInit52a153953d0362c4ed14a2192108c9be
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit52a153953d0362c4ed14a2192108c9be::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit52a153953d0362c4ed14a2192108c9be::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit52a153953d0362c4ed14a2192108c9be::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit52a153953d0362c4ed14a2192108c9be::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4::$classMap;
 
         }, null, ClassLoader::class);
     }

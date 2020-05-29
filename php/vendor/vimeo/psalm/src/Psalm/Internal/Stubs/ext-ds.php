@@ -195,11 +195,7 @@ final class Map implements Collection
      * @template TDefault
      * @param TKey $key
      * @param TDefault $default
-     * @return (
-     *     func_num_args() is 1
-     *     ? TValue
-     *     : TValue|TDefault
-     * )
+     * @return TValue|TDefault
      * @throws OutOfBoundsException
      */
     public function get($key, $default = null)
@@ -258,11 +254,7 @@ final class Map implements Collection
      * @template TDefault
      * @param TKey $key
      * @param TDefault $default
-     * @return (
-     *     func_num_args() is 1
-     *     ? TValue
-     *     : TValue|TDefault
-     * )
+     * @return TValue|TDefault
      * @throws \OutOfBoundsException
      */
     public function remove($key, $default = null)
@@ -573,13 +565,6 @@ final class Vector implements Sequence
      * @return Vector<TNewValue>
      */
     public function map(callable $callback): Vector
-    {
-    }
-
-    /**
-     * @return array<TValue>
-     */
-    public function toArray(): array
     {
     }
 }

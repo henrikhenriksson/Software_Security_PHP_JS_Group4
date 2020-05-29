@@ -31,7 +31,7 @@ trait CanAlias
     private $aliased_classes_flipped_replaceable = [];
 
     /**
-     * @var array<string, non-empty-string>
+     * @var array<string, string>
      */
     private $aliased_functions = [];
 

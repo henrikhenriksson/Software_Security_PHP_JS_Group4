@@ -3,7 +3,6 @@ namespace Psalm\Internal\Analyzer\Statements\Expression\Call;
 
 use PhpParser;
 use Psalm\Internal\Analyzer\Statements\ExpressionAnalyzer;
-use Psalm\Internal\Analyzer\Statements\Expression\ExpressionIdentifier;
 use Psalm\Internal\Analyzer\StatementsAnalyzer;
 use Psalm\CodeLocation;
 use Psalm\Context;
@@ -35,13 +34,15 @@ class MethodCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
      * @param   StatementsAnalyzer               $statements_analyzer
      * @param   PhpParser\Node\Expr\MethodCall  $stmt
      * @param   Context                         $context
+     *
+     * @return  false|null
      */
     public static function analyze(
         StatementsAnalyzer $statements_analyzer,
         PhpParser\Node\Expr\MethodCall $stmt,
         Context $context,
         bool $real_method_call = true
-    ) : bool {
+    ) {
         $was_inside_call = $context->inside_call;
 
         $context->inside_call = true;
@@ -75,7 +76,7 @@ class MethodCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
             }
         }
 
-        $lhs_var_id = ExpressionIdentifier::getArrayVarId(
+        $lhs_var_id = ExpressionAnalyzer::getArrayVarId(
             $stmt->var,
             $statements_analyzer->getFQCLN(),
             $statements_analyzer
@@ -92,7 +93,7 @@ class MethodCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
         }
 
         if (!$context->check_classes) {
-            if (ArgumentsAnalyzer::analyze(
+            if (self::checkFunctionArguments(
                 $statements_analyzer,
                 $stmt->args,
                 null,
@@ -102,7 +103,7 @@ class MethodCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                 return false;
             }
 
-            return true;
+            return null;
         }
 
         if ($class_type
@@ -119,7 +120,7 @@ class MethodCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                 return false;
             }
 
-            return true;
+            return null;
         }
 
         if ($class_type
@@ -164,11 +165,11 @@ class MethodCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
 
         $lhs_types = $class_type->getAtomicTypes();
 
-        $result = new Method\AtomicMethodCallAnalysisResult();
+        $result = new AtomicMethodCallAnalysisResult();
 
         $possible_new_class_types = [];
         foreach ($lhs_types as $lhs_type_part) {
-            Method\AtomicMethodCallAnalyzer::analyze(
+            AtomicMethodCallAnalyzer::analyze(
                 $statements_analyzer,
                 $stmt,
                 $codebase,
@@ -269,7 +270,7 @@ class MethodCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                 }
             }
 
-            return true;
+            return null;
         }
 
         if ($result->non_existent_interface_method_ids) {
@@ -299,7 +300,7 @@ class MethodCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
                 }
             }
 
-            return true;
+            return null;
         }
 
         if ($result->too_many_arguments && $result->too_many_arguments_method_ids) {
@@ -403,7 +404,5 @@ class MethodCallAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\
 
             $context->vars_in_scope[$lhs_var_id] = $class_type;
         }
-
-        return true;
     }
 }

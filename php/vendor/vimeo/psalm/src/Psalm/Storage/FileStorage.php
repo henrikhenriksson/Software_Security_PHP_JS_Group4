@@ -82,7 +82,7 @@ class FileStorage
     public $docblock_issues = [];
 
     /**
-     * @var array<string, \Psalm\Internal\Type\TypeAlias>
+     * @var array<string, array<int, array{0: string, 1: int}>>
      */
     public $type_aliases = [];
 

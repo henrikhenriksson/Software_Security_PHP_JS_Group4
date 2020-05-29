@@ -62,23 +62,18 @@ class ParseUrlReturnTypeProvider implements \Psalm\Plugin\Hook\FunctionReturnTyp
                         $component_type,
                         $acceptable_string_component_type
                     )) {
-                        $nullable_falsable_string = new Type\Union([
+                        $nullable_string = new Type\Union([
                             new Type\Atomic\TString,
-                            new Type\Atomic\TFalse,
                             new Type\Atomic\TNull,
                         ]);
 
                         $codebase = $statements_source->getCodebase();
 
                         if ($codebase->config->ignore_internal_nullable_issues) {
-                            $nullable_falsable_string->ignore_nullable_issues = true;
+                            $nullable_string->ignore_nullable_issues = true;
                         }
 
-                        if ($codebase->config->ignore_internal_falsable_issues) {
-                            $nullable_falsable_string->ignore_falsable_issues = true;
-                        }
-
-                        return $nullable_falsable_string;
+                        return $nullable_string;
                     }
 
                     if (TypeAnalyzer::isContainedBy(
@@ -86,23 +81,18 @@ class ParseUrlReturnTypeProvider implements \Psalm\Plugin\Hook\FunctionReturnTyp
                         $component_type,
                         $acceptable_int_component_type
                     )) {
-                        $nullable_falsable_int = new Type\Union([
+                        $nullable_int = new Type\Union([
                             new Type\Atomic\TInt,
-                            new Type\Atomic\TFalse,
                             new Type\Atomic\TNull,
                         ]);
 
                         $codebase = $statements_source->getCodebase();
 
                         if ($codebase->config->ignore_internal_nullable_issues) {
-                            $nullable_falsable_int->ignore_nullable_issues = true;
+                            $nullable_int->ignore_nullable_issues = true;
                         }
 
-                        if ($codebase->config->ignore_internal_falsable_issues) {
-                            $nullable_falsable_int->ignore_falsable_issues = true;
-                        }
-
-                        return $nullable_falsable_int;
+                        return $nullable_int;
                     }
                 }
             }

@@ -7,7 +7,7 @@ use Psalm\CodeLocation;
 use Psalm\Context;
 use Psalm\Internal\Analyzer\Statements\Block\ForeachAnalyzer;
 use Psalm\Internal\Analyzer\TypeAnalyzer;
-use Psalm\Internal\Codebase\InternalCallMapHandler;
+use Psalm\Internal\Codebase\CallMap;
 use Psalm\StatementsSource;
 use Psalm\Type;
 
@@ -83,7 +83,7 @@ class IteratorToArrayReturnTypeProvider implements \Psalm\Plugin\Hook\FunctionRe
                     ? $key_type
                     : Type::getArrayKey();
 
-                if ($key_type->hasMixed()) {
+                if ($key_type->isMixed()) {
                     $key_type = Type::getArrayKey();
                 }
 
@@ -96,7 +96,7 @@ class IteratorToArrayReturnTypeProvider implements \Psalm\Plugin\Hook\FunctionRe
             }
         }
 
-        $callmap_callables = InternalCallMapHandler::getCallablesFromCallMap($function_id);
+        $callmap_callables = CallMap::getCallablesFromCallMap($function_id);
 
         assert($callmap_callables && $callmap_callables[0]->return_type);
 

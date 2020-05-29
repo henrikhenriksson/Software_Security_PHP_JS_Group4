@@ -580,7 +580,6 @@ class Populator
         );
 
         if ($parent_storage->mixin && !$storage->mixin) {
-            $storage->mixin_declaring_fqcln = $parent_storage->mixin_declaring_fqcln;
             $storage->mixin = $parent_storage->mixin;
         }
 

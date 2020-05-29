@@ -12,6 +12,7 @@ use Psalm\Internal\Analyzer\InterfaceAnalyzer;
 use Psalm\Internal\Analyzer\ProjectAnalyzer;
 use Psalm\Internal\Analyzer\ScopeAnalyzer;
 use Psalm\Internal\Analyzer\SourceAnalyzer;
+use Psalm\Internal\Analyzer\Statements\ExpressionAnalyzer;
 use Psalm\Internal\Analyzer\Statements\Expression\Call\ClassTemplateParamCollector;
 use Psalm\Internal\Analyzer\StatementsAnalyzer;
 use Psalm\Internal\Analyzer\TypeAnalyzer;
@@ -393,7 +394,7 @@ class ReturnTypeAnalyzer
                 return null;
             }
 
-            if (ScopeAnalyzer::onlyThrowsOrExits($type_provider, $function_stmts)) {
+            if (ScopeAnalyzer::onlyThrowsOrExits($function_stmts)) {
                 // if there's a single throw statement, it's presumably an exception saying this method is not to be
                 // used
                 return null;
@@ -784,7 +785,7 @@ class ReturnTypeAnalyzer
             $class_template_params = ClassTemplateParamCollector::collect(
                 $codebase,
                 $classlike_storage,
-                $codebase->classlike_storage_provider->get($context->self),
+                $context->self,
                 strtolower($function->name->name),
                 new Type\Atomic\TNamedObject($context->self),
                 '$this'

@@ -48,11 +48,11 @@ final class Versions
   'symfony/polyfill-mbstring' => 'v1.17.0@fa79b11539418b02fc5e1897267673ba2c19419c',
   'symfony/polyfill-php73' => 'v1.17.0@a760d8964ff79ab9bf057613a5808284ec852ccc',
   'symfony/service-contracts' => 'v2.0.1@144c5e51266b281231e947b51223ba14acf1a749',
-  'vimeo/psalm' => '3.11.5@3c60609c218d4d4b3b257728b8089094e5c6c6c2',
+  'vimeo/psalm' => '3.11.4@58e1d8e68e5098bf4fbfdfb420c38d563f882549',
   'webmozart/assert' => '1.8.0@ab2cb0b3b559010b75981b1bdce728da3ee90ad6',
   'webmozart/glob' => '4.1.0@3cbf63d4973cf9d780b93d2da8eec7e4a9e63bbe',
   'webmozart/path-util' => '2.3.0@d939f7edc24c9a1bb9c0dee5cb05d8e859490725',
-  '__root__' => 'dev-storeInvalidRequests@1034629919d3a733b8ee5915fc5df155500d13ea',
+  '__root__' => 'dev-update-posts-format@6d4798672c5e5fc9ed61ada893b1b58bfe63fe7e',
 );
 
     private function __construct()

@@ -14,7 +14,9 @@ use Psalm\Internal\Analyzer\TypeAnalyzer;
 use Psalm\CodeLocation;
 use Psalm\Context;
 use Psalm\Exception\DocblockParseException;
-use Psalm\Internal\Taint\TaintNode;
+use Psalm\Internal\Analyzer\TypeComparisonResult;
+use Psalm\Internal\Taint\Sink;
+use Psalm\Internal\Taint\Source;
 use Psalm\Internal\Type\TemplateResult;
 use Psalm\Issue\FalsableReturnStatement;
 use Psalm\Issue\InvalidDocblock;
@@ -25,6 +27,8 @@ use Psalm\Issue\MixedReturnTypeCoercion;
 use Psalm\Issue\NoValue;
 use Psalm\Issue\NullableReturnStatement;
 use Psalm\IssueBuffer;
+use Psalm\Storage\FunctionLikeParameter;
+use Psalm\Storage\FunctionLikeStorage;
 use Psalm\Type;
 use function explode;
 use function strtolower;
@@ -125,9 +129,7 @@ class ReturnAnalyzer
         if ($stmt->expr) {
             $context->inside_call = true;
 
-            if ($stmt->expr instanceof PhpParser\Node\Expr\Closure
-                || $stmt->expr instanceof PhpParser\Node\Expr\ArrowFunction
-            ) {
+            if ($stmt->expr instanceof PhpParser\Node\Expr\Closure) {
                 self::potentiallyInferTypesOnClosureFromParentReturnType(
                     $statements_analyzer,
                     $stmt->expr,
@@ -192,17 +194,14 @@ class ReturnAnalyzer
                     $source->getParentFQCLN()
                 );
 
-                if ($codebase->taint
-                    && $codebase->config->trackTaintsInPath($statements_analyzer->getFilePath())
-                ) {
-                    self::handleTaints(
-                        $codebase,
-                        $stmt,
-                        $cased_method_id,
-                        $inferred_type,
-                        $storage
-                    );
-                }
+                self::handleTaints(
+                    $statements_analyzer,
+                    $codebase,
+                    $stmt,
+                    $cased_method_id,
+                    $inferred_type,
+                    $storage
+                );
 
                 if ($storage instanceof \Psalm\Storage\MethodStorage && $context->self) {
                     $self_class = $context->self;
@@ -231,7 +230,7 @@ class ReturnAnalyzer
                         $found_generic_params = ClassTemplateParamCollector::collect(
                             $codebase,
                             $class_storage,
-                            $class_storage,
+                            $fq_class_name,
                             strtolower($method_name),
                             null,
                             '$this'
@@ -479,33 +478,109 @@ class ReturnAnalyzer
     }
 
     private static function handleTaints(
+        StatementsAnalyzer $statements_analyzer,
         \Psalm\Codebase $codebase,
         PhpParser\Node\Stmt\Return_ $stmt,
         string $cased_method_id,
         Type\Union $inferred_type,
         \Psalm\Storage\FunctionLikeStorage $storage
     ) : void {
-        if (!$codebase->taint || !$stmt->expr || !$storage->location) {
+        if (!$codebase->taint || !$stmt->expr || !$storage->location || $storage->remove_taint) {
             return;
         }
 
-        $method_node = TaintNode::getForMethodReturn(
+        $method_sink = new Sink(
             strtolower($cased_method_id),
             $cased_method_id,
             $storage->location
         );
 
-        $codebase->taint->addTaintNode($method_node);
+        if ($previous_sink = $codebase->taint->hasPreviousSink($method_sink, $suffixes)) {
+            if ($inferred_type->sources) {
+                if ($suffixes !== null) {
+                    $new_sinks = [];
 
-        if ($inferred_type->parent_nodes) {
-            foreach ($inferred_type->parent_nodes as $parent_node) {
-                $codebase->taint->addPath(
-                    $parent_node,
-                    $method_node,
-                    $storage->added_taints,
-                    $storage->removed_taints
+                    foreach ($suffixes as $suffix) {
+                        foreach ($inferred_type->sources as $inferred_source) {
+                            $codebase->taint->addSpecialization($inferred_source->id, $suffix);
+
+                            $new_sink = new Sink(
+                                $inferred_source->id . '-' . $suffix,
+                                $inferred_source->label,
+                                $inferred_source->code_location
+                            );
+
+                            $new_sink->children = [$previous_sink];
+
+                            $new_sinks[] = $new_sink;
+                        }
+                    }
+                } else {
+                    $new_sinks = \array_map(
+                        function (Source $inferred_source) use ($previous_sink) {
+                            $new_sink = new Sink(
+                                $inferred_source->id,
+                                $inferred_source->label,
+                                $inferred_source->code_location
+                            );
+
+                            $new_sink->children = [$previous_sink];
+                            return $new_sink;
+                        },
+                        $inferred_type->sources
+                    );
+                }
+
+                $codebase->taint->addSinks(
+                    $new_sinks
                 );
             }
+        }
+
+        if ($inferred_type->sources) {
+            foreach ($inferred_type->sources as $type_source) {
+                if (($previous_source = $codebase->taint->hasPreviousSource($type_source, $suffixes))
+                    || $inferred_type->tainted
+                ) {
+                    if ($suffixes !== null) {
+                        $new_sources = [];
+
+                        foreach ($suffixes as $suffix) {
+                            $codebase->taint->addSpecialization(strtolower($cased_method_id), $suffix);
+
+                            $new_source = new Source(
+                                strtolower($cased_method_id . '-' . $suffix),
+                                $cased_method_id,
+                                $storage->location
+                            );
+
+                            $new_source->parents = [$previous_source ?: $type_source];
+
+                            $new_sources[] = $new_source;
+                        }
+                    } else {
+                        $new_source = new Source(
+                            strtolower($cased_method_id),
+                            $cased_method_id,
+                            $storage->location
+                        );
+
+                        $new_source->parents = [$previous_source ?: $type_source];
+
+                        $new_sources = [$new_source];
+                    }
+
+                    $codebase->taint->addSources(
+                        $new_sources
+                    );
+                }
+            }
+        } elseif ($inferred_type->tainted) {
+            throw new \UnexpectedValueException(
+                'sources should exist for tainted var in '
+                    . $statements_analyzer->getFileName() . ':'
+                    . $stmt->getLine()
+            );
         }
     }
 
@@ -513,11 +588,10 @@ class ReturnAnalyzer
      * If a function returns a closure, we try to infer the param/return types of
      * the inner closure.
      * @see \Psalm\Tests\ReturnTypeTest:756
-     * @param PhpParser\Node\Expr\Closure|PhpParser\Node\Expr\ArrowFunction $expr
      */
     private static function potentiallyInferTypesOnClosureFromParentReturnType(
         StatementsAnalyzer $statements_analyzer,
-        PhpParser\Node\FunctionLike $expr,
+        PhpParser\Node\Expr\Closure $expr,
         Context $context
     ): void {
         // if not returning from inside of a function, return
@@ -525,12 +599,11 @@ class ReturnAnalyzer
             return;
         }
 
-        $closure_id = (new ClosureAnalyzer($expr, $statements_analyzer))->getClosureId();
+        $closure_id = (new ClosureAnalyzer($expr, $statements_analyzer))->getId();
         $closure_storage = $statements_analyzer
             ->getCodebase()
             ->getFunctionLikeStorage($statements_analyzer, $closure_id);
 
-        /** @psalm-suppress ArgumentTypeCoercion */
         $parent_fn_storage = $statements_analyzer
             ->getCodebase()
             ->getFunctionLikeStorage(

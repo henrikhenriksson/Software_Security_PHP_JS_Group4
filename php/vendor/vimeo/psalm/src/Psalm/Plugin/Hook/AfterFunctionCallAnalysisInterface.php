@@ -11,7 +11,6 @@ use Psalm\Type\Union;
 interface AfterFunctionCallAnalysisInterface
 {
     /**
-     * @param  non-empty-string $function_id
      * @param  FileManipulation[] $file_replacements
      *
      * @return void

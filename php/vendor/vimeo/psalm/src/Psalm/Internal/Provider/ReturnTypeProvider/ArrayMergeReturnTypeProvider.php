@@ -81,26 +81,10 @@ class ArrayMergeReturnTypeProvider implements \Psalm\Plugin\Hook\FunctionReturnT
 
                         if ($unpacked_type_part instanceof Type\Atomic\ObjectLike) {
                             if ($generic_properties !== null) {
-                                foreach ($unpacked_type_part->properties as $key => $type) {
-                                    if (!\is_string($key)) {
-                                        $generic_properties[] = $type;
-                                        continue;
-                                    }
-
-                                    if (!isset($generic_properties[$key]) || !$type->possibly_undefined) {
-                                        $generic_properties[$key] = $type;
-                                    } else {
-                                        $was_possibly_undefined = $generic_properties[$key]->possibly_undefined;
-
-                                        $generic_properties[$key] = Type::combineUnionTypes(
-                                            $generic_properties[$key],
-                                            $type,
-                                            $codebase
-                                        );
-
-                                        $generic_properties[$key]->possibly_undefined = $was_possibly_undefined;
-                                    }
-                                }
+                                $generic_properties = array_merge(
+                                    $generic_properties,
+                                    $unpacked_type_part->properties
+                                );
                             }
 
                             if (!$unpacked_type_part->is_list) {

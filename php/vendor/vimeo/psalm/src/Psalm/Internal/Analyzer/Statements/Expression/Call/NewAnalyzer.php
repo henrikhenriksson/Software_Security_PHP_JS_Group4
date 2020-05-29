@@ -32,11 +32,18 @@ use function is_string;
  */
 class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAnalyzer
 {
+    /**
+     * @param   StatementsAnalyzer           $statements_analyzer
+     * @param   PhpParser\Node\Expr\New_    $stmt
+     * @param   Context                     $context
+     *
+     * @return  false|null
+     */
     public static function analyze(
         StatementsAnalyzer $statements_analyzer,
         PhpParser\Node\Expr\New_ $stmt,
         Context $context
-    ) : bool {
+    ) {
         $fq_class_name = null;
 
         $codebase = $statements_analyzer->getCodebase();
@@ -281,7 +288,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                         $statements_analyzer->node_data->setType($stmt, $new_type);
                     }
 
-                    ArgumentsAnalyzer::analyze(
+                    self::checkFunctionArguments(
                         $statements_analyzer,
                         $stmt->args,
                         null,
@@ -289,10 +296,10 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                         $context
                     );
 
-                    return true;
+                    return null;
                 }
             } else {
-                ArgumentsAnalyzer::analyze(
+                self::checkFunctionArguments(
                     $statements_analyzer,
                     $stmt->args,
                     null,
@@ -300,7 +307,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                     $context
                 );
 
-                return true;
+                return null;
             }
         }
 
@@ -320,7 +327,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
 
             if ($context->check_classes) {
                 if ($context->isPhantomClass($fq_class_name)) {
-                    ArgumentsAnalyzer::analyze(
+                    self::checkFunctionArguments(
                         $statements_analyzer,
                         $stmt->args,
                         null,
@@ -328,7 +335,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                         $context
                     );
 
-                    return true;
+                    return null;
                 }
 
                 if (ClassLikeAnalyzer::checkFullyQualifiedClassLikeName(
@@ -340,7 +347,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                     $statements_analyzer->getSuppressedIssues(),
                     false
                 ) === false) {
-                    ArgumentsAnalyzer::analyze(
+                    self::checkFunctionArguments(
                         $statements_analyzer,
                         $stmt->args,
                         null,
@@ -348,7 +355,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                         $context
                     );
 
-                    return true;
+                    return;
                 }
 
                 if ($codebase->interfaceExists($fq_class_name)) {
@@ -361,7 +368,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                     )) {
                     }
 
-                    return true;
+                    return null;
                 }
             }
 
@@ -391,7 +398,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                         ),
                         $statements_analyzer->getSuppressedIssues()
                     )) {
-                        return true;
+                        return;
                     }
                 }
 
@@ -473,7 +480,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                         return false;
                     }
 
-                    if (Method\MethodVisibilityAnalyzer::analyze(
+                    if (MethodVisibilityAnalyzer::analyze(
                         $method_id,
                         $context,
                         $statements_analyzer->getSource(),
@@ -569,7 +576,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
                     }
                 }
             } else {
-                ArgumentsAnalyzer::analyze(
+                self::checkFunctionArguments(
                     $statements_analyzer,
                     $stmt->args,
                     null,
@@ -583,7 +590,7 @@ class NewAnalyzer extends \Psalm\Internal\Analyzer\Statements\Expression\CallAna
             $context->removeAllObjectVars();
         }
 
-        return true;
+        return null;
     }
 
     /**

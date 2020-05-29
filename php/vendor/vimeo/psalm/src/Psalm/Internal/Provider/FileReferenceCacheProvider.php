@@ -13,8 +13,9 @@ use function serialize;
 use function unserialize;
 
 /**
- * @psalm-import-type  FileMapType from \Psalm\Internal\Codebase\Analyzer
- *
+ * @psalm-type  TaggedCodeType = array<int, array{0: int, 1: string}>
+ */
+/**
  * Used to determine which files reference other files, necessary for using the --diff
  * option from the command line.
  */
@@ -580,7 +581,14 @@ class FileReferenceCacheProvider
     }
 
     /**
-     * @return array<string, FileMapType>|false
+     * @return array<
+     *      string,
+     *      array{
+     *          0: TaggedCodeType,
+     *          1: TaggedCodeType,
+     *          2: array<int, array{0: int, 1: string, 2: int}>
+     *      }
+     *  >|false
      */
     public function getFileMapCache()
     {
@@ -593,7 +601,14 @@ class FileReferenceCacheProvider
             && !$this->config_changed
         ) {
             /**
-             * @var array<string, FileMapType>
+             * @var array<
+             *      string,
+             *      array{
+             *          0: TaggedCodeType,
+             *          1: TaggedCodeType,
+             *          2: array<int, array{0: int, 1: string, 2: int}>
+             *      }
+             *  >
              */
             $file_maps_cache = unserialize(file_get_contents($file_maps_cache_location));
 
@@ -604,7 +619,14 @@ class FileReferenceCacheProvider
     }
 
     /**
-     * @param array<string, FileMapType> $file_maps
+     * @param array<
+     *      string,
+     *      array{
+     *          0: TaggedCodeType,
+     *          1: TaggedCodeType,
+     *          2: array<int, array{0: int, 1: string, 2: int}>
+     *      }
+     *  > $file_maps
      *
      * @return void
      */

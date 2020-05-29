@@ -40,7 +40,7 @@ use function strpos;
 use function array_search;
 use function array_keys;
 use function end;
-use Psalm\Internal\Taint\TaintNode;
+use Psalm\Internal\Taint\Source;
 
 /**
  * @internal
@@ -609,21 +609,16 @@ abstract class FunctionLikeAnalyzer extends SourceAnalyzer
                 true
             );
 
-            $closure_return_type = $closure_return_types
-                ? \Psalm\Internal\Type\TypeCombination::combineTypes(
+            if ($closure_return_types) {
+                $closure_return_type = \Psalm\Internal\Type\TypeCombination::combineTypes(
                     $closure_return_types,
                     $codebase
-                )
-                : null;
+                );
 
-            $closure_yield_type = $closure_yield_types
-                ? \Psalm\Internal\Type\TypeCombination::combineTypes(
-                    $closure_yield_types,
-                    $codebase
-                )
-                : null;
+                $closure_yield_type = $closure_yield_types
+                    ? \Psalm\Internal\Type\TypeCombination::combineTypes($closure_yield_types)
+                    : null;
 
-            if ($closure_return_type || $closure_yield_type) {
                 if ($closure_yield_type) {
                     $closure_return_type = $closure_yield_type;
                 }
@@ -1041,14 +1036,19 @@ abstract class FunctionLikeAnalyzer extends SourceAnalyzer
             }
 
             if ($cased_method_id && $codebase->taint) {
-                $type_source = TaintNode::getForMethodArgument(
+                $type_source = Source::getForMethodArgument(
                     $cased_method_id,
                     $cased_method_id,
                     $offset,
                     $function_param->location,
                     null
                 );
-                $var_type->parent_nodes = [$type_source];
+                $var_type->sources = [$type_source];
+
+                if ($tainted_source = $codebase->taint->hasExistingSource($type_source)) {
+                    $var_type->tainted = $tainted_source->taint;
+                    $type_source->taint = $tainted_source->taint;
+                }
             }
 
             $context->vars_in_scope['$' . $function_param->name] = $var_type;
@@ -1586,10 +1586,9 @@ abstract class FunctionLikeAnalyzer extends SourceAnalyzer
             throw new \UnexpectedValueException('This is weird');
         }
 
-        return $codebase->functions->getStorage($statements_analyzer, $function_id);
+        return $codebase->functions->getStorage($statements_analyzer, strtolower($function_id));
     }
 
-    /** @return non-empty-string */
     public function getId() : string
     {
         if ($this instanceof MethodAnalyzer) {

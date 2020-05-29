@@ -182,27 +182,9 @@ class FunctionLikeStorage
     public $pure = false;
 
     /**
-     * Whether or not the function output is dependent solely on input - a function can be
-     * impure but still have this property (e.g. var_export). Useful for taint analysis.
-     *
      * @var bool
      */
-    public $specialize_call = false;
-
-    /**
-     * @var array<string>
-     */
-    public $added_taints = [];
-
-    /**
-     * @var array<string>
-     */
-    public $removed_taints = [];
-
-    /**
-     * @var list<int>
-     */
-    public $return_source_params = [];
+    public $remove_taint = false;
 
     public function __toString()
     {

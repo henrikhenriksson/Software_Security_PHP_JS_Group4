@@ -12,8 +12,9 @@ use Psalm\Internal\Analyzer\IssueData;
 use Psalm\Internal\Analyzer\ClassLikeAnalyzer;
 
 /**
- * @psalm-import-type FileMapType from \Psalm\Internal\Codebase\Analyzer
- *
+ * @psalm-type  TaggedCodeType = array<int, array{0: int, 1: string}>
+ */
+/**
  * Used to determine which files reference other files, necessary for using the --diff
  * option from the command line.
  */
@@ -118,7 +119,14 @@ class FileReferenceProvider
     private static $issues = [];
 
     /**
-     * @var array<string, FileMapType>
+     * @var array<
+     *      string,
+     *      array{
+     *          0: TaggedCodeType,
+     *          1: TaggedCodeType,
+     *          2: array<int, array{0: int, 1: string, 2: int}>
+     *      }
+     *  >
      */
     private static $file_maps = [];
 
@@ -1031,7 +1039,14 @@ class FileReferenceProvider
     }
 
     /**
-     * @param array<string, FileMapType> $file_maps
+     * @param array<
+     *      string,
+     *      array{
+     *          0: TaggedCodeType,
+     *          1: TaggedCodeType,
+     *          2: array<int, array{0: int, 1: string, 2: int}>
+     *      }
+     *  > $file_maps
      */
     public function setFileMaps(array $file_maps) : void
     {
@@ -1065,7 +1080,14 @@ class FileReferenceProvider
     }
 
     /**
-     * @return array<string, FileMapType>
+     * @return array<
+     *      string,
+     *      array{
+     *          0: TaggedCodeType,
+     *          1: TaggedCodeType,
+     *          2: array<int, array{0: int, 1: string, 2: int}>
+     *      }
+     *  >
      */
     public function getFileMaps()
     {

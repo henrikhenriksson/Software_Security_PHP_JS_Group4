@@ -26,10 +26,21 @@ return [
             );
         },
         function ($filePath, $prefix, $contents) {
+            if ($filePath === 'src/Psalm/Config.php') {
+                return str_replace(
+                    [$prefix . '\Composer\Autoload\ClassLoader', '\'Psalm\\\\Issue\\\\\''],
+                    ['Composer\Autoload\ClassLoader', '\'' . $prefix . '\\\\Psalm\\\\Issue\\\\\''],
+                    $contents
+                );
+            }
+
+            return $contents;
+        },
+        function ($filePath, $prefix, $contents) {
             if (strpos($filePath, 'src/Psalm') === 0) {
                 return str_replace(
-                    [' \\PhpParser\\'],
-                    [' \\' . $prefix . '\\PhpParser\\'],
+                    [' \\Psalm\\', ' \\PhpParser\\'],
+                    [' \\' . $prefix . '\\Psalm\\', ' \\' . $prefix . '\\PhpParser\\'],
                     $contents
                 );
             }
@@ -59,6 +70,28 @@ return [
             return $contents;
         },
         function ($filePath, $prefix, $contents) {
+            if ($filePath === 'src/Psalm/Internal/Analyzer/Statements/Expression/Call/MethodCallAnalyzer.php') {
+                return str_replace(
+                    'case \'Psalm\\\\',
+                    'case \'' . $prefix . '\\\\Psalm\\\\',
+                    $contents
+                );
+            }
+
+            return $contents;
+        },
+        function ($filePath, $prefix, $contents) {
+            if ($filePath === 'src/Psalm/Type.php') {
+                return str_replace(
+                    'get_class($type) === \'Psalm\\\\',
+                    'get_class($type) === \'' . $prefix . '\\\\Psalm\\\\',
+                    $contents
+                );
+            }
+
+            return $contents;
+        },
+        function ($filePath, $prefix, $contents) {
             if ($filePath === 'src/psalm.php') {
                 return str_replace(
                     '\\' . $prefix . '\\PSALM_VERSION',
@@ -71,8 +104,8 @@ return [
         },
         function ($filePath, $prefix, $contents) {
             $ret = str_replace(
-                $prefix . '\\Psalm\\',
-                'Psalm\\',
+                $prefix . '\Psalm\Plugin\\',
+                'Psalm\Plugin\\',
                 $contents
             );
             return $ret;
@@ -80,7 +113,7 @@ return [
     ],
     'whitelist' => [
         \Composer\Autoload\ClassLoader::class,
-        'Psalm\*',
+        'Psalm\Plugin\*',
     ],
     'files-whitelist' => [
         'src/Psalm/Internal/PropertyMap.php',

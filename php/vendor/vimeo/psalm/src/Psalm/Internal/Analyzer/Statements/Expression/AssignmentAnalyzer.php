@@ -37,7 +37,6 @@ use function is_string;
 use function strpos;
 use function strtolower;
 use function substr;
-use function array_merge;
 
 /**
  * @internal
@@ -62,14 +61,14 @@ class AssignmentAnalyzer
         Context $context,
         ?PhpParser\Comment\Doc $doc_comment
     ) {
-        $var_id = ExpressionIdentifier::getVarId(
+        $var_id = ExpressionAnalyzer::getVarId(
             $assign_var,
             $statements_analyzer->getFQCLN(),
             $statements_analyzer
         );
 
         // gets a variable id that *may* contain array keys
-        $array_var_id = ExpressionIdentifier::getArrayVarId(
+        $array_var_id = ExpressionAnalyzer::getArrayVarId(
             $assign_var,
             $statements_analyzer->getFQCLN(),
             $statements_analyzer
@@ -85,7 +84,7 @@ class AssignmentAnalyzer
 
         $codebase = $statements_analyzer->getCodebase();
 
-        $removed_taints = [];
+        $remove_taint = false;
 
         if ($doc_comment) {
             $file_path = $statements_analyzer->getRootFilePath();
@@ -125,8 +124,8 @@ class AssignmentAnalyzer
             }
 
             foreach ($var_comments as $var_comment) {
-                if ($var_comment->removed_taints) {
-                    $removed_taints = $var_comment->removed_taints;
+                if ($var_comment->remove_taint) {
+                    $remove_taint = true;
                 }
 
                 if (!$var_comment->type) {
@@ -314,7 +313,7 @@ class AssignmentAnalyzer
                 $statements_analyzer
             );
         } else {
-            $root_var_id = ExpressionIdentifier::getRootVarId(
+            $root_var_id = ExpressionAnalyzer::getRootVarId(
                 $assign_var,
                 $statements_analyzer->getFQCLN(),
                 $statements_analyzer
@@ -332,7 +331,7 @@ class AssignmentAnalyzer
         $codebase = $statements_analyzer->getCodebase();
 
         if ($assign_value_type->hasMixed()) {
-            $root_var_id = ExpressionIdentifier::getRootVarId(
+            $root_var_id = ExpressionAnalyzer::getRootVarId(
                 $assign_var,
                 $statements_analyzer->getFQCLN(),
                 $statements_analyzer
@@ -451,20 +450,6 @@ class AssignmentAnalyzer
                         );
                     }
 
-                    if ($codebase->store_node_types
-                        && !$context->collect_initializations
-                        && !$context->collect_mutations
-                    ) {
-                        $location = new CodeLocation($statements_analyzer, $assign_var);
-                        $codebase->analyzer->addNodeReference(
-                            $statements_analyzer->getFilePath(),
-                            $assign_var,
-                            $location->raw_file_start
-                                . '-' . $location->raw_file_end
-                                . ':' . $assign_value_type->getId()
-                        );
-                    }
-
                     if (isset($context->byref_constraints[$var_id]) || $assign_value_type->by_ref) {
                         $statements_analyzer->registerVariableUses([$location->getHash() => $location]);
                     }
@@ -517,7 +502,7 @@ class AssignmentAnalyzer
                     continue;
                 }
 
-                $list_var_id = ExpressionIdentifier::getArrayVarId(
+                $list_var_id = ExpressionAnalyzer::getArrayVarId(
                     $var,
                     $statements_analyzer->getFQCLN(),
                     $statements_analyzer
@@ -941,22 +926,10 @@ class AssignmentAnalyzer
                 return $context->vars_in_scope[$var_id];
             }
 
-            if ($codebase->taint
-                && $codebase->config->trackTaintsInPath($statements_analyzer->getFilePath())
-            ) {
-                if ($context->vars_in_scope[$var_id]->parent_nodes) {
-                    $var_location = new CodeLocation($statements_analyzer->getSource(), $assign_var);
+            if ($remove_taint && $context->vars_in_scope[$var_id]->sources) {
+                $context->vars_in_scope[$var_id]->sources = null;
 
-                    $new_parent_node = \Psalm\Internal\Taint\TaintNode::getForAssignment($var_id, $var_location);
-
-                    $codebase->taint->addTaintNode($new_parent_node);
-
-                    foreach ($context->vars_in_scope[$var_id]->parent_nodes as $parent_node) {
-                        $codebase->taint->addPath($parent_node, $new_parent_node, [], $removed_taints);
-                    }
-
-                    $context->vars_in_scope[$var_id]->parent_nodes = [$new_parent_node];
-                }
+                $context->vars_in_scope[$var_id]->tainted = null;
             }
         }
 
@@ -972,14 +945,14 @@ class AssignmentAnalyzer
      * @param   PhpParser\Node\Expr\AssignOp    $stmt
      * @param   Context                         $context
      *
-     * @return  bool
+     * @return  false|null
      */
     public static function analyzeAssignmentOperation(
         StatementsAnalyzer $statements_analyzer,
         PhpParser\Node\Expr\AssignOp $stmt,
         Context $context
     ) {
-        $array_var_id = ExpressionIdentifier::getArrayVarId(
+        $array_var_id = ExpressionAnalyzer::getArrayVarId(
             $stmt->var,
             $statements_analyzer->getFQCLN(),
             $statements_analyzer
@@ -1015,7 +988,7 @@ class AssignmentAnalyzer
                 $statements_analyzer->node_data->setType($stmt, $fake_coalesce_type);
             }
 
-            return true;
+            return;
         }
 
         $was_in_assignment = $context->inside_assignment;
@@ -1075,7 +1048,7 @@ class AssignmentAnalyzer
             || $stmt instanceof PhpParser\Node\Expr\AssignOp\Mul
             || $stmt instanceof PhpParser\Node\Expr\AssignOp\Pow
         ) {
-            BinaryOp\NonDivArithmeticOpAnalyzer::analyze(
+            BinaryOpAnalyzer::analyzeNonDivArithmeticOp(
                 $statements_analyzer,
                 $statements_analyzer->node_data,
                 $stmt->var,
@@ -1107,7 +1080,7 @@ class AssignmentAnalyzer
             $context->vars_in_scope[$array_var_id] = Type::combineUnionTypes(Type::getFloat(), Type::getInt());
             $statements_analyzer->node_data->setType($stmt, clone $context->vars_in_scope[$array_var_id]);
         } elseif ($stmt instanceof PhpParser\Node\Expr\AssignOp\Concat) {
-            BinaryOp\ConcatAnalyzer::analyze(
+            BinaryOpAnalyzer::analyzeConcatOp(
                 $statements_analyzer,
                 $stmt->var,
                 $stmt->expr,
@@ -1118,32 +1091,6 @@ class AssignmentAnalyzer
             if ($result_type && $array_var_id) {
                 $context->vars_in_scope[$array_var_id] = $result_type;
                 $statements_analyzer->node_data->setType($stmt, clone $context->vars_in_scope[$array_var_id]);
-
-                if ($codebase->taint
-                    && $codebase->config->trackTaintsInPath($statements_analyzer->getFilePath())
-                ) {
-                    $stmt_left_type = $statements_analyzer->node_data->getType($stmt->var);
-                    $stmt_right_type = $statements_analyzer->node_data->getType($stmt->expr);
-
-                    $var_location = new CodeLocation($statements_analyzer, $stmt);
-
-                    $new_parent_node = \Psalm\Internal\Taint\TaintNode::getForAssignment($array_var_id, $var_location);
-                    $codebase->taint->addTaintNode($new_parent_node);
-
-                    $result_type->parent_nodes = [$new_parent_node];
-
-                    if ($stmt_left_type && $stmt_left_type->parent_nodes) {
-                        foreach ($stmt_left_type->parent_nodes as $parent_node) {
-                            $codebase->taint->addPath($parent_node, $new_parent_node);
-                        }
-                    }
-
-                    if ($stmt_right_type && $stmt_right_type->parent_nodes) {
-                        foreach ($stmt_right_type->parent_nodes as $parent_node) {
-                            $codebase->taint->addPath($parent_node, $new_parent_node);
-                        }
-                    }
-                }
             }
         } elseif ($stmt_var_type
             && $stmt_expr_type
@@ -1155,7 +1102,7 @@ class AssignmentAnalyzer
                 || $stmt instanceof PhpParser\Node\Expr\AssignOp\ShiftRight
             )
         ) {
-            BinaryOp\NonDivArithmeticOpAnalyzer::analyze(
+            BinaryOpAnalyzer::analyzeNonDivArithmeticOp(
                 $statements_analyzer,
                 $statements_analyzer->node_data,
                 $stmt->var,
@@ -1184,7 +1131,7 @@ class AssignmentAnalyzer
                 $statements_analyzer
             );
         } else {
-            $root_var_id = ExpressionIdentifier::getRootVarId(
+            $root_var_id = ExpressionAnalyzer::getRootVarId(
                 $stmt->var,
                 $statements_analyzer->getFQCLN(),
                 $statements_analyzer
@@ -1213,19 +1160,21 @@ class AssignmentAnalyzer
             $context->inside_assignment = false;
         }
 
-        return true;
+        return null;
     }
 
     /**
      * @param   StatementsAnalyzer               $statements_analyzer
      * @param   PhpParser\Node\Expr\AssignRef   $stmt
      * @param   Context                         $context
+     *
+     * @return  false|null
      */
     public static function analyzeAssignmentRef(
         StatementsAnalyzer $statements_analyzer,
         PhpParser\Node\Expr\AssignRef $stmt,
         Context $context
-    ) : bool {
+    ) {
         $assignment_type = self::analyze(
             $statements_analyzer,
             $stmt->var,
@@ -1234,20 +1183,19 @@ class AssignmentAnalyzer
             $context,
             $stmt->getDocComment()
         );
-
         if ($assignment_type === false) {
             return false;
         }
 
         $assignment_type->by_ref = true;
 
-        $lhs_var_id = ExpressionIdentifier::getVarId(
+        $lhs_var_id = ExpressionAnalyzer::getVarId(
             $stmt->var,
             $statements_analyzer->getFQCLN(),
             $statements_analyzer
         );
 
-        $rhs_var_id = ExpressionIdentifier::getVarId(
+        $rhs_var_id = ExpressionAnalyzer::getVarId(
             $stmt->expr,
             $statements_analyzer->getFQCLN(),
             $statements_analyzer
@@ -1260,122 +1208,6 @@ class AssignmentAnalyzer
 
         if ($rhs_var_id && !isset($context->vars_in_scope[$rhs_var_id])) {
             $context->vars_in_scope[$rhs_var_id] = Type::getMixed();
-        }
-
-        return true;
-    }
-
-    /**
-     * @param  StatementsAnalyzer    $statements_analyzer
-     * @param  PhpParser\Node\Expr  $stmt
-     * @param  Type\Union           $by_ref_type
-     * @param  Context              $context
-     * @param  bool                 $constrain_type
-     *
-     * @return void
-     */
-    public static function assignByRefParam(
-        StatementsAnalyzer $statements_analyzer,
-        PhpParser\Node\Expr $stmt,
-        Type\Union $by_ref_type,
-        Type\Union $by_ref_out_type,
-        Context $context,
-        bool $constrain_type = true,
-        bool $prevent_null = false
-    ) {
-        if ($stmt instanceof PhpParser\Node\Expr\PropertyFetch && $stmt->name instanceof PhpParser\Node\Identifier) {
-            $prop_name = $stmt->name->name;
-
-            PropertyAssignmentAnalyzer::analyzeInstance(
-                $statements_analyzer,
-                $stmt,
-                $prop_name,
-                null,
-                $by_ref_out_type,
-                $context
-            );
-
-            return;
-        }
-
-        $var_id = ExpressionIdentifier::getVarId(
-            $stmt,
-            $statements_analyzer->getFQCLN(),
-            $statements_analyzer
-        );
-
-        if ($var_id) {
-            if (!$by_ref_type->hasMixed() && $constrain_type) {
-                $context->byref_constraints[$var_id] = new \Psalm\Internal\ReferenceConstraint($by_ref_type);
-            }
-
-            if (!$context->hasVariable($var_id, $statements_analyzer)) {
-                $context->vars_possibly_in_scope[$var_id] = true;
-
-                if (!$statements_analyzer->hasVariable($var_id)) {
-                    $location = new CodeLocation($statements_analyzer, $stmt);
-                    $statements_analyzer->registerVariable($var_id, $location, null);
-
-                    if ($constrain_type
-                        && $prevent_null
-                        && !$by_ref_type->isMixed()
-                        && !$by_ref_type->isNullable()
-                        && !strpos($var_id, '->')
-                        && !strpos($var_id, '::')
-                    ) {
-                        if (IssueBuffer::accepts(
-                            new \Psalm\Issue\NullReference(
-                                'Not expecting null argument passed by reference',
-                                new CodeLocation($statements_analyzer->getSource(), $stmt)
-                            ),
-                            $statements_analyzer->getSuppressedIssues()
-                        )) {
-                            // fall through
-                        }
-                    }
-
-                    $codebase = $statements_analyzer->getCodebase();
-
-                    if ($codebase->find_unused_variables) {
-                        $context->unreferenced_vars[$var_id] = [$location->getHash() => $location];
-                    }
-
-                    $context->hasVariable($var_id, $statements_analyzer);
-                }
-            } elseif ($var_id === '$this') {
-                // don't allow changing $this
-                return;
-            } else {
-                $existing_type = $context->vars_in_scope[$var_id];
-
-                // removes dependent vars from $context
-                $context->removeDescendents(
-                    $var_id,
-                    $existing_type,
-                    $by_ref_type,
-                    $statements_analyzer
-                );
-
-                if ($existing_type->getId() !== 'array<empty, empty>') {
-                    $context->vars_in_scope[$var_id] = clone $by_ref_out_type;
-
-                    if (!($stmt_type = $statements_analyzer->node_data->getType($stmt))
-                        || $stmt_type->isEmpty()
-                    ) {
-                        $statements_analyzer->node_data->setType($stmt, clone $by_ref_type);
-                    }
-
-                    return;
-                }
-            }
-
-            $context->assigned_var_ids[$var_id] = true;
-
-            $context->vars_in_scope[$var_id] = $by_ref_out_type;
-
-            if (!($stmt_type = $statements_analyzer->node_data->getType($stmt)) || $stmt_type->isEmpty()) {
-                $statements_analyzer->node_data->setType($stmt, clone $by_ref_type);
-            }
         }
     }
 }

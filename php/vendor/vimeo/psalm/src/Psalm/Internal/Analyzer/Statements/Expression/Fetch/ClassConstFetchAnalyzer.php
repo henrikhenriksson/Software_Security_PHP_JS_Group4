@@ -26,11 +26,18 @@ use function explode;
  */
 class ClassConstFetchAnalyzer
 {
+    /**
+     * @param   StatementsAnalyzer                   $statements_analyzer
+     * @param   PhpParser\Node\Expr\ClassConstFetch $stmt
+     * @param   Context                             $context
+     *
+     * @return  null|false
+     */
     public static function analyze(
         StatementsAnalyzer $statements_analyzer,
         PhpParser\Node\Expr\ClassConstFetch $stmt,
         Context $context
-    ) : bool {
+    ) {
         $codebase = $statements_analyzer->getCodebase();
 
         if ($stmt->class instanceof PhpParser\Node\Name) {
@@ -48,7 +55,7 @@ class ClassConstFetchAnalyzer
                         return false;
                     }
 
-                    return true;
+                    return;
                 }
 
                 $fq_class_name = $context->self;
@@ -66,7 +73,7 @@ class ClassConstFetchAnalyzer
                         return false;
                     }
 
-                    return true;
+                    return;
                 }
             } else {
                 $fq_class_name = ClassLikeAnalyzer::getFQCLNFromNameObject(
@@ -88,7 +95,7 @@ class ClassConstFetchAnalyzer
                             false,
                             true
                         ) === false) {
-                            return true;
+                            return;
                         }
                     }
                 }
@@ -155,14 +162,14 @@ class ClassConstFetchAnalyzer
                     );
                 }
 
-                return true;
+                return null;
             }
 
             // if we're ignoring that the class doesn't exist, exit anyway
             if (!$codebase->classlikes->classOrInterfaceExists($fq_class_name)) {
                 $statements_analyzer->node_data->setType($stmt, Type::getMixed());
 
-                return true;
+                return null;
             }
 
             if ($codebase->store_node_types
@@ -177,7 +184,7 @@ class ClassConstFetchAnalyzer
             }
 
             if (!$stmt->name instanceof PhpParser\Node\Identifier) {
-                return true;
+                return;
             }
 
             $const_id = $fq_class_name . '::' . $stmt->name;
@@ -217,7 +224,7 @@ class ClassConstFetchAnalyzer
                     $statements_analyzer
                 );
             } catch (\InvalidArgumentException $_) {
-                return true;
+                return;
             } catch (\Psalm\Exception\CircularReferenceException $e) {
                 if (IssueBuffer::accepts(
                     new CircularReference(
@@ -229,7 +236,7 @@ class ClassConstFetchAnalyzer
                     // fall through
                 }
 
-                return true;
+                return;
             }
 
             if (!$class_constant_type) {
@@ -264,7 +271,7 @@ class ClassConstFetchAnalyzer
                     }
                 }
 
-                return true;
+                return;
             }
 
             if ($context->calling_method_id) {
@@ -341,7 +348,7 @@ class ClassConstFetchAnalyzer
                 $statements_analyzer->node_data->setType($stmt, Type::getMixed());
             }
 
-            return true;
+            return null;
         }
 
         if ($stmt->name instanceof PhpParser\Node\Identifier && $stmt->name->name === 'class') {
@@ -375,7 +382,7 @@ class ClassConstFetchAnalyzer
                 $statements_analyzer->node_data->setType($stmt, Type::getMixed());
             }
 
-            return true;
+            return;
         }
 
         $statements_analyzer->node_data->setType($stmt, Type::getMixed());
@@ -384,39 +391,6 @@ class ClassConstFetchAnalyzer
             return false;
         }
 
-        return true;
-    }
-
-    public static function analyzeClassConstAssignment(
-        StatementsAnalyzer $statements_analyzer,
-        PhpParser\Node\Stmt\ClassConst $stmt,
-        Context $context
-    ): void {
-        $const_visibility = \ReflectionProperty::IS_PUBLIC;
-
-        if ($stmt->isProtected()) {
-            $const_visibility = \ReflectionProperty::IS_PROTECTED;
-        }
-
-        if ($stmt->isPrivate()) {
-            $const_visibility = \ReflectionProperty::IS_PRIVATE;
-        }
-
-        $codebase = $statements_analyzer->getCodebase();
-
-        foreach ($stmt->consts as $const) {
-            ExpressionAnalyzer::analyze($statements_analyzer, $const->value, $context);
-
-            if (($const_type = $statements_analyzer->node_data->getType($const->value))
-                && !$const_type->hasMixed()
-            ) {
-                $codebase->classlikes->setConstantType(
-                    (string)$statements_analyzer->getFQCLN(),
-                    $const->name->name,
-                    $const_type,
-                    $const_visibility
-                );
-            }
-        }
+        return null;
     }
 }

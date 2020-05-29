@@ -74,7 +74,7 @@ class VarDocblockComment
     public $allow_private_mutation = false;
 
     /**
-     * @var list<string>
+     * @var bool
      */
-    public $removed_taints = [];
+    public $remove_taint = false;
 }

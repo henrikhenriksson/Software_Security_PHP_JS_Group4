@@ -68,7 +68,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Psalm\\": "src/Psalm/"
+            "Psalm\\Plugin\\": "src/Psalm/Plugin",
+            "Psalm\\": "src/Psalm"
         },
         "files": [
             "src/functions.php",
@@ -77,7 +78,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Psalm\\Tests\\": "tests/"
+            "Psalm\\Tests\\": "tests"
         }
     },
     "repositories": [
@@ -102,8 +103,7 @@
             "phpunit"
         ],
         "psalm": "./psalm --find-dead-code",
-        "cs": "phpcs -p",
-        "cs-fix": "phpcbf -p",
+        "standards": "phpcs",
         "tests": [
             "phpcs",
             "phpunit"

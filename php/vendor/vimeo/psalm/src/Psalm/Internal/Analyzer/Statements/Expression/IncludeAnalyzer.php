@@ -4,7 +4,6 @@ namespace Psalm\Internal\Analyzer\Statements\Expression;
 use PhpParser;
 use Psalm\Internal\Analyzer\Statements\ExpressionAnalyzer;
 use Psalm\Internal\Analyzer\StatementsAnalyzer;
-use Psalm\Internal\Taint\Sink;
 use Psalm\CodeLocation;
 use Psalm\Config;
 use Psalm\Context;
@@ -38,12 +37,15 @@ use function preg_replace;
  */
 class IncludeAnalyzer
 {
+    /**
+     * @return  false|null
+     */
     public static function analyze(
         StatementsAnalyzer $statements_analyzer,
         PhpParser\Node\Expr\Include_ $stmt,
         Context $context,
         Context $global_context = null
-    ) : bool {
+    ) {
         $codebase = $statements_analyzer->getCodebase();
         $config = $codebase->config;
 
@@ -96,7 +98,6 @@ class IncludeAnalyzer
             $path_to_file = self::getPathTo(
                 $stmt->expr,
                 $statements_analyzer->node_data,
-                $statements_analyzer,
                 $statements_analyzer->getFileName(),
                 $config
             );
@@ -107,7 +108,7 @@ class IncludeAnalyzer
 
             // if the file is already included, we can't check much more
             if (in_array(realpath($path_to_file), get_included_files(), true)) {
-                return true;
+                return null;
             }
 
             $current_file_analyzer = $statements_analyzer->getFileAnalyzer();
@@ -118,7 +119,7 @@ class IncludeAnalyzer
                     || ($statements_analyzer->hasAlreadyRequiredFilePath($path_to_file)
                         && !$codebase->file_storage_provider->get($path_to_file)->has_extra_statements)
                 ) {
-                    return true;
+                    return null;
                 }
 
                 $current_file_analyzer->addRequiredFilePath($path_to_file);
@@ -174,7 +175,7 @@ class IncludeAnalyzer
 
                 $include_file_analyzer->clearSourceBeforeDestruction();
 
-                return true;
+                return null;
             }
 
             $source = $statements_analyzer->getSource();
@@ -189,7 +190,7 @@ class IncludeAnalyzer
                 // fall through
             }
         } else {
-            $var_id = ExpressionIdentifier::getArrayVarId($stmt->expr, null);
+            $var_id = ExpressionAnalyzer::getArrayVarId($stmt->expr, null);
 
             if (!$var_id || !isset($context->phantom_files[$var_id])) {
                 $source = $statements_analyzer->getSource();
@@ -212,7 +213,7 @@ class IncludeAnalyzer
             $context->check_functions = false;
         }
 
-        return true;
+        return null;
     }
 
     /**
@@ -225,7 +226,6 @@ class IncludeAnalyzer
     public static function getPathTo(
         PhpParser\Node\Expr $stmt,
         ?\Psalm\Internal\Provider\NodeDataProvider $type_provider,
-        ?StatementsAnalyzer $statements_analyzer,
         $file_name,
         Config $config
     ) {
@@ -246,9 +246,10 @@ class IncludeAnalyzer
             return $stmt->value;
         }
 
-        $stmt_type = $type_provider ? $type_provider->getType($stmt) : null;
-
-        if ($stmt_type && $stmt_type->isSingleStringLiteral()) {
+        if ($type_provider
+            && ($stmt_type = $type_provider->getType($stmt))
+            && $stmt_type->isSingleStringLiteral()
+        ) {
             if (DIRECTORY_SEPARATOR !== '/') {
                 return str_replace(
                     '/',
@@ -258,33 +259,6 @@ class IncludeAnalyzer
             }
 
             return $stmt_type->getSingleStringLiteral()->value;
-        }
-
-        if ($stmt_type && $statements_analyzer) {
-            $codebase = $statements_analyzer->getCodebase();
-
-            if ($codebase->taint
-                && $stmt_type->parent_nodes
-                && $codebase->config->trackTaintsInPath($statements_analyzer->getFilePath())
-            ) {
-                $arg_location = new CodeLocation($statements_analyzer->getSource(), $stmt);
-
-                $include_param_sink = Sink::getForMethodArgument(
-                    'include',
-                    'include',
-                    0,
-                    $arg_location,
-                    $arg_location
-                );
-
-                $include_param_sink->taints = [\Psalm\Type\TaintKind::INPUT_TEXT];
-
-                $codebase->taint->addSink($include_param_sink);
-
-                foreach ($stmt_type->parent_nodes as $parent_node) {
-                    $codebase->taint->addPath($parent_node, $include_param_sink);
-                }
-            }
         }
 
         if ($stmt instanceof PhpParser\Node\Expr\ArrayDimFetch) {
@@ -298,8 +272,8 @@ class IncludeAnalyzer
                 }
             }
         } elseif ($stmt instanceof PhpParser\Node\Expr\BinaryOp\Concat) {
-            $left_string = self::getPathTo($stmt->left, $type_provider, $statements_analyzer, $file_name, $config);
-            $right_string = self::getPathTo($stmt->right, $type_provider, $statements_analyzer, $file_name, $config);
+            $left_string = self::getPathTo($stmt->left, $type_provider, $file_name, $config);
+            $right_string = self::getPathTo($stmt->right, $type_provider, $file_name, $config);
 
             if ($left_string && $right_string) {
                 return $left_string . $right_string;
@@ -319,13 +293,7 @@ class IncludeAnalyzer
                     }
                 }
 
-                $evaled_path = self::getPathTo(
-                    $stmt->args[0]->value,
-                    $type_provider,
-                    $statements_analyzer,
-                    $file_name,
-                    $config
-                );
+                $evaled_path = self::getPathTo($stmt->args[0]->value, $type_provider, $file_name, $config);
 
                 if (!$evaled_path) {
                     return null;

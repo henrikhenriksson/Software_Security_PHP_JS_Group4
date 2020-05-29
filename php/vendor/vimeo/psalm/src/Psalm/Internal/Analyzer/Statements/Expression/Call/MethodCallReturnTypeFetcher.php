@@ -1,9 +1,10 @@
 <?php
-namespace Psalm\Internal\Analyzer\Statements\Expression\Call\Method;
+namespace Psalm\Internal\Analyzer\Statements\Expression\Call;
 
 use PhpParser;
+use Psalm\Internal\Analyzer\Statements\ExpressionAnalyzer;
 use Psalm\Internal\Analyzer\StatementsAnalyzer;
-use Psalm\Internal\Codebase\InternalCallMapHandler;
+use Psalm\Internal\Codebase\CallMap;
 use Psalm\Codebase;
 use Psalm\CodeLocation;
 use Psalm\Context;
@@ -12,7 +13,7 @@ use Psalm\Internal\Type\TemplateResult;
 use Psalm\Type;
 use Psalm\Type\Atomic\TGenericObject;
 use function strtolower;
-use Psalm\Internal\Taint\TaintNode;
+use Psalm\Internal\Taint\Source;
 
 class MethodCallReturnTypeFetcher
 {
@@ -33,7 +34,7 @@ class MethodCallReturnTypeFetcher
         array $args,
         AtomicMethodCallAnalysisResult $result,
         TemplateResult $template_result
-    ) : Type\Union {
+    ) : ?Type\Union {
         $call_map_id = $declaring_method_id ?: $method_id;
 
         $fq_class_name = $method_id->fq_class_name;
@@ -80,7 +81,7 @@ class MethodCallReturnTypeFetcher
 
         $class_storage = $codebase->methods->getClassLikeStorageForMethod($method_id);
 
-        if (InternalCallMapHandler::inCallMap((string) $call_map_id)) {
+        if (CallMap::inCallMap((string) $call_map_id)) {
             if (($template_result->upper_bounds || $class_storage->stubbed)
                 && isset($class_storage->methods[$method_id->method_name])
                 && ($method_storage = $class_storage->methods[$method_id->method_name])
@@ -88,15 +89,14 @@ class MethodCallReturnTypeFetcher
             ) {
                 $return_type_candidate = clone $method_storage->return_type;
 
-                $return_type_candidate = self::replaceTemplateTypes(
-                    $return_type_candidate,
-                    $template_result,
-                    $method_id,
-                    \count($stmt->args),
-                    $codebase
-                );
+                if ($template_result->upper_bounds) {
+                    $return_type_candidate->replaceTemplateTypesWithArgTypes(
+                        $template_result,
+                        $codebase
+                    );
+                }
             } else {
-                $callmap_callables = InternalCallMapHandler::getCallablesFromCallMap((string) $call_map_id);
+                $callmap_callables = CallMap::getCallablesFromCallMap((string) $call_map_id);
 
                 if (!$callmap_callables || $callmap_callables[0]->return_type === null) {
                     throw new \UnexpectedValueException('Shouldn’t get here');
@@ -129,13 +129,44 @@ class MethodCallReturnTypeFetcher
             if ($return_type_candidate) {
                 $return_type_candidate = clone $return_type_candidate;
 
-                $return_type_candidate = self::replaceTemplateTypes(
-                    $return_type_candidate,
-                    $template_result,
-                    $method_id,
-                    \count($stmt->args),
-                    $codebase
-                );
+                if ($template_result->template_types) {
+                    $bindable_template_types = $return_type_candidate->getTemplateTypes();
+
+                    foreach ($bindable_template_types as $template_type) {
+                        if ($template_type->defining_class !== $fq_class_name
+                            && !isset(
+                                $template_result->upper_bounds
+                                    [$template_type->param_name]
+                                    [$template_type->defining_class]
+                            )
+                        ) {
+                            if ($template_type->param_name === 'TFunctionArgCount') {
+                                $template_result->upper_bounds[$template_type->param_name] = [
+                                    'fn-' . $method_id => [Type::getInt(false, \count($stmt->args)), 0]
+                                ];
+                            } else {
+                                $template_result->upper_bounds[$template_type->param_name] = [
+                                    ($template_type->defining_class) => [Type::getEmpty(), 0]
+                                ];
+                            }
+                        }
+                    }
+                }
+
+                if ($template_result->upper_bounds) {
+                    $return_type_candidate = \Psalm\Internal\Type\TypeExpander::expandUnion(
+                        $codebase,
+                        $return_type_candidate,
+                        null,
+                        null,
+                        null
+                    );
+
+                    $return_type_candidate->replaceTemplateTypesWithArgTypes(
+                        $template_result,
+                        $codebase
+                    );
+                }
 
                 $return_type_candidate = \Psalm\Internal\Type\TypeExpander::expandUnion(
                     $codebase,
@@ -148,6 +179,16 @@ class MethodCallReturnTypeFetcher
                     $static_type instanceof Type\Atomic\TNamedObject
                         && $codebase->classlike_storage_provider->get($static_type->value)->final
                 );
+
+                if ($codebase->taint) {
+                    $return_type_candidate->sources = [
+                        new Source(
+                            strtolower((string) $method_id),
+                            $cased_method_id,
+                            new CodeLocation($statements_analyzer, $stmt->name)
+                        )
+                    ];
+                }
 
                 $return_type_location = $codebase->methods->getMethodReturnTypeLocation(
                     $method_id,
@@ -178,86 +219,6 @@ class MethodCallReturnTypeFetcher
                     $result->returns_by_ref
                         || $codebase->methods->getMethodReturnsByRef($method_id);
             }
-        }
-
-        if (!$return_type_candidate) {
-            $return_type_candidate = $method_name === '__tostring' ? Type::getString() : Type::getMixed();
-        }
-
-        if ($codebase->taint
-            && $declaring_method_id
-            && $codebase->config->trackTaintsInPath($statements_analyzer->getFilePath())
-        ) {
-            $method_storage = $codebase->methods->getStorage(
-                $declaring_method_id
-            );
-
-            $node_location = new CodeLocation($statements_analyzer, $stmt);
-
-            $method_call_node = TaintNode::getForMethodReturn(
-                (string) $method_id,
-                $cased_method_id,
-                $node_location,
-                $method_storage->specialize_call ? $node_location : null
-            );
-
-            $codebase->taint->addTaintNode($method_call_node);
-
-            $return_type_candidate->parent_nodes = [
-                $method_call_node
-            ];
-        }
-
-        return $return_type_candidate;
-    }
-
-    private static function replaceTemplateTypes(
-        Type\Union $return_type_candidate,
-        TemplateResult $template_result,
-        MethodIdentifier $method_id,
-        int $arg_count,
-        Codebase $codebase
-    ) : Type\Union {
-        if ($template_result->template_types) {
-            $bindable_template_types = $return_type_candidate->getTemplateTypes();
-
-            foreach ($bindable_template_types as $template_type) {
-                if ($template_type->defining_class !== $method_id->fq_class_name
-                    && !isset(
-                        $template_result->upper_bounds
-                            [$template_type->param_name]
-                            [$template_type->defining_class]
-                    )
-                ) {
-                    if ($template_type->param_name === 'TFunctionArgCount') {
-                        $template_result->upper_bounds[$template_type->param_name] = [
-                            'fn-' . strtolower((string) $method_id) => [
-                                Type::getInt(false, $arg_count),
-                                0
-                            ]
-                        ];
-                    } else {
-                        $template_result->upper_bounds[$template_type->param_name] = [
-                            ($template_type->defining_class) => [Type::getEmpty(), 0]
-                        ];
-                    }
-                }
-            }
-        }
-
-        if ($template_result->upper_bounds) {
-            $return_type_candidate = \Psalm\Internal\Type\TypeExpander::expandUnion(
-                $codebase,
-                $return_type_candidate,
-                null,
-                null,
-                null
-            );
-
-            $return_type_candidate->replaceTemplateTypesWithArgTypes(
-                $template_result,
-                $codebase
-            );
         }
 
         return $return_type_candidate;

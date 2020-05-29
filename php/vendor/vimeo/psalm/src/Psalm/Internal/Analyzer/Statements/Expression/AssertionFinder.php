@@ -5,6 +5,7 @@ use PhpParser;
 use Psalm\Codebase;
 use Psalm\Internal\Analyzer\ClassLikeAnalyzer;
 use Psalm\Internal\Analyzer\StatementsAnalyzer;
+use Psalm\Internal\Analyzer\Statements\ExpressionAnalyzer;
 use Psalm\Internal\Analyzer\TypeAnalyzer;
 use Psalm\CodeLocation;
 use Psalm\FileSource;
@@ -53,7 +54,7 @@ class AssertionFinder
             $instanceof_types = self::getInstanceOfTypes($conditional, $this_class_name, $source);
 
             if ($instanceof_types) {
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $conditional->expr,
                     $this_class_name,
                     $source
@@ -123,7 +124,7 @@ class AssertionFinder
             return $if_types;
         }
 
-        $var_name = ExpressionIdentifier::getArrayVarId(
+        $var_name = ExpressionAnalyzer::getArrayVarId(
             $conditional,
             $this_class_name,
             $source
@@ -140,7 +141,7 @@ class AssertionFinder
         }
 
         if ($conditional instanceof PhpParser\Node\Expr\Assign) {
-            $var_name = ExpressionIdentifier::getArrayVarId(
+            $var_name = ExpressionAnalyzer::getArrayVarId(
                 $conditional->var,
                 $this_class_name,
                 $source
@@ -228,7 +229,7 @@ class AssertionFinder
                 }
 
                 /** @var PhpParser\Node\Expr\FuncCall $counted_expr */
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $counted_expr->args[0]->value,
                     $this_class_name,
                     $source
@@ -252,7 +253,7 @@ class AssertionFinder
             if ($typed_value_position) {
                 if ($typed_value_position === self::ASSIGNMENT_TO_RIGHT) {
                     /** @var PhpParser\Node\Expr $conditional->right */
-                    $var_name = ExpressionIdentifier::getArrayVarId(
+                    $var_name = ExpressionAnalyzer::getArrayVarId(
                         $conditional->left,
                         $this_class_name,
                         $source
@@ -288,7 +289,7 @@ class AssertionFinder
                 }
 
                 /** @var PhpParser\Node\Expr\FuncCall $count_expr */
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $count_expr->args[0]->value,
                     $this_class_name,
                     $source
@@ -307,36 +308,19 @@ class AssertionFinder
 
             if ($typed_value_position) {
                 if ($typed_value_position === self::ASSIGNMENT_TO_RIGHT) {
-                    /** @var PhpParser\Node\Expr $conditional->left */
-                    $var_name = ExpressionIdentifier::getArrayVarId(
-                        $conditional->left,
-                        $this_class_name,
-                        $source
-                    );
-
-                    $expr = $conditional->right;
+                    $var_name = null;
                 } elseif ($typed_value_position === self::ASSIGNMENT_TO_LEFT) {
                     /** @var PhpParser\Node\Expr $conditional->left */
-                    $var_name = ExpressionIdentifier::getArrayVarId(
+                    $var_name = ExpressionAnalyzer::getArrayVarId(
                         $conditional->right,
                         $this_class_name,
                         $source
                     );
-
-                    $expr = $conditional->left;
                 } else {
                     throw new \UnexpectedValueException('$typed_value_position value');
                 }
 
-                $expr_type = $source instanceof StatementsAnalyzer
-                    ? $source->node_data->getType($expr)
-                    : null;
-
-                if ($var_name
-                    && $expr_type
-                    && $expr_type->isSingleIntLiteral()
-                    && ($expr_type->getSingleIntLiteral()->value === 0)
-                ) {
+                if ($var_name) {
                     $if_types[$var_name] = [['=isset']];
                 }
 
@@ -365,7 +349,7 @@ class AssertionFinder
         }
 
         if ($conditional instanceof PhpParser\Node\Expr\Empty_) {
-            $var_name = ExpressionIdentifier::getArrayVarId(
+            $var_name = ExpressionAnalyzer::getArrayVarId(
                 $conditional->expr,
                 $this_class_name,
                 $source
@@ -380,7 +364,7 @@ class AssertionFinder
 
         if ($conditional instanceof PhpParser\Node\Expr\Isset_) {
             foreach ($conditional->vars as $isset_var) {
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $isset_var,
                     $this_class_name,
                     $source
@@ -395,7 +379,7 @@ class AssertionFinder
                     while ($array_root instanceof PhpParser\Node\Expr\ArrayDimFetch && !$var_name) {
                         $array_root = $array_root->var;
 
-                        $var_name = ExpressionIdentifier::getArrayVarId(
+                        $var_name = ExpressionAnalyzer::getArrayVarId(
                             $array_root,
                             $this_class_name,
                             $source
@@ -465,7 +449,7 @@ class AssertionFinder
                 throw new \UnexpectedValueException('$null_position value');
             }
 
-            $var_name = ExpressionIdentifier::getArrayVarId(
+            $var_name = ExpressionAnalyzer::getArrayVarId(
                 $base_conditional,
                 $this_class_name,
                 $source
@@ -544,7 +528,7 @@ class AssertionFinder
                     false
                 );
             } else {
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $base_conditional,
                     $this_class_name,
                     $source
@@ -648,7 +632,7 @@ class AssertionFinder
                     true
                 );
             } else {
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $base_conditional,
                     $this_class_name,
                     $source
@@ -747,7 +731,7 @@ class AssertionFinder
                 throw new \UnexpectedValueException('$empty_array_position value');
             }
 
-            $var_name = ExpressionIdentifier::getArrayVarId(
+            $var_name = ExpressionAnalyzer::getArrayVarId(
                 $base_conditional,
                 $this_class_name,
                 $source
@@ -766,11 +750,15 @@ class AssertionFinder
                 && ($var_type = $source->node_data->getType($base_conditional))
                 && $conditional instanceof PhpParser\Node\Expr\BinaryOp\Identical
             ) {
-                $empty_array_type = Type::getEmptyArray();
+                $null_type = Type::getEmptyArray();
 
-                if (!TypeAnalyzer::canExpressionTypesBeIdentical(
+                if (!TypeAnalyzer::isContainedBy(
                     $codebase,
-                    $empty_array_type,
+                    $var_type,
+                    $null_type
+                ) && !TypeAnalyzer::isContainedBy(
+                    $codebase,
+                    $null_type,
                     $var_type
                 )) {
                     if ($var_type->from_docblock) {
@@ -812,7 +800,7 @@ class AssertionFinder
             }
 
             /** @var PhpParser\Node\Expr\FuncCall $gettype_expr */
-            $var_name = ExpressionIdentifier::getArrayVarId(
+            $var_name = ExpressionAnalyzer::getArrayVarId(
                 $gettype_expr->args[0]->value,
                 $this_class_name,
                 $source
@@ -849,7 +837,7 @@ class AssertionFinder
             }
 
             /** @var PhpParser\Node\Expr\FuncCall $count_expr */
-            $var_name = ExpressionIdentifier::getArrayVarId(
+            $var_name = ExpressionAnalyzer::getArrayVarId(
                 $count_expr->args[0]->value,
                 $this_class_name,
                 $source
@@ -884,7 +872,7 @@ class AssertionFinder
             }
 
             if ($getclass_expr instanceof PhpParser\Node\Expr\FuncCall && isset($getclass_expr->args[0])) {
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $getclass_expr->args[0]->value,
                     $this_class_name,
                     $source
@@ -945,7 +933,7 @@ class AssertionFinder
         if ($typed_value_position) {
             if ($typed_value_position === self::ASSIGNMENT_TO_RIGHT) {
                 /** @var PhpParser\Node\Expr $conditional->right */
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $conditional->left,
                     $this_class_name,
                     $source
@@ -955,7 +943,7 @@ class AssertionFinder
                 $var_type = $source->node_data->getType($conditional->right);
             } elseif ($typed_value_position === self::ASSIGNMENT_TO_LEFT) {
                 /** @var PhpParser\Node\Expr $conditional->left */
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $conditional->right,
                     $this_class_name,
                     $source
@@ -1084,7 +1072,7 @@ class AssertionFinder
                 throw new \UnexpectedValueException('Bad null variable position');
             }
 
-            $var_name = ExpressionIdentifier::getArrayVarId(
+            $var_name = ExpressionAnalyzer::getArrayVarId(
                 $base_conditional,
                 $this_class_name,
                 $source
@@ -1155,7 +1143,7 @@ class AssertionFinder
                 throw new \UnexpectedValueException('Bad false variable position');
             }
 
-            $var_name = ExpressionIdentifier::getArrayVarId(
+            $var_name = ExpressionAnalyzer::getArrayVarId(
                 $base_conditional,
                 $this_class_name,
                 $source
@@ -1262,7 +1250,7 @@ class AssertionFinder
                     true
                 );
             } else {
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $base_conditional,
                     $this_class_name,
                     $source
@@ -1361,7 +1349,7 @@ class AssertionFinder
                 throw new \UnexpectedValueException('Bad empty array variable position');
             }
 
-            $var_name = ExpressionIdentifier::getArrayVarId(
+            $var_name = ExpressionAnalyzer::getArrayVarId(
                 $base_conditional,
                 $this_class_name,
                 $source
@@ -1431,7 +1419,7 @@ class AssertionFinder
             }
 
             /** @var PhpParser\Node\Expr\FuncCall $gettype_expr */
-            $var_name = ExpressionIdentifier::getArrayVarId(
+            $var_name = ExpressionAnalyzer::getArrayVarId(
                 $gettype_expr->args[0]->value,
                 $this_class_name,
                 $source
@@ -1487,7 +1475,7 @@ class AssertionFinder
             }
 
             if ($getclass_expr instanceof PhpParser\Node\Expr\FuncCall) {
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $getclass_expr->args[0]->value,
                     $this_class_name,
                     $source
@@ -1549,7 +1537,7 @@ class AssertionFinder
         if ($typed_value_position) {
             if ($typed_value_position === self::ASSIGNMENT_TO_RIGHT) {
                 /** @var PhpParser\Node\Expr $conditional->right */
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $conditional->left,
                     $this_class_name,
                     $source
@@ -1559,7 +1547,7 @@ class AssertionFinder
                 $var_type = $source->node_data->getType($conditional->right);
             } elseif ($typed_value_position === self::ASSIGNMENT_TO_LEFT) {
                 /** @var PhpParser\Node\Expr $conditional->left */
-                $var_name = ExpressionIdentifier::getArrayVarId(
+                $var_name = ExpressionAnalyzer::getArrayVarId(
                     $conditional->right,
                     $this_class_name,
                     $source
@@ -1655,7 +1643,7 @@ class AssertionFinder
         $prefix = $negate ? '!' : '';
 
         $first_var_name = isset($expr->args[0]->value)
-            ? ExpressionIdentifier::getArrayVarId(
+            ? ExpressionAnalyzer::getArrayVarId(
                 $expr->args[0]->value,
                 $this_class_name,
                 $source
@@ -1909,20 +1897,6 @@ class AssertionFinder
         } elseif (self::hasCallableCheck($expr)) {
             if ($first_var_name) {
                 $if_types[$first_var_name] = [[$prefix . 'callable']];
-            } elseif ($expr->args[0]->value instanceof PhpParser\Node\Expr\Array_
-                && isset($expr->args[0]->value->items[0], $expr->args[0]->value->items[1])
-                && $expr->args[0]->value->items[1]->value instanceof PhpParser\Node\Scalar\String_
-            ) {
-                $first_var_name_in_array_argument = ExpressionIdentifier::getArrayVarId(
-                    $expr->args[0]->value->items[0]->value,
-                    $this_class_name,
-                    $source
-                );
-                if ($first_var_name_in_array_argument) {
-                    $if_types[$first_var_name_in_array_argument] = [
-                        [$prefix . 'hasmethod-' . $expr->args[0]->value->items[1]->value->value]
-                    ];
-                }
             }
         } elseif (self::hasIterableCheck($expr)) {
             if ($first_var_name) {
@@ -2004,7 +1978,7 @@ class AssertionFinder
             }
         } elseif (self::hasArrayKeyExistsCheck($expr)) {
             $array_root = isset($expr->args[1]->value)
-                ? ExpressionIdentifier::getArrayVarId(
+                ? ExpressionAnalyzer::getArrayVarId(
                     $expr->args[1]->value,
                     $this_class_name,
                     $source
@@ -2018,29 +1992,6 @@ class AssertionFinder
                     $first_var_name = '\'' . $first_arg->value->value . '\'';
                 } elseif ($first_arg->value instanceof PhpParser\Node\Scalar\LNumber) {
                     $first_var_name = (string) $first_arg->value->value;
-                }
-            }
-
-            if ($expr->args[0]->value instanceof PhpParser\Node\Expr\ClassConstFetch
-                && $expr->args[0]->value->name instanceof PhpParser\Node\Identifier
-                && $expr->args[0]->value->name->name !== 'class'
-            ) {
-                $const_type = null;
-
-                if ($source instanceof StatementsAnalyzer) {
-                    $const_type = $source->node_data->getType($expr->args[0]->value);
-                }
-
-                if ($const_type) {
-                    if ($const_type->isSingleStringLiteral()) {
-                        $first_var_name = $const_type->getSingleStringLiteral()->value;
-                    } elseif ($const_type->isSingleIntLiteral()) {
-                        $first_var_name = (string) $const_type->getSingleIntLiteral()->value;
-                    } else {
-                        $first_var_name = null;
-                    }
-                } else {
-                    $first_var_name = null;
                 }
             }
 
@@ -2157,7 +2108,7 @@ class AssertionFinder
         $prefix = $negate ? '!' : '';
 
         $first_var_name = isset($expr->args[0]->value)
-            ? ExpressionIdentifier::getArrayVarId(
+            ? ExpressionAnalyzer::getArrayVarId(
                 $expr->args[0]->value,
                 $this_class_name,
                 $source
@@ -2172,7 +2123,7 @@ class AssertionFinder
                     if ($assertion->var_id === 0) {
                         $var_name = $first_var_name;
                     } else {
-                        $var_name = ExpressionIdentifier::getArrayVarId(
+                        $var_name = ExpressionAnalyzer::getArrayVarId(
                             $expr->args[$assertion->var_id]->value,
                             $this_class_name,
                             $source
@@ -2187,7 +2138,7 @@ class AssertionFinder
                         }
                     }
                 } elseif ($assertion->var_id === '$this' && $expr instanceof PhpParser\Node\Expr\MethodCall) {
-                    $var_id = ExpressionIdentifier::getArrayVarId(
+                    $var_id = ExpressionAnalyzer::getArrayVarId(
                         $expr->var,
                         $this_class_name,
                         $source
@@ -2220,7 +2171,7 @@ class AssertionFinder
                     if ($assertion->var_id === 0) {
                         $var_name = $first_var_name;
                     } else {
-                        $var_name = ExpressionIdentifier::getArrayVarId(
+                        $var_name = ExpressionAnalyzer::getArrayVarId(
                             $expr->args[$assertion->var_id]->value,
                             $this_class_name,
                             $source
@@ -2235,7 +2186,7 @@ class AssertionFinder
                         }
                     }
                 } elseif ($assertion->var_id === '$this' && $expr instanceof PhpParser\Node\Expr\MethodCall) {
-                    $var_id = ExpressionIdentifier::getArrayVarId(
+                    $var_id = ExpressionAnalyzer::getArrayVarId(
                         $expr->var,
                         $this_class_name,
                         $source
