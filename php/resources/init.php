@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';  // Let composer handle autoloads
 
+use ParagonIE\CSPBuilder\CSPBuilder;
+
 // Both these options are forced by the server now, but why "trust" the server
 // Reduces risk of common XSS attacks (if the browser enforces it).
 session_start([
@@ -17,8 +19,9 @@ session_start([
     'cookie_secure' => true     // Only send cookie over https
 ]);
 
-// TODO look at https://github.com/paragonie/csp-builder
-// Only allow scripts from this domain to run
+// Limit what content can be loaded in this page
+$csp = CSPBuilder::fromFile(__DIR__ . '/content-security-header.json');
+$csp->sendCSPHeader();
 
 // Only send full referrer information (where the request came from) to this site
 // over https, and only domain name to other sites over https. Any http request

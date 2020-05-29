@@ -22,6 +22,8 @@ return array(
     'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
     'ParagonIE\\EasyDB\\' => array($vendorDir . '/paragonie/easydb/src'),
     'ParagonIE\\Corner\\' => array($vendorDir . '/paragonie/corner/src'),
+    'ParagonIE\\ConstantTime\\' => array($vendorDir . '/paragonie/constant_time_encoding/src'),
+    'ParagonIE\\CSPBuilder\\' => array($vendorDir . '/paragonie/csp-builder/src'),
     'PackageVersions\\' => array($vendorDir . '/ocramius/package-versions/src/PackageVersions'),
     'Latitude\\QueryBuilder\\' => array($vendorDir . '/latitude/latitude/src'),
     'LanguageServerProtocol\\' => array($vendorDir . '/felixfbecker/language-server-protocol/src'),
