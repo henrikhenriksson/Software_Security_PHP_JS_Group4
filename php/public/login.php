@@ -9,6 +9,9 @@ declare(strict_types=1);
  ******************************************************************************/
 
 require_once __DIR__ . '/../resources/init.php';
+use \ParagonIE\AntiCSRF\AntiCSRF as Token;
+
+$token = new Token();
 
 function _sendInvalidMessageResponse($msg):void
 {
@@ -39,12 +42,12 @@ if (!InvReq::validIpCurUser()) {
 if (!isset($_POST["token"]) || !isset($_POST["TS"])) {
     // Cross reference protection not provided
     ///@todo decide action
-    InvReq::addInvalidRequest('invalidTsLogin', 'na');
+    InvReq::addInvalidRequest('missing Token data', 'na');
     _sendInvalidMessageResponse("Required login data not provided");
     exit;
 }
 
-if (!Token::validateToken("login", $_POST["TS"], $_POST["token"])) {
+if (! $token-> ) {
     InvReq::addInvalidRequest('invalidTokenLogin', 'na');
     _sendInvalidMessageResponse("Invalid token");
     exit;
