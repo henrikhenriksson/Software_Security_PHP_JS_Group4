@@ -26,13 +26,9 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
         } ?>
         <label><b>Username</b></label>
         <input type="text" placeholder="m" name="uname" id="uname" required maxlength="10" value="m" autocomplete="off">
-        <label>
-            <p><b>Password</b></p>
-        </label>
+        <label><b>Password</b></label>
         <input type="password" placeholder="Enter Password" name="psw" id="psw" required>
-        <br>
         <button type="button" id="loginButton">Login</button>
-        <span id="loginMsg" class="red"></span>
     </form>
     <h3>Not A Member?</h3>
     <p>
