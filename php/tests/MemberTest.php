@@ -106,7 +106,7 @@ final class MemberTest extends TestCase
         );
     }
 
-    public function testCantUsePasswordLongerThan64Characters(): void
+    public function testCantInsertWithPasswordLongerThan64Characters(): void
     {
         $member = new Member(static::$db);
         $member->setUsername('abc');
@@ -115,6 +115,18 @@ final class MemberTest extends TestCase
         $this->assertFalse(
             $member->save(\str_repeat('a', 65)),
             "Could insert member with password length > 64"
+        );
+    }
+
+    public function testCantInsertEmptyPassword(): void
+    {
+        $member = new Member(static::$db);
+        $member->setUsername('abc');
+        static::$addedUsers[] = $member->username();
+
+        $this->assertFalse(
+            $member->save(''),
+            "Could insert member with empty password"
         );
     }
 
@@ -260,16 +272,30 @@ final class MemberTest extends TestCase
         static::$addedUsers[] = $member->username();
 
         $this->assertTrue($member->save('pass'), "Could not insert new member");
+        $newPass = str_repeat('a', 65);
         $this->assertFalse(
-            $member->changePassword(str_repeat('a', 65)),
+            $member->changePassword($newPass),
             "Could change to too long password"
         );
 
-        $member = Member::login('abc', 'newPass', self::$db);
+        $member = Member::login('abc', $newPass, self::$db);
         $this->assertTrue($member->error());
         $this->assertFalse(
             Member::loggedIn(),
             "Member not on database was logged in with new password"
+        );
+    }
+
+    public function testCannotUpdatePasswordIfEmpty(): void
+    {
+        $member = new Member(self::$db);
+        $member->setUsername('abc');
+        static::$addedUsers[] = $member->username();
+
+        $this->assertTrue($member->save('pass'), "Could not insert new member");
+        $this->assertFalse(
+            $member->changePassword(''),
+            "Could change password to empty string"
         );
     }
 
