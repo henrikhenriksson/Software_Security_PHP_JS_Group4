@@ -11,7 +11,6 @@ require_once __DIR__ . '/../functions/strings.php';
 require_once __DIR__ . '/../functions/sql.php';
 
 use ParagonIE\EasyDB\EasyDB;
-use function Latitude\QueryBuilder\field;
 
 /**
  * Post handles post data and operations such as CRUD
@@ -71,12 +70,12 @@ class Post
     /**
      * Returns an array of posts from the database.
      */
-    public static function fetchPosts(int $lim = 0, int $off = 0, EasyDB $db = null)
+    public static function fetchPosts(int $lim = 0, int $off = 0, EasyDB $db = null): array
     {
         $factory = makeQueryFactory();
         $query = $factory
             ->select('*')
-            ->from('dt167g.posts')
+            ->from('posts')
             ->limit($lim > 0 ? $lim : null) // LIMIT 0 will return 0 rows
             ->offset($off)
             ->compile();
@@ -119,26 +118,36 @@ class Post
         return $post;
     }
 
-    public static function fromUsername(string $username)
+    public static function fromUsername(string $username): array
     {
         $db = getEasyDB();
-        $query = "SELECT * FROM dt167g.posts WHERE name ILIKE :1;";
+        $query = "SELECT * FROM posts WHERE name ILIKE :1;";
         $params = [
             ':1' => $username
         ];
 
-        return $db->safeQuery($query, $params, \PDO::FETCH_ASSOC, false, false);
+        $posts = [];
+        foreach ($db->safeQuery($query, $params, \PDO::FETCH_ASSOC, false, false) as $row) {
+            $posts[] = static::fromRow($db, $row);
+        }
+
+        return $posts;
     }
 
-    public static function fromKeyword(string $keyword)
+    public static function fromKeyword(string $keyword): array
     {
         $db = getEasyDB();
-        $query = "SELECT * FROM dt167g.posts WHERE message ILIKE :1;";
+        $query = "SELECT * FROM posts WHERE message ILIKE :1;";
         $params = [
             ':1' => "%{$keyword}%"
         ];
 
-        return $db->safeQuery($query, $params, \PDO::FETCH_ASSOC, false, false);
+        $posts = [];
+        foreach ($db->safeQuery($query, $params, \PDO::FETCH_ASSOC, false, false) as $row) {
+            $posts[] = static::fromRow($db, $row);
+        }
+
+        return $posts;
     }
 
     private function setName(string $name): void
@@ -182,7 +191,7 @@ class Post
         }
 
         try {
-            $this->id = $db->insertGet('dt167g.posts', [
+            $this->id = $db->insertGet('posts', [
                 'name' => $this->name,
                 'message' => $this->message,
                 'iplog' => empty($this->iplog) ? $_SERVER['REMOTE_ADDR'] : $this->iplog,
@@ -191,7 +200,7 @@ class Post
             $this->clearError();
             return true;
         } catch (\Exception $e) { // @codeCoverageIgnoreStart
-            $this->setError($e->getMessage());
+            $this->setError('Unable to insert member');
             $this->id = -1;
             return false;
         } // @codeCoverageIgnoreEnd
@@ -261,7 +270,7 @@ class Post
     public static function setRating(Int $post_id, Int $user_id, String $rating_action): void
     {
         $db = getEasyDB();
-        $query = "INSERT INTO dt167g.likes (postid, userid, rating_action) VALUES (:1, :2, :3) ON CONFLICT (postid, userid) DO UPDATE SET rating_action=:3";
+        $query = "INSERT INTO likes (postid, userid, rating_action) VALUES (:1, :2, :3) ON CONFLICT (postid, userid) DO UPDATE SET rating_action=:3";
         $params = [
             ':1' => $post_id,
             ':2' => $user_id,
@@ -273,7 +282,7 @@ class Post
     public static function unsetRating(Int $post_id, Int $user_id): void
     {
         $db = getEasyDB();
-        $query = "DELETE FROM dt167g.likes WHERE postid = :1 AND userid = :2;";
+        $query = "DELETE FROM likes WHERE postid = :1 AND userid = :2;";
         $params = [
             ':1' => $post_id,
             ':2' => $user_id,
@@ -285,21 +294,20 @@ class Post
     {
         $db = getEasyDB();
 
-        $query = "SELECT COUNT(*) FROM dt167g.likes WHERE postid = :1 AND rating_action = :2;";
+        $query = "SELECT COUNT(*) FROM likes WHERE postid = :1 AND rating_action = :2;";
         $params = [
             ':1' => $post_id,
             ':2' => $rating_action
         ];
 
-        $result = $db->safeQuery($query, $params);
-
-        return $result[0]['count'];
+        $result = $db->single($query, $params);
+        return $result;
     }
 
     public static function isRatedByUser(Int $post_id, Int $user_id, String $rating_action): bool
     {
         $db = getEasyDB();
-        $query = "SELECT COUNT(*) FROM dt167g.likes WHERE postid = :1 AND userid = :2 AND rating_action = :3;";
+        $query = "SELECT COUNT(*) FROM likes WHERE postid = :1 AND userid = :2 AND rating_action = :3;";
         $params = [
             ':1' => $post_id,
             ':2' => $user_id,
@@ -309,13 +317,14 @@ class Post
         return $db->single($query, $params) != false;
     }
 
-    public static function deletePost(Int $post_id): int
+    public static function deletePost(Int $post_id): bool
     {
         $db = getEasyDB();
-        $query = "DELETE FROM dt167g.posts WHERE id = :1;";
+        $query = "DELETE FROM posts WHERE id = :1;";
         $params = [
             ':1' => $post_id,
         ];
-        return $db->safeQuery($query, $params, \PDO::FETCH_NUM, true, false);
+        $result = $db->safeQuery($query, $params, \PDO::FETCH_NUM, true, false);
+        return $result > 0;
     }
 }

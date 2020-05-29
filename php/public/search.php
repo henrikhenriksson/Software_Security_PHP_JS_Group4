@@ -65,13 +65,13 @@ if (isset($_GET["search-type"]) && isset($_GET["search-field"])) {
                     <!-- Print out the searched posts -->
                     <?php foreach ($posts as $post) : ?>
                         <tr>
-                            <td><?php echo escape($post['name']); ?></td>
-                            <td><?php echo escape($post['message']); ?></td>
-                            <td><?php echo "IP: {$post['iplog']}"; ?><br><?php echo "TID: {$post['timelog']}"; ?></td>
+                            <td><?php echo $post->getName(); ?></td>
+                            <td><?php echo $post->getMessage(); ?></td>
+                            <td><?php echo "IP: {$post->getIplog()}"; ?><br><?php echo "TID: {$post->getTimelog()}"; ?></td>
                             <td>
                                 <i <?php
                                     // Set likes based on user being logged in and previous likes
-                                    if (Member::loggedIn() && Post::isRatedByUser($post['id'], Member::fromSession()->id(), 'like')) : ?>
+                                    if (Member::loggedIn() && Post::isRatedByUser($post->getId(), Member::fromSession()->id(), 'like')) : ?>
                                     
                                     class="fas fa-thumbs-up like-btn" 
                                     
@@ -79,15 +79,15 @@ if (isset($_GET["search-type"]) && isset($_GET["search-field"])) {
                                     
                                     class="far fa-thumbs-up like-btn" 
                                     
-                                    <?php endif; ?> data-id="<?php echo $post['id']; ?>">
+                                    <?php endif; ?> data-id="<?php echo $post->getId(); ?>">
                                 </i>
                                 
                                 <!-- Get the number of likes for current post. -->
-                                <span class="likes"><?php echo Post::getRatingCount($post['id'], 'like'); ?></span>
+                                <span class="likes"><?php echo Post::getRatingCount($post->getId(), 'like'); ?></span>
 
                                 <i <?php
                                     // Set dislikes based on user being logged in and previous dislikes
-                                    if (Member::loggedIn() && Post::isRatedByUser($post['id'], Member::fromSession()->id(), 'dislike')) : ?> 
+                                    if (Member::loggedIn() && Post::isRatedByUser($post->getId(), Member::fromSession()->id(), 'dislike')) : ?> 
                                     
                                     class="fas fa-thumbs-down dislike-btn" 
                                     
@@ -95,17 +95,17 @@ if (isset($_GET["search-type"]) && isset($_GET["search-field"])) {
                                         
                                     class="far fa-thumbs-down dislike-btn" 
                                     
-                                    <?php endif; ?> data-id="<?php echo $post['id']; ?>">
+                                    <?php endif; ?> data-id="<?php echo $post->getId(); ?>">
                                 </i>
 
                                 <!-- Get the number of dislikes for current post. -->
-                                <span class="dislikes"><?php echo Post::getRatingCount($post['id'], 'dislike'); ?></span>
+                                <span class="dislikes"><?php echo Post::getRatingCount($post->getId(), 'dislike'); ?></span>
                             </td>
 
                             <!-- If current post belongs to logged in user, enable deletion by displaying a trash bin. -->
                             <td id="trash-bin-td-border">
-                                <?php if (Member::loggedIn() && Member::fromSession()->username() == escape($post['name'])) : ?>
-                                    <i class="far fa-trash-alt delete-post" data-id="<?php echo $post['id']; ?>"></i>
+                                <?php if (Member::loggedIn() && Member::fromSession()->username() == $post->getName()) : ?>
+                                    <i class="far fa-trash-alt delete-post" data-id="<?php echo $post->getId(); ?>"></i>
                                 <?php endif; ?>
                             </td>
                         </tr>
