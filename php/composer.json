@@ -11,5 +11,7 @@
         "paragonie/anti-csrf": "^2.2"
         "vimeo/psalm": "^3.11",
         "paragonie/csp-builder": "^2.4"
+        "vimeo/psalm": "^3.11",
+        "paragonie/anti-csrf": "^2.2"
     }
 }
