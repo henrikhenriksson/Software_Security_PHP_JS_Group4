@@ -19,8 +19,7 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
 <div id="login" class="<?php echo $loginClass; ?>">
     <h2>LOGIN</h2>
     <form id="loginForm">
-
-        <?php $token->insertToken('./login.php') ?>
+        <?php $token->insertToken('/public/login.php') ?>
         <label><b>Username</b></label>
         <input type="text" placeholder="m" name="uname" id="uname" required maxlength="10" value="m" autocomplete="off">
         <label>
