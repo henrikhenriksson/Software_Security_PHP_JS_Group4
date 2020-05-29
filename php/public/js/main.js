@@ -183,31 +183,64 @@ function addRemoveButtonListeners() {
  * Function doLogin
  ******************************************************************************/
 function doLogin() {
-  const UNAME = byId("uname").value;
-  const PSW = byId("psw").value;
-  const TOKEN = byId("token").value;
-  const TS = byId("TS").value;
+  const UNAME = byId('uname').value;
+  const PSW = byId('psw').value;
+  const _CSRF_TOKEN = byId('_CSRF_TOKEN').value;
+  const _CSRF_INDEX = byId('_CSRF_INDEX').value;
 
-  if (UNAME !== "" && PSW !== "") {
-    xhr.addEventListener("readystatechange", processLogin, false);
+  if (UNAME !== '' && PSW !== '') {
+    xhr.addEventListener('readystatechange', processLogin, false);
     let data = new FormData();
-    data.append("uname", UNAME);
-    data.append("psw", PSW);
-    data.append("token", TOKEN);
-    data.append("TS", TS);
+    data.append('uname', UNAME);
+    data.append('psw', PSW);
+    data.append('_CSRF_TOKEN', _CSRF_TOKEN);
+    data.append('_CSRF_INDEX', _CSRF_INDEX);
 
     // Send formdata with URL to login.php
-    xhr.open("POST", `login.php`, true);
+    //xhr.open("GET", `login.php?uname=${UNAME}&psw=${PSW}`, true);
+    xhr.open('POST', `login.php`, true);
     xhr.send(data);
   }
+}
+/*******************************************************************************
+ * Function doSignup
+ ******************************************************************************/
+function doSignup() {
+  const userName = byId('userName').value;
+  const password1 = byId('password1').value;
+  const password2 = byId('password2').value;
+  const token = byId('su_token').value;
+  const timeStamp = byId('su_ts').value;
+
+  if (!userName || userName.trim() == '') {
+    byId('signup_message').innerHTML = 'Username can not be empty!';
+    return;
+  }
+
+  if (!password1 || password1.trim() === '') {
+    byId('signup_message').innerHTML =
+      'Password can not be empty or contain only whitespace characters.';
+    return;
+  }
+
+  // if username is not empty and password has any value (not null);
+  xhr.addEventListener('readystatechange', processSignup, false);
+  let data = new FormData();
+  data.append('user_name', userName);
+  data.append('password1', password1);
+  data.append('password2', password2);
+  data.append('su_token', token);
+  data.append('su_ts', timeStamp);
+  xhr.open('POST', 'signup.php', true);
+  xhr.send(data);
 }
 
 /*******************************************************************************
  * Function doLogout
  ******************************************************************************/
 function doLogout() {
-  xhr.addEventListener("readystatechange", processLogout, false);
-  xhr.open("GET", "logout.php", true);
+  xhr.addEventListener('readystatechange', processLogout, false);
+  xhr.open('GET', 'logout.php', true);
   xhr.send(null);
 }
 
@@ -217,13 +250,16 @@ function doLogout() {
 function processLogin() {
   if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
     //First we must remove the registered event since we use the same xhr object for login and logout
-    xhr.removeEventListener("readystatechange", processLogin, false);
+    xhr.removeEventListener('readystatechange', processLogin, false);
+    ///@todo remove debug log
+    console.log('Login response:' + this.responseText);
 
     var myResponse = JSON.parse(this.responseText);
 
     // Get menu links from XHR response
-    let links = myResponse["links"];
-    let menu = "";
+    ///@todo should this be removed
+    let links = myResponse['links'];
+    let menu = '';
     for (let key in links) {
       menu += `<li><a href="${links[key]}">${key}</a></li>`;
     }
@@ -253,12 +289,15 @@ function processLogin() {
 function processLogout() {
   if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
     //First we most remove the registered event since we use the same xhr object for login and logout
-    xhr.removeEventListener("readystatechange", processLogout, false);
+    xhr.removeEventListener('readystatechange', processLogout, false);
+    ///@todo remove debu
+    console.log('Logout: ' + this.responseText);
     var myResponse = JSON.parse(this.responseText);
 
     // Get menu links from XHR response
-    let links = myResponse["links"];
-    let menu = "";
+    ///@todo is this needed
+    let links = myResponse['links'];
+    let menu = '';
     for (let key in links) {
       menu += `<li><a href="${links[key]}">${key}</a></li>`;
     }
@@ -279,44 +318,12 @@ function processLogout() {
 }
 
 /*******************************************************************************
- * Function doSignup
- ******************************************************************************/
-function doSignup() {
-  const userName = byId("userName").value;
-  const password1 = byId("password1").value;
-  const password2 = byId("password2").value;
-  const token = byId("su_token").value;
-  const timeStamp = byId("su_ts").value;
-
-  if (!userName || userName.trim() == "") {
-    byId("signup_message").innerHTML = "Username can not be empty!";
-    return;
-  }
-
-  if (!password1 || password1.trim() === "") {
-    byId("signup_message").innerHTML =
-      "Password can not be empty or contain only whitespace characters.";
-    return;
-  }
-
-  // if username is not empty and password has any value (not null);
-  xhr.addEventListener("readystatechange", processSignup, false);
-  let data = new FormData();
-  data.append("user_name", userName);
-  data.append("password1", password1);
-  data.append("password2", password2);
-  data.append("su_token", token);
-  data.append("su_ts", timeStamp);
-  xhr.open("POST", "signup.php", true);
-  xhr.send(data);
-}
-
-/*******************************************************************************
  * Function processSignup
  ******************************************************************************/
 function processSignup() {
   if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
     xhr.removeEventListener("readystatechange", processSignup, false);
+    ///@todo remove degug output
     console.log(this.responseText);
     let myResponse = JSON.parse(this.responseText);
     byId("signup_message").innerHTML = myResponse["msg"];
