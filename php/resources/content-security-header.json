@@ -3,7 +3,7 @@
     "report-to": "",
     "report-uri": "",
     "base-uri": [],
-    "default-src": ["self"],
+    "default-src": ["https://127.0.0.1:8080", "https://localhost:8080"],
     "child-src": {
         "allow": [
             "https://www.youtube.com",
@@ -13,6 +13,9 @@
     },
     "connect-src": [],
     "font-src": {
+        "allow": [
+            "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/webfonts/"
+        ],
         "self": true
     },
     "form-action": {
@@ -35,7 +38,7 @@
         "unsafe-eval": false
     },
     "style-src": {
-        "allow": ["https://cdnjs.cloudflare.com/ajax/libs/font-awesome/*"],
+        "allow": ["https://cdnjs.cloudflare.com/ajax/libs/font-awesome/"],
         "self": true
     },
     "upgrade-insecure-requests": true
