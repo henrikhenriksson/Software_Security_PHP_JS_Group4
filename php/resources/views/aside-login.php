@@ -7,6 +7,11 @@ declare(strict_types=1);
  * File: aside-login-php
  ******************************************************************************/
 
+use \ParagonIE\AntiCSRF\AntiCSRF as Token;
+
+$token = new Token();
+
+
 $loginClass = Member::loggedIn() ? "hide" : "";
 $logoutClass = Member::loggedIn() ? "" : "hide";
 ?>
@@ -14,8 +19,7 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
 <div id="login" class="<?php echo $loginClass; ?>">
     <h2>LOGIN</h2>
     <form id="loginForm">
-        <input type="hidden" id="token" value="<?php echo Token::generateToken('login'); ?>">
-        <input type="hidden" id="TS" value="<?php echo Token::generateTs(); ?>">
+        <?php $token->insertToken('./login.php') ?>
         <label><b>Username</b></label>
         <input type="text" placeholder="m" name="uname" id="uname" required maxlength="10" value="m" autocomplete="off">
         <label><b>Password</b></label>
