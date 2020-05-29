@@ -130,6 +130,7 @@ footer {
 
 address {
   display: inline-block;
+  margin-top: 1em;
 }
 
 .mail-links {
