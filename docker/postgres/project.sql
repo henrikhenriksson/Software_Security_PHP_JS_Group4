@@ -50,52 +50,11 @@ CREATE TABLE dt167g.likes(
       postId     INTEGER     NOT NULL,
       userId        INTEGER     NOT NULL,
       UNIQUE( postId, userId),
+      rating_action VARCHAR(20) NOT NULL,
       FOREIGN KEY(postId) REFERENCES dt167g.posts(id) ON DELETE CASCADE,
       FOREIGN KEY(userId) REFERENCES dt167g.users(id) ON DELETE CASCADE
   )
 WITHOUT OIDS;
-
-
--- -- ##############################################
--- -- Then we create the role table
--- -- ##############################################
--- DROP TABLE IF EXISTS dt167g.role CASCADE;
---
--- CREATE TABLE dt167g.role (
---   id        SERIAL PRIMARY KEY,
---   role      text NOT NULL CHECK (role <> ''),
---   roletext  text NOT NULL CHECK (roletext <> ''),
---   CONSTRAINT unique_role UNIQUE(role)
--- )
--- WITHOUT OIDS;
-
--- ##############################################
--- Now we insert some values
--- ##############################################
--- INSERT INTO dt167g.role (role, roletext) VALUES ('user','Meddlem i föreningen');
--- INSERT INTO dt167g.role (role, roletext) VALUES ('admin','Administratör i föreningen');
-
--- ##############################################
--- Then we create the role table
--- ##############################################
--- DROP TABLE IF EXISTS dt167g.user_role;
---
--- CREATE TABLE dt167g._user_role (
---   id        SERIAL PRIMARY KEY,
---   user_id integer REFERENCES dt167g.user (id),
---   role_id   integer REFERENCES dt167g.role (id),
---   CONSTRAINT unique_user_role UNIQUE(user_id, role_id)
--- )
--- WITHOUT OIDS;
-
--- ##############################################
--- Now we insert some values
--- ##############################################
--- INSERT INTO dt167g.user_role (user_id, role_id) VALUES (1,1);
--- INSERT INTO dt167g.user_role (user_id, role_id) VALUES (2,1);
--- INSERT INTO dt167g.user_role (user_id, role_id) VALUES (2,2);
-
-
 
 -- ##############################################
 -- Things that follows are not part of the laboration
@@ -127,7 +86,6 @@ CREATE TABLE dt167g.invalid_requests (
     req_page    text    NOT NULL,
     user_name   text    NOT NULL,
     timelog     timestamp default now()
-
 );
 
 -- ##############################################
