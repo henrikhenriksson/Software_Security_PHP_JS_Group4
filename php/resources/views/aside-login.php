@@ -7,9 +7,9 @@ declare(strict_types=1);
  * File: aside-login-php
  ******************************************************************************/
 
-use \ParagonIE\AntiCSRF\AntiCSRF as Token;
+use \ParagonIE\AntiCSRF\AntiCSRF as TokenLib;
 
-$token = new Token();
+$token = new TokenLib();
 
 
 $loginClass = Member::loggedIn() ? "hide" : "";
@@ -20,7 +20,8 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
     <h2>LOGIN</h2>
     <form id="loginForm">
         <?php try {
-            $token->insertToken('/login.php');//'/public/login.php');
+            Token::generateTokenForm($token,'login', '/login.php', true);
+//            $token->insertToken('/login.php');//'/public/login.php');
         } catch (Exception $e) {
             ///@todo link to page https://www.monkeyuser.com/2017/http-status-codes/
         } ?>

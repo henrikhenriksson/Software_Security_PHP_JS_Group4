@@ -13,6 +13,7 @@ const CURRENT_PAGE = window.location.pathname;
 function byId(id) {
   return document.getElementById(id);
 }
+
 /******************************************************************************/
 
 /*******************************************************************************
@@ -185,9 +186,14 @@ function addRemoveButtonListeners() {
 function doLogin() {
   const UNAME = byId('uname').value;
   const PSW = byId('psw').value;
-  const _CSRF_TOKEN = byId('_CSRF_TOKEN').value;
-  const _CSRF_INDEX = byId('_CSRF_INDEX').value;
 
+  const _CSRF_TOKEN = byId('login_CSRF_TOKEN').value;
+  const _CSRF_INDEX = byId('login_CSRF_INDEX').value;
+
+
+  ///@todo remove debug log
+  console.log('doLogin token: ' + _CSRF_TOKEN);
+  console.log('doLogin index: ' + _CSRF_INDEX);
   if (UNAME !== '' && PSW !== '') {
     xhr.addEventListener('readystatechange', processLogin, false);
     let data = new FormData();
@@ -254,7 +260,7 @@ function processLogin() {
     ///@todo remove debug log
     console.log('Login response:' + this.responseText);
 
-    var myResponse = JSON.parse(this.responseText);
+    let myResponse = JSON.parse(this.responseText);
 
     // Get menu links from XHR response
     ///@todo should this be removed
@@ -262,6 +268,18 @@ function processLogin() {
     let menu = '';
     for (let key in links) {
       menu += `<li><a href="${links[key]}">${key}</a></li>`;
+    }
+
+    if(myResponse.hasOwnProperty('newToken'))
+    {
+      ///@todo update token from response
+      console.log("new token: " + myResponse['newToken']['_CSRF_TOKEN']);
+      updateTokenFromResponse('login_CSRF_TOKEN', myResponse['newToken']['_CSRF_TOKEN']);
+      updateTokenFromResponse('login_CSRF_INDEX', myResponse['newToken']['_CSRF_INDEX']);
+    }
+    else
+    {
+      console.log("no new token given");
     }
 
     // If successful login update menu and login form
@@ -275,7 +293,8 @@ function processLogin() {
         byId("gb-form").style.display = "block";
       }
 
-      location.reload();
+      ///$todo is this neede
+      //location.reload();
     }
 
     // Show information about the login
@@ -313,7 +332,8 @@ function processLogout() {
       byId("gb-form").style.display = "none";
     }
 
-    location.reload();
+    ///@todo is this needed
+    //location.reload();
   }
 }
 
@@ -328,4 +348,9 @@ function processSignup() {
     let myResponse = JSON.parse(this.responseText);
     byId("signup_message").innerHTML = myResponse["msg"];
   }
+}
+
+function updateTokenFromResponse(id, token)
+{
+  byId(id).value = token;
 }
