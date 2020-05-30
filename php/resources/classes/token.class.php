@@ -11,14 +11,13 @@ use \ParagonIE\AntiCSRF\AntiCSRF as TokenLib;
 ///@todo replace wiht AntiCSRf
 class Token
 {
-
     public static function generateTokenForm(TokenLib $token, string $idPrefix, string $lockTo = '', bool $echo = true): string
     {
         $token_array = $token->getTokenArray($lockTo);
-        $prefixArray = array_fill(0, count($token_array), $idPrefix );
+        $prefixArray = array_fill(0, count($token_array), $idPrefix);
         $ret = \implode(
             \array_map(
-                function( string $idPrefix, string $key, string $value): string {
+                function (string $idPrefix, string $key, string $value): string {
                     return "<!--\n-->".
                         "<input type=\"hidden\"" .
                         " name=\"". $key . "\"" .
@@ -48,7 +47,6 @@ class Token
 
     public static function validateToken(string $a, string $b)
     {
-        return true;    
+        return true;
     }
-
 }
