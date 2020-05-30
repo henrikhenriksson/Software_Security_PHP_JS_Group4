@@ -9,9 +9,9 @@ declare(strict_types=1);
  ******************************************************************************/
 
 require_once __DIR__ . '/../resources/init.php';
-use \ParagonIE\AntiCSRF\AntiCSRF as Token;
+use \ParagonIE\AntiCSRF\AntiCSRF as TokenLib;
 
-$token = new Token();
+$token = new TokenLib();
 
 function _sendInvalidResponseMessage($msg):void
 {
@@ -60,7 +60,8 @@ if (! $token->validateRequest() ) {
     _sendInvalidResponseComplex([
         'msg'=>"Invalid token",
         //'newToken'=>$token->getTokenArray('./login')
-        'newToken'=>\htmlentities($token->getTokenArray('./login'), ENT_QUOTES, 'UTF-8')
+        //'newToken'=>\htmlentities($token->getTokenArray('./login'), ENT_QUOTES, 'UTF-8')
+        'newToken'=>Token::generateTokenArray($token, './login')
     ]);
     exit;
 }

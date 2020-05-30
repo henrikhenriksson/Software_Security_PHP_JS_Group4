@@ -270,17 +270,20 @@ function processLogin() {
       menu += `<li><a href="${links[key]}">${key}</a></li>`;
     }
 
-    if(myResponse.hasOwnProperty('newToken'))
-    {
-      ///@todo update token from response
-      console.log("new token: " + myResponse['newToken']['_CSRF_TOKEN']);
-      updateTokenFromResponse('login_CSRF_TOKEN', myResponse['newToken']['_CSRF_TOKEN']);
-      updateTokenFromResponse('login_CSRF_INDEX', myResponse['newToken']['_CSRF_INDEX']);
-    }
-    else
-    {
-      console.log("no new token given");
-    }
+    // update page with new token
+    // /// @todo update token, can a working solution be developed
+    // if(myResponse.hasOwnProperty('newToken'))
+    // {
+    //   ///@todo update token from response
+    //   console.log("new token: " + myResponse['newToken']['_CSRF_TOKEN']);
+    //   console.log("new index: " + myResponse['newToken']['_CSRF_INDEX']);
+    //   updateTokenFromResponse('login_CSRF_TOKEN', myResponse['newToken']['_CSRF_TOKEN']);
+    //   updateTokenFromResponse('login_CSRF_INDEX', myResponse['newToken']['_CSRF_INDEX']);
+    // }
+    // else
+    // {
+    //   console.log("no new token given");
+    // }
 
     // If successful login update menu and login form
     if (myResponse["isValidLogin"]) {
@@ -293,9 +296,10 @@ function processLogin() {
         byId("gb-form").style.display = "block";
       }
 
-      ///$todo is this neede
-      //location.reload();
     }
+
+    ///$todo reload is this needed, needed for now to generate new token
+    location.reload();
 
     // Show information about the login
     byId("loginMsg").innerHTML = myResponse["msg"];
@@ -332,8 +336,8 @@ function processLogout() {
       byId("gb-form").style.display = "none";
     }
 
-    ///@todo is this needed
-    //location.reload();
+    ///@todo reload is this needed, needed for now to generate new token
+    location.reload();
   }
 }
 
