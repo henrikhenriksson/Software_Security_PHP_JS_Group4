@@ -19,7 +19,11 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
 <div id="login" class="<?php echo $loginClass; ?>">
     <h2>LOGIN</h2>
     <form id="loginForm">
-        <?php $token->insertToken('/public/login.php') ?>
+        <?php try {
+            $token->insertToken('/login.php');//'/public/login.php');
+        } catch (Exception $e) {
+            ///@todo link to page https://www.monkeyuser.com/2017/http-status-codes/
+        } ?>
         <label><b>Username</b></label>
         <input type="text" placeholder="m" name="uname" id="uname" required maxlength="10" value="m" autocomplete="off">
         <label><b>Password</b></label>
