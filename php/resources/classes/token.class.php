@@ -38,10 +38,12 @@ class Token
         return $ret;
     }
 
-    public static function generateToken(string $action)
+    public static function generateTokenArray(TokenLib $token, string $lockTo): array
     {
-        ///@todo implement token generator
-        return "12";
+        $newCluster = $token->getTokenArray($lockTo);
+        $result = ['_CSRF_TOKEN'=>\htmlentities($newCluster['_CSRF_TOKEN'], ENT_QUOTES, 'UTF-8'),
+            '_CSRF_INDEX'=>\htmlentities($newCluster['_CSRF_INDEX'], ENT_QUOTES, 'UTF-8')];
+        return $result;
     }
 
     public static function validateToken(string $userAction, string $userTS, string $userToken)
@@ -51,14 +53,4 @@ class Token
         return true;
     }
 
-    public static function generateTs()
-    {
-        ///@todo implement generateTs
-        return "34";
-    }
-
-    public static function validateTs(string $userTs)
-    {
-        ///@todo implement validateTs
-    }
 }
