@@ -34,34 +34,56 @@ if (Member::loggedIn()) {
 
 $errorMsg = "";
 
+\checkUserPostMsg($member, $token, $errorMsg);
+
+function checkUserPostMsg(?Member $member, TokenLib $token, string &$errorMsg)
+{
+
 // Om användaren är inloggad och har submittat något.
-if ($member && isset($_POST)) {
-    if (isset($_POST['post-message']) && isset($_POST[$token->getFormToken()]) && isset($_POST[$token->getFormIndex()])) {
-
-        // Check that the user/ip is not blocked
-        if(!InvReq::validIpCurUser()) {
-            $errorMsg = "IP blocked!";
-        }else{
-            // Validera TS och TOKEN
-            if ($token->validateRequest()) {
-                $post = Post::fromForm(Member::fromSession()->username(), $_POST['post-message']);
-
-                $post->save();
-
-                if ($post->isSetError()) {
-                    $errorMsg = $post->getErrorMessage();
-                } else {
-                    // Refresha sidan
-                    header("Location: index.php");
-                }
-            } else {
-                ///@todo add post, remove debug print
-                ///@todo add post, uncomment
-                //InvReq::addInvalidRequest('post msg', $member->username());
-                $errorMsg = "Invalid post Token!";
-            }
-        }
+    if(!isset($_POST['post-message']))
+    {
+        // No post data supplied, nothing to check
+        return;
     }
+
+    if (!InvReq::validIpCurUser()) {
+        $errorMsg = "Ip blocked";
+    }
+
+    if( null == $member || ($member->id() <= 0) )
+    {
+        // Trying to add post without logged in
+        InvReq::addInvalidRequest('post_msg_no_user', 'NA');
+        $errorMsg = "Not logged in";
+        return;
+    }
+
+
+    if(!isset($_POST[$token->getFormToken()]) || !isset($_POST[$token->getFormIndex()]))
+    {
+        // Trying to post messages without adding token data, possible CSRF attack
+        InvReq::addInvalidRequest('post_msg_no_token', $member->username());
+        $errorMsg = "Token not supplied";
+        return;
+    }
+
+    if( !$token->validateRequest()) {
+        InvReq::addInvalidRequest('post_msg_invalid_token', $member->username());
+        $errorMsg = "Invalid Token";
+        return;
+    }
+
+    $post = Post::fromForm(Member::fromSession()->username(), $_POST['post-message']);
+
+    $post->save();
+
+    if ($post->isSetError()) {
+        $errorMsg = $post->getErrorMessage();
+    } else {
+        // Refresha sidan
+        header("Location: index.php");
+    }
+
 }
 
 function like_btn_class(int $postid): string
@@ -108,111 +130,112 @@ function member_owns_post(string $postname): bool
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?=  $title ?></title>
+    <title><?= $title ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css"/>
     <script src="js/jquery-3.5.1.min.js"></script>
     <script src="js/main.js"></script>
 </head>
 
 <body>
-    <header>
-        <img src="img/mittuniversitetet.jpg" alt="miun logga" class="logo" />
-        <h1><?=  $title ?></h1>
-    </header>
-    <main>
-        <aside>
-            <?php require __DIR__ . '/../resources/views/aside-login.php'; ?>
-            <?php require __DIR__ . '/../resources/views/aside-search.php'; ?>
-        </aside>
+<header>
+    <img src="img/mittuniversitetet.jpg" alt="miun logga" class="logo"/>
+    <h1><?= $title ?></h1>
+</header>
+<main>
+    <aside>
+        <?php require __DIR__ . '/../resources/views/aside-login.php'; ?>
+        <?php require __DIR__ . '/../resources/views/aside-search.php'; ?>
+    </aside>
 
-        <section class="content-wrapper">
-            <!-- Guestbook form -->
-            <section id="gb-form" class="<?=  $formClass ?>">
-                <form id="guestbookForm" class="<?=  $formClass ?>" action="index.php" method="POST">
-                    <fieldset>
-                        <legend>Add post</legend>
-                        <textarea id="post-message" name="post-message" rows="10" cols="50" placeholder="Enter message here..."></textarea>
-                        <br>
-                        <button type="submit">Send</button>
-                        <span id="post-error" class="red"><?=  $errorMsg ?></span>
-                    </fieldset>
+    <section class="content-wrapper">
+        <!-- Guestbook form -->
+        <section id="gb-form" class="<?= $formClass ?>">
+            <form id="guestbookForm" class="<?= $formClass ?>" action="index.php" method="POST">
+                <fieldset>
+                    <legend>Add post</legend>
+                    <textarea id="post-message" name="post-message" rows="10" cols="50"
+                              placeholder="Enter message here..."></textarea>
+                    <br>
+                    <button type="submit">Send</button>
+                    <span id="post-error" class="red"><?= $errorMsg ?></span>
+                </fieldset>
 
-                    <!-- Security token / timestamp submitted with post -->
-                    <?php Token::generateTokenForm($token, 'post_msg', '/index.php',true) ?>
-                </form>
-            </section>
+                <!-- Security token / timestamp submitted with post -->
+                <?php Token::generateTokenForm($token, 'post_msg', '/index.php', true) ?>
+            </form>
+        </section>
 
-            <!-- Welcome message that is shown if user is logged out -->
-            <section id="welcome-message" class="<?=  $welcomeClass ?>">
-                <h2>Welcome!
-                </h2>
-                <p>This is a social networking page where you can share your thoughts on software security. <br />
-                    Just log in to your account or sign up to post a message.</p>
-                <br>
-                <hr>
-                <br>
-            </section>
+        <!-- Welcome message that is shown if user is logged out -->
+        <section id="welcome-message" class="<?= $welcomeClass ?>">
+            <h2>Welcome!
+            </h2>
+            <p>This is a social networking page where you can share your thoughts on software security. <br/>
+                Just log in to your account or sign up to post a message.</p>
             <br>
+            <hr>
             <br>
+        </section>
+        <br>
+        <br>
 
-            <!-- Check if there is any posts to print out. -->
-            <section id="gustbook-posts">
+        <!-- Check if there is any posts to print out. -->
+        <section id="gustbook-posts">
 
-                <?php if (empty($posts)) : ?>
+            <?php if (empty($posts)) : ?>
                 <h2>The guestbook is empty</h2>
 
-                <?php else : ?>
+            <?php else : ?>
                 <h2>Guestbook posts</h2>
-            <!-- Print out the posts, latest post first. -->
+                <!-- Print out the posts, latest post first. -->
                 <?php foreach (array_reverse($posts) as $post) : ?>
-                <article class="post">
-                    <div class="post-header">
-                        <h4><?=  $post->getName() ?> wrote:</h4>
-                        <p class="time">At: <?=  $post->getTimeLog() ?></p>
-                    </div>
-                    <p class="content"><?=  $post->getMessage() ?></p>
-                    <footer>
-                        <div class="post-stats">
-                            <!-- like btn -->
-                            <i data-id="<?=  $post->getId() ?>"
-                                class="<?=  like_btn_class($post->getId()) ?>">
-                            </i>
-                            <!-- Get the number of likes for current post. -->
-                            <span class="likes"><?=  Post::getRatingCount($post->getId(), 'like') ?>
+                    <article class="post">
+                        <div class="post-header">
+                            <h4><?= $post->getName() ?> wrote:</h4>
+                            <p class="time">At: <?= $post->getTimeLog() ?></p>
+                        </div>
+                        <p class="content"><?= $post->getMessage() ?></p>
+                        <footer>
+                            <div class="post-stats">
+                                <!-- like btn -->
+                                <i data-id="<?= $post->getId() ?>"
+                                   class="<?= like_btn_class($post->getId()) ?>">
+                                </i>
+                                <!-- Get the number of likes for current post. -->
+                                <span class="likes"><?= Post::getRatingCount($post->getId(), 'like') ?>
                             </span>
 
-                            <!-- dislike btn -->
-                            <i data-id="<?=  $post->getId() ?>"
-                                class="<?=  dislike_btn_class($post->getId()) ?>">
-                            </i>
-                            <!-- Get the number of likes for current post. -->
-                            <span class="dislikes"><?=  Post::getRatingCount($post->getId(), 'dislike') ?>
+                                <!-- dislike btn -->
+                                <i data-id="<?= $post->getId() ?>"
+                                   class="<?= dislike_btn_class($post->getId()) ?>">
+                                </i>
+                                <!-- Get the number of likes for current post. -->
+                                <span class="dislikes"><?= Post::getRatingCount($post->getId(), 'dislike') ?>
                             </span>
-                        </div>
+                            </div>
 
-                        <?php if (member_owns_post($post->getName())): ?>
-                        <div class="delete-post">
-                            <i class="far fa-trash-alt delete-post"
-                                data-id="<?=  $post->getId() ?>">
-                            </i>
-                        </div>
-                        <?php endif; ?>
+                            <?php if (member_owns_post($post->getName())): ?>
+                                <div class="delete-post">
+                                    <i class="far fa-trash-alt delete-post"
+                                       data-id="<?= $post->getId() ?>">
+                                    </i>
+                                </div>
+                            <?php endif; ?>
 
-                    </footer>
-                </article>
+                        </footer>
+                    </article>
                 <?php endforeach; ?>
                 <!-- Security token / timestamp submitted when liking , disliking and deleting posts -->
-                <input type="hidden" id="gb-token" value="<?=  Token::generateToken('delete-post') ?>">
-                <input type="hidden" id="gb-ts" value="<?=  Token::generateTs() ?>">
-                <?php endif; ?>
-            </section><!-- gbposts -->
-        </section><!-- content wrapper -->
-    </main>
+                <input type="hidden" id="gb-token" value="<?= Token::generateToken('delete-post') ?>">
+                <input type="hidden" id="gb-ts" value="<?= Token::generateTs() ?>">
+            <?php endif; ?>
+        </section><!-- gbposts -->
+    </section><!-- content wrapper -->
+</main>
 
-    <footer>
-        Footer
-    </footer>
+<footer>
+    Footer
+</footer>
 </body>
 
 </html>
