@@ -35,7 +35,11 @@ if (!isValidPasswordInput($_POST['password1'], $_POST['password2'])) {
     ]);
 }
 
-
+if (!validateCaptcha($_POST['captcha'])) {
+    ajax_respond([
+        'msg' => 'Error passing captcha challenge.'
+    ]);
+}
 
 // check if save was successfull
 if (!$member->save($_POST['password1'])) {
@@ -63,4 +67,31 @@ function ajax_respond(array $responseText): void
 function isValidPasswordInput(string $input1, string $input2): bool
 {
     return $input1 === $input2;
+}
+
+// @Todo: Move this to a function file under /functions to increase scalability.
+function validateCaptcha($captcha)
+{
+    $secret = '6Lfpr_0UAAAAANaYPlORYVfO-fXkBheXdc2VcMNL';
+    $curlx = curl_init();
+    curl_setopt($curlx, CURLOPT_URL, "https://www.google.com/recaptcha/api/siteverify");
+    curl_setopt($curlx, CURLOPT_HEADER, 0);
+    curl_setopt($curlx, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curlx, CURLOPT_POST, 1);
+
+    $post_data = [
+        'secret' => $secret,
+        'response' => $captcha
+    ];
+
+    curl_setopt($curlx, CURLOPT_POSTFIELDS, $post_data);
+
+    $resp = json_decode(curl_exec($curlx));
+
+    curl_close($curlx);
+
+    if (!$resp->success) {
+        return false;
+    }
+    return true;
 }

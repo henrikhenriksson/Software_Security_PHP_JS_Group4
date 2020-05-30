@@ -31,6 +31,7 @@ if (Member::loggedIn()) {
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/jquery-3.5.1.min.js"></script>
     <script src="js/main.js"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
 <body>
@@ -60,7 +61,8 @@ if (Member::loggedIn()) {
                     <div>
                         <input type="password" placeholder="Re-enter Password" name="password2" id="password2" minlength="1" maxlength="64" autocomplete="off" required>
                     </div>
-
+                    <div class="g-recaptcha" id="cap" data-sitekey="6Lfpr_0UAAAAAIt8xL7fRCEyTAVWzKL7EXR6gsmT"></div>
+                    <br />
                     <button type="button" id=sign_up_button> <b>Sign Up!</b></button>
                     <p id="signup_message"></p>
 
