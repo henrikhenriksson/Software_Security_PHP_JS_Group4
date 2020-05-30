@@ -20,7 +20,7 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
     <h2>LOGIN</h2>
     <form id="loginForm">
         <?php try {
-            $token->insertToken('/public/login.php');
+            $token->insertToken('/login.php');//'/public/login.php');
         } catch (Exception $e) {
             ///@todo link to page https://www.monkeyuser.com/2017/http-status-codes/
         } ?>
