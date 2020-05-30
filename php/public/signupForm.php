@@ -11,6 +11,9 @@ $title = "DT167G - Group 4";
 
 require_once __DIR__ . '/../resources/init.php';
 
+use \ParagonIE\AntiCSRF\AntiCSRF as TokenLib;
+
+$token = new TokenLib();
 
 if (Member::loggedIn()) {
     header('Location: /');
@@ -34,43 +37,43 @@ if (Member::loggedIn()) {
 </head>
 
 <body>
-    <header>
-        <img src="img/mittuniversitetet.jpg" alt="miun logga" class="logo" />
-        <h1><?php echo $title ?></h1>
-    </header>
-    <main>
-        <aside>
-            <?php require '../resources/views/aside-login.php'; ?>
-            <?php require '../resources/views/aside-search.php'; ?>
-        </aside>
-        <section class="content-wrapper">
-            <div id="new_member">
+<header>
+    <img src="img/mittuniversitetet.jpg" alt="miun logga" class="logo" />
+    <h1><?php echo $title ?></h1>
+</header>
+<main>
+    <aside>
+        <?php require '../resources/views/aside-login.php'; ?>
+        <?php require '../resources/views/aside-search.php'; ?>
+    </aside>
+    <section class="content-wrapper">
+        <div id="new_member">
 
-                <h2 class>Sign up To Use the Website</h2>
-                <br>
-                <form id="signup_form">
-                    <input type="hidden" name="su_token" id="su_token" value="<?php echo Token::generateToken('signup'); ?>">
-                    <input type="hidden" name="su_ts" id="su_ts" value="<?php echo Token::generateTs(); ?>">
-                    <div>
-                        <input type="text" placeholder="Enter Username" name="user_name" id="userName" minlength="1" maxlength="10" autocomplete="off" required>
-                    </div>
-                    <div>
-                        <input type="password" placeholder="Enter Password" name="password" id="password1" minlength="1" maxlength="64" autocomplete="off" required>
-                    </div>
-                    <div>
-                        <input type="password" placeholder="Re-enter Password" name="password2" id="password2" minlength="1" maxlength="64" autocomplete="off" required>
-                    </div>
+            <h2 class>Sign up To Use the Website</h2>
+            <br>
+            <form id="signup_form">
+                <?php Token::generateTokenForm($token, 'signup', '/signupForm.php', true) ?>
+                <div>
 
-                    <button type="button" id=sign_up_button> <b>Sign Up!</b></button>
-                    <p id="signup_message"></p>
+                    <input type="text" placeholder="Enter Username" name="user_name" id="userName" minlength="1" maxlength="10" autocomplete="off" required>
+                </div>
+                <div>
+                    <input type="password" placeholder="Enter Password" name="password" id="password1" minlength="1" maxlength="64" autocomplete="off" required>
+                </div>
+                <div>
+                    <input type="password" placeholder="Re-enter Password" name="password2" id="password2" minlength="1" maxlength="64" autocomplete="off" required>
+                </div>
 
-                </form>
-            </div>
-        </section>
-    </main>
-</body>
+                <button type="button" id=sign_up_button> <b>Sign Up!</b></button>
+                <p id="signup_message"></p>
+
+            </form>
+        </div>
+    </section>
+</main>
 <footer>
-    Footer
+    <?php require_once __DIR__ . '/../resources/views/footer.php'; ?>
 </footer>
 
+</body>
 </html>

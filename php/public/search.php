@@ -39,37 +39,37 @@ if (isset($_GET["search-type"]) && isset($_GET["search-field"])) {
 </head>
 
 <body>
-    <header>
-        <img src="img/mittuniversitetet.jpg" alt="miun logga" class="logo" />
-        <h1><?php echo $title ?></h1>
-    </header>
-    <main>
-        <aside>
-            <?php require __DIR__ . '/../resources/views/aside-login.php'; ?>
-            <?php require __DIR__ . '/../resources/views/aside-search.php'; ?>
-            <a href="index.php">Back to guestbook</a>
-        </aside>
-        <section class="content-wrapper">
-            <section>
-                <h2>Search results</h2>
+<header>
+    <img src="img/mittuniversitetet.jpg" alt="miun logga" class="logo" />
+    <h1><?php echo $title ?></h1>
+</header>
+<main>
+    <aside>
+        <?php require __DIR__ . '/../resources/views/aside-login.php'; ?>
+        <?php require __DIR__ . '/../resources/views/aside-search.php'; ?>
+        <a href="index.php">Back to guestbook</a>
+    </aside>
+    <section class="content-wrapper">
+        <section>
+            <h2>Search results</h2>
 
-                <?php if (empty($posts)) : ?>
-                    <p>Your search did not return any posts.</p>
-                <?php else : ?>
-                    <!-- Print out the posts, latest post first. -->
-                    <?php foreach (array_reverse($posts) as $post) : ?>
-                        <?php require __DIR__ . '/../resources/views/post.php'; ?>
-                    <?php endforeach; ?>
-                <!-- Security token / timestamp submitted when liking , disliking and deleting posts -->
-                <input type="hidden" id="gb-token" value="<?=  Token::generateToken('delete-post') ?>">
-                <input type="hidden" id="gb-ts" value="<?=  Token::generateTs() ?>">
-                <?php endif; ?>
-            </section><!-- posts -->
-        </section><!-- content wrapper -->
-    </main>
-    <footer>
-        Footer
-    </footer>
+            <?php if (empty($posts)) : ?>
+                <p>Your search did not return any posts.</p>
+            <?php else : ?>
+                <!-- Print out the posts, latest post first. -->
+                <?php foreach (array_reverse($posts) as $post) : ?>
+                    <?php require __DIR__ . '/../resources/views/post.php'; ?>
+                <?php endforeach; ?>
+            <!-- Security token / timestamp submitted when liking , disliking and deleting posts -->
+            <input type="hidden" id="gb-token" value="<?=  Token::generateToken('delete-post') ?>">
+            <input type="hidden" id="gb-ts" value="<?=  Token::generateTs() ?>">
+            <?php endif; ?>
+        </section><!-- posts -->
+    </section><!-- content wrapper -->
+</main>
+<footer>
+    <?php require_once __DIR__ . '/../resources/views/footer.php'; ?>
+</footer>
 </body>
 
 </html>
