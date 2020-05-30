@@ -13,14 +13,20 @@ use \ParagonIE\AntiCSRF\AntiCSRF as Token;
 
 $token = new Token();
 
-function _sendInvalidMessageResponse($msg):void
+function _sendInvalidResponseMessage($msg):void
 {
     $responseText = ['isValidLogin'=> false, 'msg'=>$msg];
 
     sendResponse($responseText);
 }
 
-function _sendValidMessageResponse($msg):void
+function _sendInvalidResponseComplex($response)
+{
+    $response['isValidLogin'] = false;
+    sendResponse($response);
+}
+
+function _sendValidResponseMessage($msg):void
 {
     $responseText = ['isValidLogin'=> true, 'msg'=>$msg];
 
@@ -34,7 +40,7 @@ function sendResponse($responseText)
 }
 
 if (!InvReq::validIpCurUser()) {
-    _sendInvalidMessageResponse('Ip blocked');
+    _sendInvalidResponseMessage('Ip blocked');
     exit;
 }
 
@@ -43,13 +49,18 @@ if (!isset($_POST["_CSRF_TOKEN"]) || !isset($_POST["_CSRF_INDEX"])) {
     // Cross reference protection not provided
     ///@todo decide action
     InvReq::addInvalidRequest('missing Token data', 'na');
-    _sendInvalidMessageResponse("Required login data not provided");
+    _sendInvalidResponseMessage("Required login data not provided");
     exit;
 }
 
+
+
 if (! $token->validateRequest() ) {
     InvReq::addInvalidRequest('invalidTokenLogin', 'na');
-    _sendInvalidMessageResponse("Invalid token");
+    _sendInvalidResponseComplex([
+        'msg'=>"Invalid token",
+        'newToken'=>$token->getTokenArray('./login')
+    ]);
     exit;
 }
 
@@ -59,12 +70,15 @@ $member = Member::login($_POST["uname"], $_POST['psw']);
 if( $member->error() )
 {
     InvReq::addInvalidRequest('invalidLoginCredentials', $member->username());
-    _sendInvalidMessageResponse($member->errorMessage());
+    _sendInvalidResponseComplex([
+        'msg'=>$member->errorMessage(),
+        'newToken'=>$token->getTokenArray('./login')
+    ]);
     ///@todo regenerate_session_id() and Send new token back to user, must only be sent when the first token is valid
     exit;
 }
 
-_sendValidMessageResponse('valid login');
+_sendValidResponseMessage('valid login');
 
 
 
