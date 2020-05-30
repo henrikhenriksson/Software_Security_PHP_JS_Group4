@@ -59,7 +59,8 @@ if (! $token->validateRequest() ) {
     InvReq::addInvalidRequest('invalidTokenLogin', 'na');
     _sendInvalidResponseComplex([
         'msg'=>"Invalid token",
-        'newToken'=>$token->getTokenArray('./login')
+        //'newToken'=>$token->getTokenArray('./login')
+        'newToken'=>\htmlentities($token->getTokenArray('./login'), ENT_QUOTES, 'UTF-8')
     ]);
     exit;
 }
