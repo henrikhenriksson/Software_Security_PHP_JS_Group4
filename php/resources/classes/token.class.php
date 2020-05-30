@@ -46,11 +46,6 @@ class Token
         return $result;
     }
 
-    public static function validateToken(string $userAction, string $userTS, string $userToken)
-    {
-        ///@todo implement validateToken
 
-        return true;
-    }
 
 }
