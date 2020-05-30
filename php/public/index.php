@@ -40,8 +40,7 @@ function checkUserPostMsg(?Member $member, TokenLib $token, string &$errorMsg)
 {
 
 // Om användaren är inloggad och har submittat något.
-    if(!isset($_POST['post-message']))
-    {
+    if (!isset($_POST['post-message'])) {
         // No post data supplied, nothing to check
         return;
     }
@@ -50,8 +49,7 @@ function checkUserPostMsg(?Member $member, TokenLib $token, string &$errorMsg)
         $errorMsg = "Ip blocked";
     }
 
-    if( null == $member || ($member->id() <= 0) )
-    {
+    if (null == $member || ($member->id() <= 0)) {
         // Trying to add post without logged in
         InvReq::addInvalidRequest('post_msg_no_user', 'NA');
         $errorMsg = "Not logged in";
@@ -59,15 +57,14 @@ function checkUserPostMsg(?Member $member, TokenLib $token, string &$errorMsg)
     }
 
 
-    if(!isset($_POST[$token->getFormToken()]) || !isset($_POST[$token->getFormIndex()]))
-    {
+    if (!isset($_POST[$token->getFormToken()]) || !isset($_POST[$token->getFormIndex()])) {
         // Trying to post messages without adding token data, possible CSRF attack
         InvReq::addInvalidRequest('post_msg_no_token', $member->username());
         $errorMsg = "Token not supplied";
         return;
     }
 
-    if( !$token->validateRequest()) {
+    if (!$token->validateRequest()) {
         InvReq::addInvalidRequest('post_msg_invalid_token', $member->username());
         $errorMsg = "Invalid Token";
         return;
@@ -83,41 +80,6 @@ function checkUserPostMsg(?Member $member, TokenLib $token, string &$errorMsg)
         // Refresha sidan
         header("Location: index.php");
     }
-
-}
-
-function like_btn_class(int $postid): string
-{
-    global $member;
-    if ($member && member_has_liked($postid, $member->id())) {
-        return "fas fa-thumbs-up like-btn";
-    }
-    return "far fa-thumbs-up like-btn";
-}
-
-function dislike_btn_class(int $postid): string
-{
-    global $member;
-    if ($member && member_has_disliked($postid, $member->id())) {
-        return "fas fa-thumbs-down dislike-btn";
-    }
-    return "far fa-thumbs-down dislike-btn";
-}
-
-function member_has_liked(int $postid, int $memberid): bool
-{
-    return Post::isRatedByUser($postid, $memberid, 'like');
-}
-
-function member_has_disliked(int $postid, int $memberid): bool
-{
-    return Post::isRatedByUser($postid, $memberid, 'dislike');
-}
-
-function member_owns_post(string $postname): bool
-{
-    global $member;
-    return $member && $member->username() === $postname;
 }
 
 /*******************************************************************************
@@ -189,41 +151,7 @@ function member_owns_post(string $postname): bool
                 <h2>Guestbook posts</h2>
                 <!-- Print out the posts, latest post first. -->
                 <?php foreach (array_reverse($posts) as $post) : ?>
-                    <article class="post">
-                        <div class="post-header">
-                            <h4><?= $post->getName() ?> wrote:</h4>
-                            <p class="time">At: <?= $post->getTimeLog() ?></p>
-                        </div>
-                        <p class="content"><?= $post->getMessage() ?></p>
-                        <footer>
-                            <div class="post-stats">
-                                <!-- like btn -->
-                                <i data-id="<?= $post->getId() ?>"
-                                   class="<?= like_btn_class($post->getId()) ?>">
-                                </i>
-                                <!-- Get the number of likes for current post. -->
-                                <span class="likes"><?= Post::getRatingCount($post->getId(), 'like') ?>
-                            </span>
-
-                                <!-- dislike btn -->
-                                <i data-id="<?= $post->getId() ?>"
-                                   class="<?= dislike_btn_class($post->getId()) ?>">
-                                </i>
-                                <!-- Get the number of likes for current post. -->
-                                <span class="dislikes"><?= Post::getRatingCount($post->getId(), 'dislike') ?>
-                            </span>
-                            </div>
-
-                            <?php if (member_owns_post($post->getName())): ?>
-                                <div class="delete-post">
-                                    <i class="far fa-trash-alt delete-post"
-                                       data-id="<?= $post->getId() ?>">
-                                    </i>
-                                </div>
-                            <?php endif; ?>
-
-                        </footer>
-                    </article>
+                    <?php require __DIR__ . '/../resources/views/post.php'; ?>
                 <?php endforeach; ?>
                 <!-- Security token / timestamp submitted when liking , disliking and deleting posts -->
                 <input type="hidden" id="gb-token" value="todo ?>">
