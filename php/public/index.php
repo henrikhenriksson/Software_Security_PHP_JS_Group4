@@ -11,6 +11,10 @@ declare(strict_types=1);
 $title = "Group 4 Guestbook";
 require_once __DIR__ . '/../resources/init.php';
 
+use \ParagonIE\AntiCSRF\AntiCSRF as TokenLib;
+
+$token = new TokenLib();
+
 // Usage example of DB class.
 $posts = Post::fetchAll();  // Use posts class to retrieve
 
@@ -32,19 +36,29 @@ $errorMsg = "";
 
 // Om användaren är inloggad och har submittat något.
 if ($member && isset($_POST)) {
-    if (isset($_POST['post-message']) && isset($_POST['post-ts']) && isset($_POST['post-token'])) {
+    if (isset($_POST['post-message']) && isset($_POST[$token->getFormToken()]) && isset($_POST[$token->getFormIndex()])) {
 
-        // Validera TS och TOKEN
-        if (Token::validateToken("login", $_POST["post-ts"], $_POST["post-token"])) {
-            $post = Post::fromForm(Member::fromSession()->username(), $_POST['post-message']);
+        // Check that the user/ip is not blocked
+        if(!InvReq::validIpCurUser()) {
+            $errorMsg = "IP blocked!";
+        }else{
+            // Validera TS och TOKEN
+            if ($token->validateRequest()) {
+                $post = Post::fromForm(Member::fromSession()->username(), $_POST['post-message']);
 
-            $post->save();
+                $post->save();
 
-            if ($post->isSetError()) {
-                $errorMsg = $post->getErrorMessage();
+                if ($post->isSetError()) {
+                    $errorMsg = $post->getErrorMessage();
+                } else {
+                    // Refresha sidan
+                    header("Location: index.php");
+                }
             } else {
-                // Refresha sidan
-                header("Location: index.php");
+                ///@todo add post, remove debug print
+                ///@todo add post, uncomment
+                //InvReq::addInvalidRequest('post msg', $member->username());
+                $errorMsg = "Invalid post Token!";
             }
         }
     }
@@ -125,8 +139,7 @@ function member_owns_post(string $postname): bool
                     </fieldset>
 
                     <!-- Security token / timestamp submitted with post -->
-                    <input type="hidden" id="post-token" name="post-token" value="<?=  Token::generateToken('post') ?>">
-                    <input type="hidden" id="post-ts" name="post-ts" value="<?=  Token::generateTs() ?>">
+                    <?php Token::generateTokenForm($token, 'post_msg', '/index.php',true) ?>
                 </form>
             </section>
 
