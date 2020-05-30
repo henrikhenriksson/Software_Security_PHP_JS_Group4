@@ -7,7 +7,8 @@
     "child-src": {
         "allow": [
             "https://www.youtube.com",
-            "https://www.youtube-nocookie.com"
+            "https://www.youtube-nocookie.com",
+            "https://www.google.com/recaptcha/api2/"
         ],
         "self": false
     },
@@ -34,7 +35,10 @@
     "object-src": [],
     "plugin-types": [],
     "script-src": {
-        "allow": ["https://www.google.com/recaptcha/*"],
+        "allow": [
+            "https://www.google.com/recaptcha/",
+            "https://www.gstatic.com/recaptcha/"
+        ],
         "self": true,
         "unsafe-inline": false,
         "unsafe-eval": false
