@@ -29,9 +29,9 @@ function main() {
       xhr = new XMLHttpRequest();
     } else if (window.ActiveXObject) {
       // code for IE6, IE5
-      xhr = new ActiveXObject("Microsoft.XMLHTTP");
+      xhr = new ActiveXObject('Microsoft.XMLHTTP');
     } else {
-      throw new Error("Cannot create XMLHttpRequest object");
+      throw new Error('Cannot create XMLHttpRequest object');
     }
   } catch (e) {
     alert('"XMLHttpRequest failed!' + e.message);
