@@ -34,6 +34,7 @@ final class Versions
   'nikic/php-parser' => 'v4.4.0@bd43ec7152eaaab3bd8c6d0aa95ceeb1df8ee120',
   'ocramius/package-versions' => '1.8.0@421679846270a5772534828013a93be709fb13df',
   'openlss/lib-array2xml' => '1.0.0@a91f18a8dfc69ffabe5f9b068bc39bb202c81d90',
+  'paragonie/anti-csrf' => 'v2.2.1@b1b861266b04b80108996729e34339444817ef59',
   'paragonie/constant_time_encoding' => 'v2.3.0@47a1cedd2e4d52688eb8c96469c05ebc8fd28fa2',
   'paragonie/corner' => 'v2.0.1@f222adc1da32547e20a3c5007f4a711b0cf633d0',
   'paragonie/csp-builder' => 'v2.4.0@3e63cd5ad62a6fc74561306c0798ae600c81794b',
@@ -43,22 +44,18 @@ final class Versions
   'phpdocumentor/type-resolver' => '1.1.0@7462d5f123dfc080dfdf26897032a6513644fc95',
   'psr/container' => '1.0.0@b7ce3b176482dbbc1245ebf52b181af44c2cf55f',
   'psr/log' => '1.1.3@0f73288fd15629204f9d42b7055f72dacbe811fc',
-  'roave/security-advisories' => 'dev-master@e38de1df609b39d97144514d28b0804ad4daaddb',
+  'roave/security-advisories' => 'dev-master@55922f51129488c246a776ff944463605d447da0',
   'sebastian/diff' => '4.0.1@3e523c576f29dacecff309f35e4cc5a5c168e78a',
   'symfony/console' => 'v5.0.8@5fa1caadc8cdaa17bcfb25219f3b53fe294a9935',
   'symfony/polyfill-ctype' => 'v1.17.0@e94c8b1bbe2bc77507a1056cdb06451c75b427f9',
   'symfony/polyfill-mbstring' => 'v1.17.0@fa79b11539418b02fc5e1897267673ba2c19419c',
   'symfony/polyfill-php73' => 'v1.17.0@a760d8964ff79ab9bf057613a5808284ec852ccc',
-  'symfony/service-contracts' => 'v2.0.1@144c5e51266b281231e947b51223ba14acf1a749',
-  'vimeo/psalm' => '3.11.4@58e1d8e68e5098bf4fbfdfb420c38d563f882549',
+  'symfony/service-contracts' => 'v2.1.2@66a8f0957a3ca54e4f724e49028ab19d75a8918b',
+  'vimeo/psalm' => '3.11.5@3c60609c218d4d4b3b257728b8089094e5c6c6c2',
   'webmozart/assert' => '1.8.0@ab2cb0b3b559010b75981b1bdce728da3ee90ad6',
   'webmozart/glob' => '4.1.0@3cbf63d4973cf9d780b93d2da8eec7e4a9e63bbe',
   'webmozart/path-util' => '2.3.0@d939f7edc24c9a1bb9c0dee5cb05d8e859490725',
-<<<<<<< HEAD
-  '__root__' => 'dev-content-security-headers@c91b770a5ce9b1996179f5b5110209271f98663a',
-=======
-  '__root__' => 'dev-update-posts-format@6d4798672c5e5fc9ed61ada893b1b58bfe63fe7e',
->>>>>>> origin
+  '__root__' => 'dev-AntiCSRF@fa89bdede52efccd3358aa2a2a08a0e3bb08d6e2',
 );
 
     private function __construct()

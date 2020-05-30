@@ -8,13 +8,13 @@ class ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
-        '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
-        'dc51568953534d6c54b08731e61104e2' => __DIR__ . '/..' . '/vimeo/psalm/src/functions.php',
-        '8e4171839e12546525126d38dac3dafa' => __DIR__ . '/..' . '/vimeo/psalm/src/spl_object_id.php',
         'e8aa6e4b5a1db2f56ae794f1505391a8' => __DIR__ . '/..' . '/amphp/amp/lib/functions.php',
         '76cd0796156622033397994f25b0d8fc' => __DIR__ . '/..' . '/amphp/amp/lib/Internal/functions.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
         '6cd5651c4fef5ed6b63e8d8b8ffbf3cc' => __DIR__ . '/..' . '/amphp/byte-stream/lib/functions.php',
+        'dc51568953534d6c54b08731e61104e2' => __DIR__ . '/..' . '/vimeo/psalm/src/functions.php',
+        '8e4171839e12546525126d38dac3dafa' => __DIR__ . '/..' . '/vimeo/psalm/src/spl_object_id.php',
         '094883ee9da9e6fabd95b86a5ef61b72' => __DIR__ . '/..' . '/latitude/latitude/src/functions.php',
         'c8c93a72f62de193f7644671de10d207' => __DIR__ . '/../..' . '/resources/globals.php',
         '749e644416863dbba76b7a8e21d06e15' => __DIR__ . '/../..' . '/resources/functions/strings.php',
@@ -43,13 +43,13 @@ class ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4
         array (
             'Psr\\Log\\' => 8,
             'Psr\\Container\\' => 14,
-            'Psalm\\Plugin\\' => 13,
             'Psalm\\' => 6,
             'PhpParser\\' => 10,
             'ParagonIE\\EasyDB\\' => 17,
             'ParagonIE\\Corner\\' => 17,
             'ParagonIE\\ConstantTime\\' => 23,
             'ParagonIE\\CSPBuilder\\' => 21,
+            'ParagonIE\\AntiCSRF\\' => 19,
             'PackageVersions\\' => 16,
         ),
         'L' => 
@@ -74,8 +74,8 @@ class ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4
         'phpDocumentor\\Reflection\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
-            1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
-            2 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+            1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+            2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
         ),
         'Webmozart\\PathUtil\\' => 
         array (
@@ -117,10 +117,6 @@ class ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
         ),
-        'Psalm\\Plugin\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/vimeo/psalm/src/Psalm/Plugin',
-        ),
         'Psalm\\' => 
         array (
             0 => __DIR__ . '/..' . '/vimeo/psalm/src/Psalm',
@@ -144,6 +140,10 @@ class ComposerStaticInit0657792e61c48cebb335ecd308a8b8e4
         'ParagonIE\\CSPBuilder\\' => 
         array (
             0 => __DIR__ . '/..' . '/paragonie/csp-builder/src',
+        ),
+        'ParagonIE\\AntiCSRF\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/anti-csrf/src',
         ),
         'PackageVersions\\' => 
         array (

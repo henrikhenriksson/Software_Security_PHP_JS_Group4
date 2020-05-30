@@ -7,6 +7,11 @@ declare(strict_types=1);
  * File: aside-login-php
  ******************************************************************************/
 
+use \ParagonIE\AntiCSRF\AntiCSRF as TokenLib;
+
+$token = new TokenLib();
+
+
 $loginClass = Member::loggedIn() ? "hide" : "";
 $logoutClass = Member::loggedIn() ? "" : "hide";
 ?>
@@ -14,19 +19,17 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
 <div id="login" class="<?php echo $loginClass; ?>">
     <h2>LOGIN</h2>
     <form id="loginForm">
-        <input type="hidden" id="token" value="<?php echo Token::generateToken('login'); ?>">
-        <input type="hidden" id="TS" value="<?php echo Token::generateTs(); ?>">
-        <label>
-            <p><b>Username</b></p>
-        </label>
+        <?php try {
+            Token::generateTokenForm($token,'login', '/login.php', true);
+//            $token->insertToken('/login.php');//'/public/login.php');
+        } catch (Exception $e) {
+            ///@todo link to page https://www.monkeyuser.com/2017/http-status-codes/
+        } ?>
+        <label><b>Username</b></label>
         <input type="text" placeholder="m" name="uname" id="uname" required maxlength="10" value="m" autocomplete="off">
-        <label>
-            <p><b>Password</b></p>
-        </label>
+        <label><b>Password</b></label>
         <input type="password" placeholder="Enter Password" name="psw" id="psw" required>
-        <br>
         <button type="button" id="loginButton">Login</button>
-        <span id="loginMsg" class="red"></span>
     </form>
     <h3>Not A Member?</h3>
     <p>
@@ -37,3 +40,4 @@ $logoutClass = Member::loggedIn() ? "" : "hide";
     <h2>LOGOUT</h2>
     <button type="button" id="logoutButton">Logout</button>
 </div>
+<p id="loginMsg"></p>
