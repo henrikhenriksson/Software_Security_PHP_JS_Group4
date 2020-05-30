@@ -46,6 +46,9 @@ class Token
         return $result;
     }
 
-
+    public static function validateToken(string $a, string $b)
+    {
+        return true;    
+    }
 
 }

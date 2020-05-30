@@ -226,8 +226,8 @@ function member_owns_post(string $postname): bool
                     </article>
                 <?php endforeach; ?>
                 <!-- Security token / timestamp submitted when liking , disliking and deleting posts -->
-                <input type="hidden" id="gb-token" value="<?= Token::generateToken('delete-post') ?>">
-                <input type="hidden" id="gb-ts" value="<?= Token::generateTs() ?>">
+                <input type="hidden" id="gb-token" value="todo ?>">
+                <input type="hidden" id="gb-ts" value="todo ?>">
             <?php endif; ?>
         </section><!-- gbposts -->
     </section><!-- content wrapper -->
