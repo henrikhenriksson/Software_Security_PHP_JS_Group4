@@ -114,7 +114,3 @@ Many web applications suffer from botting attacks, in which the sign up form is 
 ## DDOS
 
 Distributed denial of service takes the form of a multi-pronged attack from several different mashines comprising a bot-net, that floods the web application with bogus request in order to take it down, thus denying valid user access to the application. We have considered this, and looked at some possible solutions. But appart from the countermeasures to repeated sending of form data with the invalid request class, we have not implemented any specific countermeasure to a greater DDOS, as we decided this was beyond the scope of this project and course.
-
-**Application logic**
-
-**Response headers**
