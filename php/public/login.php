@@ -40,6 +40,7 @@ function sendResponse($responseText)
 }
 
 if (!InvReq::validIpCurUser()) {
+    Session::kill();
     _sendInvalidResponseMessage('Ip blocked');
     exit;
 }
@@ -47,16 +48,17 @@ if (!InvReq::validIpCurUser()) {
 
 if (!isset($_POST["_CSRF_TOKEN"]) || !isset($_POST["_CSRF_INDEX"])) {
     // Cross reference protection not provided
-    ///@todo decide action
     InvReq::addInvalidRequest('missing Token data', 'na');
+    Session::kill();
     _sendInvalidResponseMessage("Required login data not provided");
     exit;
 }
 
 
 
-if (! $token->validateRequest() ) {
+if (! $token->validateRequest()) {
     InvReq::addInvalidRequest('invalidTokenLogin', 'na');
+    Session::kill();
     _sendInvalidResponseComplex([
         'msg'=>"Invalid token",
         //'newToken'=>$token->getTokenArray('./login')
@@ -69,20 +71,13 @@ if (! $token->validateRequest() ) {
 $member = Member::login($_POST["uname"], $_POST['psw']);
 
 // Set response data
-if( $member->error() )
-{
+if ($member->error()) {
     InvReq::addInvalidRequest('invalidLoginCredentials', $member->username());
     _sendInvalidResponseComplex([
         'msg'=>$member->errorMessage(),
         'newToken'=>$token->getTokenArray('./login')
     ]);
-    ///@todo regenerate_session_id() and Send new token back to user, must only be sent when the first token is valid
     exit;
 }
 
 _sendValidResponseMessage('valid login');
-
-
-
-
-
