@@ -384,7 +384,12 @@ function processSignup() {
     byId("signup_message").innerHTML = response["msg"];
     if (!response.success && responseHasNewToken(response)) {
       updateToken("signup", response);
+      return;
     }
+    // Success! Redirect after 2s
+    setTimeout(() => {
+      window.location = "/";
+    }, 2000);
   }
 }
 
