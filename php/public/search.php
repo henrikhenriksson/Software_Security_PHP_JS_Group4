@@ -60,9 +60,11 @@ if (isset($_GET["search-type"]) && isset($_GET["search-field"])) {
                 <?php foreach (array_reverse($posts) as $post) : ?>
                     <?php require __DIR__ . '/../resources/views/post.php'; ?>
                 <?php endforeach; ?>
-            <!-- Security token / timestamp submitted when liking , disliking and deleting posts -->
-            <input type="hidden" id="gb-token" value="<?=  Token::generateToken('delete-post') ?>">
-            <input type="hidden" id="gb-ts" value="<?=  Token::generateTs() ?>">
+
+                <?php if (Member::loggedIn()): ?>
+                    <?php Token::generateTokenForm($token, 'rate-post', '/rating.php', true); ?>
+                    <?php Token::generateTokenForm($token, 'delete-post', '/delete-post.php', true); ?>
+                <?php endif; ?>
             <?php endif; ?>
         </section><!-- posts -->
     </section><!-- content wrapper -->
