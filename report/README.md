@@ -114,3 +114,9 @@ Many web applications suffer from botting attacks, in which the sign up form is 
 ## DDOS
 
 Distributed denial of service takes the form of a multi-pronged attack from several different mashines comprising a bot-net, that floods the web application with bogus request in order to take it down, thus denying valid user access to the application. We have considered this, and looked at some possible solutions. But appart from the countermeasures to repeated sending of form data with the invalid request class, we have not implemented any specific countermeasure to a greater DDOS, as we decided this was beyond the scope of this project and course.
+
+## Conclusion
+We hope that the from this project resulting web application can be considered a secure one. We have tried to encorporate as many time saving and effective
+packages as possible, and have tried avoiding compromises where a possible solution could be found. Several parts of this project proved challenging, but we have all
+learned valuable lessons about developing web app code. As the web is an ever evolving thing that continues to grow larger in scope, learning to avoid security
+pitfalls early can prove invaluable for the future
