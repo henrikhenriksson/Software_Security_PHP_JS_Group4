@@ -166,6 +166,8 @@ class Member
                 return static::memberError("Invalid credentials!", $db);
             }
             Session::set('userid', $row['id']);
+            // Privilege change, regenerate id
+            session_regenerate_id();
             return static::fromRow($db, $row);
         } catch (\Exception $e) {
             return static::memberError("Something went wrong when logging in", $db);
@@ -212,6 +214,7 @@ class Member
     public static function logout(): void
     {
         Session::unset('userid');
+        // Privilege change, regenerate id
         \session_regenerate_id();
     }
 
@@ -335,6 +338,8 @@ class Member
             return false;
             // @codeCoverageIgnoreEnd
         }
+        // Changed sensitive information, regenerate id
+        session_regenerate_id();
         $this->clearError();
         return true;
     }

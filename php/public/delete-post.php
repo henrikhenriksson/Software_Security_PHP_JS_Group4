@@ -9,6 +9,7 @@ $token = new TokenLib();
 
 $passedTokenValidation = false;
 if (!InvReq::validIpCurUser()) {
+    Session::kill();
     ajax_respond([ 'msg' => 'IP blocked' ]);
 }
 
@@ -33,6 +34,7 @@ $member = Member::fromSession();
 
 if (!$token->validateRequest()) {
     InvReq::addInvalidRequest('delete_post_invalid_token', $member->username());
+    Session::kill();
     ajax_respond(['msg' => 'Invalid token']);
 }
 

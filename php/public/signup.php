@@ -15,6 +15,7 @@ use \ParagonIE\AntiCSRF\AntiCSRF as TokenLib;
 $passedTokenValidation = false;
 
 if (!InvReq::validIpCurUser()) {
+    Session::kill();
     ajax_respond([ 'msg' => 'IP blocked' ]);
 }
 
@@ -24,6 +25,7 @@ if (!isset($_POST)) {
 
 $token = new TokenLib();
 if (!$token->validateRequest()) {
+    Session::kill();
     ajax_respond([ 'msg' => "Invalid token!"]);
 }
 
