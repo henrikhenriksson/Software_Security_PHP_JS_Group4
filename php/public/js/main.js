@@ -56,19 +56,6 @@ function addListeners() {
   addRemoveButtonListeners();
 }
 
-/**
- * Returns the index and token for the given index or two null references
- * if no token exists.
- */
-function getTokens(tokenIndex) {
-  const token = byId(`${tokenIndex}_CSRF_TOKEN`);
-  const index = byId(`${tokenIndex}_CSRF_INDEX`);
-  if (!token || !index) {
-    return { token: null, index: null };
-  }
-  return { token: token.value, index: index.value };
-}
-
 /*******************************************************************************
  * Function addLikeButtonListeners
  ******************************************************************************/
@@ -405,12 +392,38 @@ function responseHasNewToken(jsonResponse) {
 
 function updateToken(tokenPrefix, jsonResponse) {
   const responseToken = jsonResponse.newToken;
-  const token = byId(`${tokenPrefix}_CSRF_TOKEN`);
-  const index = byId(`${tokenPrefix}_CSRF_INDEX`);
+  const { token, index } = getTokenElems(tokenPrefix);
+
+  if (!token || !index) {
+    return;
+  }
 
   token.value = responseToken._CSRF_TOKEN;
   index.value = responseToken._CSRF_INDEX;
 
   delete responseToken._CSRF_TOKEN;
   delete responseToken._CSRF_INDEX;
+}
+
+/**
+ * Returns the index and token for the given index or two null references
+ * if no token exists.
+ */
+function getTokens(tokenIndex) {
+  const { token, index } = getTokenElems(tokenIndex);
+  if (!token || !index) {
+    return { token: null, index: null };
+  }
+  return { token: token.value, index: index.value };
+}
+
+/**
+ * Returns the index and token elements for the given index or two null references
+ * if no token exists.
+ */
+function getTokenElems(tokenIndex) {
+  return {
+    token: byId(`${tokenIndex}_CSRF_TOKEN`),
+    index: byId(`${tokenIndex}_CSRF_INDEX`)
+  };
 }
