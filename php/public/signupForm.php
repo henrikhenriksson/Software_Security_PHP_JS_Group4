@@ -45,6 +45,7 @@ if (Member::loggedIn()) {
     <aside>
         <?php require '../resources/views/aside-login.php'; ?>
         <?php require '../resources/views/aside-search.php'; ?>
+        <a href="index.php">Back to guestbook</a>
     </aside>
     <section class="content-wrapper">
         <div id="new_member">
@@ -52,7 +53,7 @@ if (Member::loggedIn()) {
             <h2 class>Sign up To Use the Website</h2>
             <br>
             <form id="signup_form">
-                <?php Token::generateTokenForm($token, 'signup', '/signupForm.php', true) ?>
+                <?php Token::generateTokenForm($token, 'signup', '/signup.php', true); ?>
                 <div>
 
                     <input type="text" placeholder="Enter Username" name="user_name" id="userName" minlength="1" maxlength="10" autocomplete="off" required>
