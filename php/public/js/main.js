@@ -266,6 +266,7 @@ function doSignup() {
   const userName = byId("userName").value;
   const password1 = byId("password1").value;
   const password2 = byId("password2").value;
+  const recaptcha = grecaptcha.getResponse();
 
   if (!userName || userName.trim() == "") {
     byId("signup_message").innerHTML = "Username can not be empty!";
@@ -282,6 +283,7 @@ function doSignup() {
   xhr.addEventListener("readystatechange", processSignup, false);
 
   let data = new FormData(byId("signup_form"));
+  data.append("captcha", recaptcha);
   xhr.open("POST", "signup.php", true);
   xhr.send(data);
 }
@@ -382,7 +384,12 @@ function processSignup() {
     byId("signup_message").innerHTML = response["msg"];
     if (!response.success && responseHasNewToken(response)) {
       updateToken("signup", response);
+      return;
     }
+    // Success! Redirect after 2s
+    setTimeout(() => {
+      window.location = "/";
+    }, 2000);
   }
 }
 
