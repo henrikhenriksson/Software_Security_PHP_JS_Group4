@@ -1,4 +1,4 @@
-<?PHP
+<?php
 
 declare(strict_types=1);
 
@@ -10,57 +10,127 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../resources/init.php';
 
-// if no token is present, or if token validation failed.
-if (!isset($_POST["su_token"]) || !isset($_POST["su_ts"]) || !Token::validateToken("signup", $_POST["su_ts"], $_POST['su_token'])) {
-    // Cross reference protection not provided
-    // @TODO register invalid request once that class has been merged.
-    ajax_respond([
-        'msg' => 'An error occured. Your data could not be validated.'
-    ]);
+use \ParagonIE\AntiCSRF\AntiCSRF as TokenLib;
+
+$passedTokenValidation = false;
+
+if (!InvReq::validIpCurUser()) {
+    ajax_respond([ 'msg' => 'IP blocked' ]);
 }
-$member = new Member();
-$member->setUsername($_POST['user_name']);
+
+if (!isset($_POST)) {
+    ajax_respond([ 'msg' => 'No signup information provided' ]);
+}
+
+$token = new TokenLib();
+if (!$token->validateRequest()) {
+    ajax_respond([ 'msg' => "Invalid token!"]);
+}
 
 // check if member is already logged in.
-if ($member->loggedIn()) {
+if (Member::loggedIn()) {
     ajax_respond([
         'msg' => 'You are already logged in and cannot create a new account!'
     ]);
 }
 
+// =============== TOKEN VALIDATION SUCCESSFUL =================
+// Send new token for each new response
+$passedTokenValidation = true;
+
+
+if (!isset($_POST['password']) || !isset($_POST['password2'])) {
+    ajax_respond([ 'msg' => "Password fields are required!" ]);
+}
+
+
 // validate password input:
-if (!isValidPasswordInput($_POST['password1'], $_POST['password2'])) {
+if (($_POST['password'] !== $_POST['password2'])) {
     ajax_respond([
         'msg' => 'The passwords you entered does not match!'
     ]);
 }
 
+if (!isset($_POST['user_name'])) {
+    ajax_respond([ 'msg' => "username is required!" ]);
+}
 
+$member = new Member();
+if ($member->error()) {
+    ajax_respond([ 'msg' => $member->errorMessage() ]);
+}
+
+$member->setUsername($_POST['user_name']);
+if ($member->error()) {
+    ajax_respond([ 'msg' => $member->errorMessage() ]);
+}
+
+if (!validateCaptcha($_POST['captcha'])) {
+    ajax_respond([
+        'msg' => 'Error passing captcha challenge.'
+    ]);
+}
 
 // check if save was successfull
-if (!$member->save($_POST['password1'])) {
+if (!$member->save($_POST['password'])) {
     ajax_respond([
         'msg' => $member->errorMessage()
     ]);
 }
 
 // happy path
-ajax_respond([
-    'msg' => 'You are now signed up and may post messages!'
+ajax_respond_success([
+    'msg' => 'You are now signed up and may post messages!',
 ]);
 
-// send the reply
-function ajax_respond(array $responseText): void
+
+/* ============================== Functions ============================== */
+
+
+function ajax_respond_success(array $responseText): void
 {
+    ajax_respond($responseText, true);
+}
+
+// send the reply
+function ajax_respond(array $responseText, bool $success = false): void
+{
+    global $passedTokenValidation;
+    global $token;
+
+    $responseText['success'] = $success;
+    if (!$success && $passedTokenValidation === true) {
+        $responseText['newToken'] = Token::generateTokenArray($token, '/signup.php');
+    }
+
     header('Content-Type: application/json');
     echo json_encode($responseText);
     exit;
 }
 
-//--- Support function ---\\
-
-// Check to compare that both entered passwords string are the same.
-function isValidPasswordInput(string $input1, string $input2): bool
+// @Todo: Move this to a function file under /functions to increase scalability.
+function validateCaptcha($captcha)
 {
-    return $input1 === $input2;
+    $secret = '6Lfpr_0UAAAAANaYPlORYVfO-fXkBheXdc2VcMNL';
+    $curlx = curl_init();
+    curl_setopt($curlx, CURLOPT_URL, "https://www.google.com/recaptcha/api/siteverify");
+    curl_setopt($curlx, CURLOPT_HEADER, 0);
+    curl_setopt($curlx, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curlx, CURLOPT_POST, 1);
+
+    $post_data = [
+        'secret' => $secret,
+        'response' => $captcha
+    ];
+
+    curl_setopt($curlx, CURLOPT_POSTFIELDS, $post_data);
+
+    $resp = json_decode(curl_exec($curlx));
+
+    curl_close($curlx);
+
+    if (!$resp->success) {
+        return false;
+    }
+    return true;
 }

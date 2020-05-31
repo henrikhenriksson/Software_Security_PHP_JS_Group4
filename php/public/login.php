@@ -9,15 +9,24 @@ declare(strict_types=1);
  ******************************************************************************/
 
 require_once __DIR__ . '/../resources/init.php';
+use \ParagonIE\AntiCSRF\AntiCSRF as TokenLib;
 
-function _sendInvalidMessageResponse($msg):void
+$token = new TokenLib();
+
+function _sendInvalidResponseMessage($msg):void
 {
     $responseText = ['isValidLogin'=> false, 'msg'=>$msg];
 
     sendResponse($responseText);
 }
 
-function _sendValidMessageResponse($msg):void
+function _sendInvalidResponseComplex($response)
+{
+    $response['isValidLogin'] = false;
+    sendResponse($response);
+}
+
+function _sendValidResponseMessage($msg):void
 {
     $responseText = ['isValidLogin'=> true, 'msg'=>$msg];
 
@@ -31,22 +40,29 @@ function sendResponse($responseText)
 }
 
 if (!InvReq::validIpCurUser()) {
-    _sendInvalidMessageResponse('Ip blocked');
+    _sendInvalidResponseMessage('Ip blocked');
     exit;
 }
 
 
-if (!isset($_POST["token"]) || !isset($_POST["TS"])) {
+if (!isset($_POST["_CSRF_TOKEN"]) || !isset($_POST["_CSRF_INDEX"])) {
     // Cross reference protection not provided
     ///@todo decide action
-    InvReq::addInvalidRequest('invalidTsLogin', 'na');
-    _sendInvalidMessageResponse("Required login data not provided");
+    InvReq::addInvalidRequest('missing Token data', 'na');
+    _sendInvalidResponseMessage("Required login data not provided");
     exit;
 }
 
-if (!Token::validateToken("login", $_POST["TS"], $_POST["token"])) {
+
+
+if (! $token->validateRequest() ) {
     InvReq::addInvalidRequest('invalidTokenLogin', 'na');
-    _sendInvalidMessageResponse("Invalid token");
+    _sendInvalidResponseComplex([
+        'msg'=>"Invalid token",
+        //'newToken'=>$token->getTokenArray('./login')
+        //'newToken'=>\htmlentities($token->getTokenArray('./login'), ENT_QUOTES, 'UTF-8')
+        'newToken'=>Token::generateTokenArray($token, './login')
+    ]);
     exit;
 }
 
@@ -56,11 +72,15 @@ $member = Member::login($_POST["uname"], $_POST['psw']);
 if( $member->error() )
 {
     InvReq::addInvalidRequest('invalidLoginCredentials', $member->username());
-    _sendInvalidMessageResponse($member->errorMessage());
+    _sendInvalidResponseComplex([
+        'msg'=>$member->errorMessage(),
+        'newToken'=>$token->getTokenArray('./login')
+    ]);
+    ///@todo regenerate_session_id() and Send new token back to user, must only be sent when the first token is valid
     exit;
 }
 
-_sendValidMessageResponse('valid login');
+_sendValidResponseMessage('valid login');
 
 
 

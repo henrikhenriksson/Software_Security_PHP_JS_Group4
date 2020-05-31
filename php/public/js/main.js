@@ -13,6 +13,7 @@ const CURRENT_PAGE = window.location.pathname;
 function byId(id) {
   return document.getElementById(id);
 }
+
 /******************************************************************************/
 
 /*******************************************************************************
@@ -60,11 +61,15 @@ function addListeners() {
  ******************************************************************************/
 function addLikeButtonListeners() {
   // Add onClickListeners for like buttons
-  $(".like-btn").on("click", function () {
-    let post_id = $(this).data("id");
-    let token = byId("gb-token").value;
-    let ts = byId("gb-ts").value;
+  $(".like-btn").on("click", function() {
     $clicked_btn = $(this);
+    let action;
+
+    const { token, index } = getTokens("rate-post");
+    if (!token || !index) {
+      // We have no tokens, do nothing
+      return false;
+    }
 
     if ($clicked_btn.hasClass("far")) {
       action = "like";
@@ -77,12 +82,23 @@ function addLikeButtonListeners() {
       type: "post",
       data: {
         action: action,
-        post_id: post_id,
-        token: token,
-        ts: ts,
+        post_id: $clicked_btn.data("id"),
+        _CSRF_TOKEN: token,
+        _CSRF_INDEX: index
       },
       dataType: "json",
-      success: function (data) {
+      success: function(data) {
+        console.log(data);
+
+        if (responseHasNewToken(data)) {
+          updateToken("rate-post", data);
+        }
+
+        if (!data.success) {
+          console.log("Error: " + data.msg);
+          return;
+        }
+
         if (action == "like") {
           $clicked_btn.removeClass("far");
           $clicked_btn.addClass("fas");
@@ -98,7 +114,7 @@ function addLikeButtonListeners() {
           .siblings("i.fas.fa-thumbs-down")
           .removeClass("fas")
           .addClass("far");
-      },
+      }
     });
   });
 }
@@ -108,11 +124,15 @@ function addLikeButtonListeners() {
  ******************************************************************************/
 function addDislikeButtonListeners() {
   // Add onClickListeners for dislike buttons
-  $(".dislike-btn").on("click", function () {
-    let post_id = $(this).data("id");
-    let token = byId("gb-token").value;
-    let ts = byId("gb-ts").value;
+  $(".dislike-btn").on("click", function() {
     $clicked_btn = $(this);
+    let action;
+    const { token, index } = getTokens("rate-post");
+
+    if (!token || !index) {
+      // We have no tokens, do nothing
+      return false;
+    }
 
     if ($clicked_btn.hasClass("far")) {
       action = "dislike";
@@ -125,12 +145,23 @@ function addDislikeButtonListeners() {
       type: "post",
       data: {
         action: action,
-        post_id: post_id,
-        token: token,
-        ts: ts,
+        post_id: $clicked_btn.data("id"),
+        _CSRF_TOKEN: token,
+        _CSRF_INDEX: index
       },
       dataType: "json",
-      success: function (data) {
+      success: function(data) {
+        console.log(data);
+
+        if (responseHasNewToken(data)) {
+          updateToken("rate-post", data);
+        }
+
+        if (!data.success) {
+          console.log("Error: " + data.msg);
+          return;
+        }
+
         if (action == "dislike") {
           $clicked_btn.removeClass("far");
           $clicked_btn.addClass("fas");
@@ -146,7 +177,7 @@ function addDislikeButtonListeners() {
           .siblings("i.fas.fa-thumbs-up")
           .removeClass("fas")
           .addClass("far");
-      },
+      }
     });
   });
 }
@@ -155,27 +186,49 @@ function addDislikeButtonListeners() {
  * Function addRemoveButtonListeners
  ******************************************************************************/
 function addRemoveButtonListeners() {
-  $(".delete-post").on("click", function () {
-    let post_id = $(this).data("id");
-    let token = byId("gb-token").value;
-    let ts = byId("gb-ts").value;
+  $(".delete-post").on("click", function() {
     $clicked_btn = $(this);
+    const postID = $clicked_btn.data("id");
+    const { token, index } = getTokens("delete-post");
+
+    if (!token || !index) {
+      // We have no tokens do nothing
+      return false;
+    }
 
     $.ajax({
       url: "delete-post.php",
       type: "post",
       data: {
-        post_id: post_id,
-        token: token,
-        ts: ts,
+        _CSRF_TOKEN: token,
+        _CSRF_INDEX: index,
+        post_id: postID
       },
       dataType: "json",
-      success: function (data) {
-        if (data === "true") {
-          location.reload();
+      success: function(data) {
+        console.log(data);
+
+        if (responseHasNewToken(data)) {
+          updateToken("delete-post", data);
         }
-      },
+
+        if (!data.success) {
+          console.log("Error: " + data.msg);
+          return;
+        }
+
+        const postElem = document.querySelector(`article#post-${postID}`);
+        console.log(postElem);
+
+        if (!postElem.parentNode) {
+          console.log("Cannot remove post dom element");
+          return;
+        }
+        postElem.parentNode.removeChild(postElem);
+      }
     });
+
+    return false;
   });
 }
 
@@ -185,21 +238,54 @@ function addRemoveButtonListeners() {
 function doLogin() {
   const UNAME = byId("uname").value;
   const PSW = byId("psw").value;
-  const TOKEN = byId("token").value;
-  const TS = byId("TS").value;
 
+  const _CSRF_TOKEN = byId("login_CSRF_TOKEN").value;
+  const _CSRF_INDEX = byId("login_CSRF_INDEX").value;
+
+  ///@todo remove debug log
+  console.log("doLogin token: " + _CSRF_TOKEN);
+  console.log("doLogin index: " + _CSRF_INDEX);
   if (UNAME !== "" && PSW !== "") {
     xhr.addEventListener("readystatechange", processLogin, false);
     let data = new FormData();
     data.append("uname", UNAME);
     data.append("psw", PSW);
-    data.append("token", TOKEN);
-    data.append("TS", TS);
+    data.append("_CSRF_TOKEN", _CSRF_TOKEN);
+    data.append("_CSRF_INDEX", _CSRF_INDEX);
 
     // Send formdata with URL to login.php
+    //xhr.open("GET", `login.php?uname=${UNAME}&psw=${PSW}`, true);
     xhr.open("POST", `login.php`, true);
     xhr.send(data);
   }
+}
+/*******************************************************************************
+ * Function doSignup
+ ******************************************************************************/
+function doSignup() {
+  const userName = byId("userName").value;
+  const password1 = byId("password1").value;
+  const password2 = byId("password2").value;
+  const recaptcha = grecaptcha.getResponse();
+
+  if (!userName || userName.trim() == "") {
+    byId("signup_message").innerHTML = "Username can not be empty!";
+    return;
+  }
+
+  if (!password1 || password1.trim() === "") {
+    byId("signup_message").innerHTML =
+      "Password can not be empty or contain only whitespace characters.";
+    return;
+  }
+
+  // if username is not empty and password has any value (not null);
+  xhr.addEventListener("readystatechange", processSignup, false);
+
+  let data = new FormData(byId("signup_form"));
+  data.append("captcha", recaptcha);
+  xhr.open("POST", "signup.php", true);
+  xhr.send(data);
 }
 
 /*******************************************************************************
@@ -218,10 +304,13 @@ function processLogin() {
   if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
     //First we must remove the registered event since we use the same xhr object for login and logout
     xhr.removeEventListener("readystatechange", processLogin, false);
+    ///@todo remove debug log
+    console.log("Login response:" + this.responseText);
 
-    var myResponse = JSON.parse(this.responseText);
+    let myResponse = JSON.parse(this.responseText);
 
     // Get menu links from XHR response
+    ///@todo should this be removed
     let links = myResponse["links"];
     let menu = "";
     for (let key in links) {
@@ -238,9 +327,10 @@ function processLogin() {
         byId("welcome-message").style.display = "none";
         byId("gb-form").style.display = "block";
       }
-
-      location.reload();
     }
+
+    ///$todo reload is this needed, needed for now to generate new token
+    location.reload();
 
     // Show information about the login
     byId("loginMsg").innerHTML = myResponse["msg"];
@@ -254,9 +344,12 @@ function processLogout() {
   if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
     //First we most remove the registered event since we use the same xhr object for login and logout
     xhr.removeEventListener("readystatechange", processLogout, false);
+    ///@todo remove debu
+    console.log("Logout: " + this.responseText);
     var myResponse = JSON.parse(this.responseText);
 
     // Get menu links from XHR response
+    ///@todo is this needed
     let links = myResponse["links"];
     let menu = "";
     for (let key in links) {
@@ -274,41 +367,9 @@ function processLogout() {
       byId("gb-form").style.display = "none";
     }
 
+    ///@todo reload is this needed, needed for now to generate new token
     location.reload();
   }
-}
-
-/*******************************************************************************
- * Function doSignup
- ******************************************************************************/
-function doSignup() {
-  const userName = byId("userName").value;
-  const password1 = byId("password1").value;
-  const password2 = byId("password2").value;
-  const token = byId("su_token").value;
-  const timeStamp = byId("su_ts").value;
-
-  if (!userName || userName.trim() == "") {
-    byId("signup_message").innerHTML = "Username can not be empty!";
-    return;
-  }
-
-  if (!password1 || password1.trim() === "") {
-    byId("signup_message").innerHTML =
-      "Password can not be empty or contain only whitespace characters.";
-    return;
-  }
-
-  // if username is not empty and password has any value (not null);
-  xhr.addEventListener("readystatechange", processSignup, false);
-  let data = new FormData();
-  data.append("user_name", userName);
-  data.append("password1", password1);
-  data.append("password2", password2);
-  data.append("su_token", token);
-  data.append("su_ts", timeStamp);
-  xhr.open("POST", "signup.php", true);
-  xhr.send(data);
 }
 
 /*******************************************************************************
@@ -317,8 +378,59 @@ function doSignup() {
 function processSignup() {
   if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
     xhr.removeEventListener("readystatechange", processSignup, false);
+    ///@todo remove degug output
     console.log(this.responseText);
-    let myResponse = JSON.parse(this.responseText);
-    byId("signup_message").innerHTML = myResponse["msg"];
+    let response = JSON.parse(this.responseText);
+    byId("signup_message").innerHTML = response["msg"];
+    if (!response.success && responseHasNewToken(response)) {
+      updateToken("signup", response);
+      return;
+    }
+    // Success! Redirect after 2s
+    setTimeout(() => {
+      window.location = "/";
+    }, 2000);
   }
+}
+
+function responseHasNewToken(jsonResponse) {
+  return jsonResponse.newToken != null;
+}
+
+function updateToken(tokenPrefix, jsonResponse) {
+  const responseToken = jsonResponse.newToken;
+  const { token, index } = getTokenElems(tokenPrefix);
+
+  if (!token || !index) {
+    return;
+  }
+
+  token.value = responseToken._CSRF_TOKEN;
+  index.value = responseToken._CSRF_INDEX;
+
+  delete responseToken._CSRF_TOKEN;
+  delete responseToken._CSRF_INDEX;
+}
+
+/**
+ * Returns the index and token for the given index or two null references
+ * if no token exists.
+ */
+function getTokens(tokenIndex) {
+  const { token, index } = getTokenElems(tokenIndex);
+  if (!token || !index) {
+    return { token: null, index: null };
+  }
+  return { token: token.value, index: index.value };
+}
+
+/**
+ * Returns the index and token elements for the given index or two null references
+ * if no token exists.
+ */
+function getTokenElems(tokenIndex) {
+  return {
+    token: byId(`${tokenIndex}_CSRF_TOKEN`),
+    index: byId(`${tokenIndex}_CSRF_INDEX`)
+  };
 }
