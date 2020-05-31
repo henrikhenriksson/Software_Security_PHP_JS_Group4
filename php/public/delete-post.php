@@ -19,18 +19,17 @@ if (!isset($_POST)) {
 $post_id = filter_input(INPUT_POST, 'post_id', FILTER_VALIDATE_INT);
 
 if (!$post_id) {
-    // Expecting this as an unintended call since no data to modify is supplied
+    // Expecting this as an unintended reques since no data to modify is supplied
     ajax_respond([
         'msg' => "Not a valid request format",
-        'POST' => $_POST
 ]);
 }
 
-$member = Member::fromSession();
-if (($member->id() <= 0)) {
+if (!Member::loggedIn()) {
     InvReq::addInvalidRequest('delete_post_no_user', 'NA');
     ajax_respond(['msg' => 'Not logged in']);
 }
+$member = Member::fromSession();
 
 if (!$token->validateRequest()) {
     InvReq::addInvalidRequest('delete_post_invalid_token', $member->username());
