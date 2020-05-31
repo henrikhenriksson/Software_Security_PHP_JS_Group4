@@ -60,12 +60,14 @@ function checkUserPostMsg(?Member $member, TokenLib $token, string &$errorMsg)
     if (!isset($_POST[$token->getFormToken()]) || !isset($_POST[$token->getFormIndex()])) {
         // Trying to post messages without adding token data, possible CSRF attack
         InvReq::addInvalidRequest('post_msg_no_token', $member->username());
+        Session::kill();
         $errorMsg = "Token not supplied";
         return;
     }
 
     if (!$token->validateRequest()) {
         InvReq::addInvalidRequest('post_msg_invalid_token', $member->username());
+        Session::kill();
         $errorMsg = "Invalid Token";
         return;
     }
