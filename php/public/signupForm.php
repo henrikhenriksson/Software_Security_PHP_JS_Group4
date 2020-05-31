@@ -77,4 +77,5 @@ if (Member::loggedIn()) {
 <footer>
     <?php require_once __DIR__ . '/../resources/views/footer.php'; ?>
 </footer>
+</body>
 </html>
