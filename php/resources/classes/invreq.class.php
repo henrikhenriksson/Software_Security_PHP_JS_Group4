@@ -2,21 +2,15 @@
 
 declare(strict_types=1);
 
-/**
- * Class InvReqRate Helps to detect if multiple invalid request is made from the same IP address
- * If an invalid request is detected the request should be stored in the database and can be done with this class
- *
- *
- */
-
-//require_once __DIR__ . '../../resources/functions/strings.php';
-//require_once __DIR__ . '../../resources/functions/sql.php';
-
 use \ParagonIE\EasyDB\EasyDB;
 use function Latitude\QueryBuilder\field;
 
 use \Latitude\QueryBuilder as Q;
 
+/**
+ * Class InvReqRate Helps to detect if multiple invalid request is made from the same IP address
+ * If an invalid request is detected the request should be stored in the database and can be done with this class
+ */
 class InvReq
 {
 
@@ -48,20 +42,6 @@ class InvReq
         $db->setAllowSeparators(true);
 
         $db->insert('invalid_requests', $data);
-
-//        prettyprint( $data );
-//        $sql = $db->buildInsertQuery('dt167g.invalidRequests', [
-//            'iplog', 'reqpage', 'username'
-//        ]);
-//
-//        $db->q($sql,
-//            $data,
-//            \PDO::FETCH_BOTH,
-//            true);
-//
-//        // insert new entry
-//        $querry = "INSERT INTO dt167g.invalidRequests (iplog, reqpage, username) VALUES ($1, $2, $3)";
-//        $result = $db->query($querry, $data);
     }
 
     /**
@@ -95,18 +75,6 @@ class InvReq
         );
         ;
         return 3 > $count;
-//        // get timestamp for the last hour
-//
-//        $query = "SELECT count(*) FROM dt167g.invalidRequests where iplog = $1 and timelog > $2;";
-//        $result = $db->query($query, array($checkIp, $time));
-
-//        if (!empty($result)) {
-//            $count = $result['count'];
-//            echo $count;
-//            return ( 3 > $count );
-//        }
-//
-
     }
 
     /**
@@ -114,7 +82,7 @@ class InvReq
      *
      * @return mixed|string representation of the ip address
      */
-    static function getUserIpAddress(): string
+    public static function getUserIpAddress(): string
     {
         if (isset($_SERVER['REMOTE_ADDR'])) {
             return $_SERVER['REMOTE_ADDR'];

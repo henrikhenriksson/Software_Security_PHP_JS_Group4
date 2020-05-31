@@ -11,7 +11,7 @@ require_once __DIR__ . '/../functions/post.php';
 
 ?>
 
-<article class="post">
+    <article class="post" id="post-<?= $post->getId() ?>">
     <div class="post-header">
         <h4><?=  $post->getName() ?> wrote:</h4>
         <p class="time">At: <?=  $post->getTimeLog() ?></p>
