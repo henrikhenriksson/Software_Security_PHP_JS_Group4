@@ -153,9 +153,11 @@ function checkUserPostMsg(?Member $member, TokenLib $token, string &$errorMsg)
                 <?php foreach (array_reverse($posts) as $post) : ?>
                     <?php require __DIR__ . '/../resources/views/post.php'; ?>
                 <?php endforeach; ?>
-                <!-- Security token / timestamp submitted when liking , disliking and deleting posts -->
-                <input type="hidden" id="gb-token" value="todo ?>">
-                <input type="hidden" id="gb-ts" value="todo ?>">
+
+                <?php if (Member::loggedIn()): ?>
+                    <?php Token::generateTokenForm($token, 'rate-post', '/rating.php', true); ?>
+                    <?php Token::generateTokenForm($token, 'delete-post', '/delete-post.php', true); ?>
+                <?php endif; ?>
             <?php endif; ?>
         </section><!-- gbposts -->
     </section><!-- content wrapper -->

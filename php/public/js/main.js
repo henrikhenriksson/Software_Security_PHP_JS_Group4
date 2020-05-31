@@ -63,8 +63,8 @@ function addLikeButtonListeners() {
   // Add onClickListeners for like buttons
   $(".like-btn").on("click", function() {
     let post_id = $(this).data("id");
-    let token = byId("gb-token").value;
-    let ts = byId("gb-ts").value;
+    let token = byId("rate-post_CSRF_TOKEN").value;
+    let index = byId("rate-post_CSRF_INDEX").value;
     $clicked_btn = $(this);
 
     if ($clicked_btn.hasClass("far")) {
@@ -79,11 +79,22 @@ function addLikeButtonListeners() {
       data: {
         action: action,
         post_id: post_id,
-        token: token,
-        ts: ts
+        _CSRF_TOKEN: token,
+        _CSRF_INDEX: index
       },
       dataType: "json",
       success: function(data) {
+        console.log(data);
+
+        if (!data.success) {
+          console.log("Error: " + data.msg);
+          return;
+        }
+
+        if (responseHasNewToken(data)) {
+          updateToken("rate-post", data);
+        }
+
         if (action == "like") {
           $clicked_btn.removeClass("far");
           $clicked_btn.addClass("fas");
@@ -111,8 +122,8 @@ function addDislikeButtonListeners() {
   // Add onClickListeners for dislike buttons
   $(".dislike-btn").on("click", function() {
     let post_id = $(this).data("id");
-    let token = byId("gb-token").value;
-    let ts = byId("gb-ts").value;
+    let token = byId("rate-post_CSRF_TOKEN").value;
+    let index = byId("rate-post_CSRF_INDEX").value;
     $clicked_btn = $(this);
 
     if ($clicked_btn.hasClass("far")) {
@@ -127,11 +138,22 @@ function addDislikeButtonListeners() {
       data: {
         action: action,
         post_id: post_id,
-        token: token,
-        ts: ts
+        _CSRF_TOKEN: token,
+        _CSRF_INDEX: index
       },
       dataType: "json",
       success: function(data) {
+        console.log(data);
+
+        if (!data.success) {
+          console.log("Error: " + data.msg);
+          return;
+        }
+
+        if (responseHasNewToken(data)) {
+          updateToken("rate-post", data);
+        }
+
         if (action == "dislike") {
           $clicked_btn.removeClass("far");
           $clicked_btn.addClass("fas");
@@ -263,21 +285,6 @@ function processLogin() {
       menu += `<li><a href="${links[key]}">${key}</a></li>`;
     }
 
-    // update page with new token
-    // /// @todo update token, can a working solution be developed
-    // if(myResponse.hasOwnProperty('newToken'))
-    // {
-    //   ///@todo update token from response
-    //   console.log("new token: " + myResponse['newToken']['_CSRF_TOKEN']);
-    //   console.log("new index: " + myResponse['newToken']['_CSRF_INDEX']);
-    //   updateTokenFromResponse('login_CSRF_TOKEN', myResponse['newToken']['_CSRF_TOKEN']);
-    //   updateTokenFromResponse('login_CSRF_INDEX', myResponse['newToken']['_CSRF_INDEX']);
-    // }
-    // else
-    // {
-    //   console.log("no new token given");
-    // }
-
     // If successful login update menu and login form
     if (myResponse["isValidLogin"]) {
       byId("logout").style.display = "block";
@@ -350,7 +357,7 @@ function processSignup() {
 }
 
 function responseHasNewToken(jsonResponse) {
-  return !!jsonResponse.newToken;
+  return jsonResponse.newToken != null;
 }
 
 function updateToken(tokenPrefix, jsonResponse) {
