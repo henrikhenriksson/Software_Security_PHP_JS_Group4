@@ -89,6 +89,16 @@ class Post
         return $posts;
     }
 
+    public static function fetchById(int $id): Post
+    {
+        $db = getEasyDB();
+        $row = $db->row("SELECT * FROM posts WHERE id = ?;", $id);
+        if (!$row) {
+            return static::postError('Error while fetching post', $db);
+        }
+        return static::fromRow($db, $row);
+    }
+
     private static function postError(string $error_msg, EasyDB $db): Post
     {
         $post = new Post($db);

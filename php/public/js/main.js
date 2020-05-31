@@ -86,13 +86,13 @@ function addLikeButtonListeners() {
       success: function(data) {
         console.log(data);
 
+        if (responseHasNewToken(data)) {
+          updateToken("rate-post", data);
+        }
+
         if (!data.success) {
           console.log("Error: " + data.msg);
           return;
-        }
-
-        if (responseHasNewToken(data)) {
-          updateToken("rate-post", data);
         }
 
         if (action == "like") {
@@ -145,13 +145,13 @@ function addDislikeButtonListeners() {
       success: function(data) {
         console.log(data);
 
+        if (responseHasNewToken(data)) {
+          updateToken("rate-post", data);
+        }
+
         if (!data.success) {
           console.log("Error: " + data.msg);
           return;
-        }
-
-        if (responseHasNewToken(data)) {
-          updateToken("rate-post", data);
         }
 
         if (action == "dislike") {
@@ -179,26 +179,45 @@ function addDislikeButtonListeners() {
  ******************************************************************************/
 function addRemoveButtonListeners() {
   $(".delete-post").on("click", function() {
-    let post_id = $(this).data("id");
-    let token = byId("gb-token").value;
-    let ts = byId("gb-ts").value;
+    const post_id = $(this).data("id");
+    console.log("Post_id: ", post_id);
+    const token = byId("delete-post_CSRF_TOKEN").value;
+    const index = byId("delete-post_CSRF_INDEX").value;
     $clicked_btn = $(this);
 
     $.ajax({
       url: "delete-post.php",
       type: "post",
       data: {
-        post_id: post_id,
-        token: token,
-        ts: ts
+        _CSRF_TOKEN: token,
+        _CSRF_INDEX: index,
+        post_id: post_id
       },
       dataType: "json",
       success: function(data) {
-        if (data === "true") {
-          location.reload();
+        console.log(data);
+
+        if (responseHasNewToken(data)) {
+          updateToken("delete-post", data);
         }
+
+        if (!data.success) {
+          console.log("Error: " + data.msg);
+          return;
+        }
+
+        const postElem = document.querySelector(`article#post-${post_id}`);
+        console.log(postElem);
+
+        if (!postElem.parentNode) {
+          console.log("Cannot remove post dom element");
+          return;
+        }
+        postElem.parentNode.removeChild(postElem);
       }
     });
+
+    return false;
   });
 }
 
