@@ -56,16 +56,33 @@ function addListeners() {
   addRemoveButtonListeners();
 }
 
+/**
+ * Returns the index and token for the given index or two null references
+ * if no token exists.
+ */
+function getTokens(tokenIndex) {
+  const token = byId(`${tokenIndex}_CSRF_TOKEN`);
+  const index = byId(`${tokenIndex}_CSRF_INDEX`);
+  if (!token || !index) {
+    return { token: null, index: null };
+  }
+  return { token: token.value, index: index.value };
+}
+
 /*******************************************************************************
  * Function addLikeButtonListeners
  ******************************************************************************/
 function addLikeButtonListeners() {
   // Add onClickListeners for like buttons
   $(".like-btn").on("click", function() {
-    let post_id = $(this).data("id");
-    let token = byId("rate-post_CSRF_TOKEN").value;
-    let index = byId("rate-post_CSRF_INDEX").value;
     $clicked_btn = $(this);
+    let action;
+
+    const { token, index } = getTokens("rate-post");
+    if (!token || !index) {
+      // We have no tokens, do nothing
+      return false;
+    }
 
     if ($clicked_btn.hasClass("far")) {
       action = "like";
@@ -78,7 +95,7 @@ function addLikeButtonListeners() {
       type: "post",
       data: {
         action: action,
-        post_id: post_id,
+        post_id: $clicked_btn.data("id"),
         _CSRF_TOKEN: token,
         _CSRF_INDEX: index
       },
@@ -121,10 +138,14 @@ function addLikeButtonListeners() {
 function addDislikeButtonListeners() {
   // Add onClickListeners for dislike buttons
   $(".dislike-btn").on("click", function() {
-    let post_id = $(this).data("id");
-    let token = byId("rate-post_CSRF_TOKEN").value;
-    let index = byId("rate-post_CSRF_INDEX").value;
     $clicked_btn = $(this);
+    let action;
+    const { token, index } = getTokens("rate-post");
+
+    if (!token || !index) {
+      // We have no tokens, do nothing
+      return false;
+    }
 
     if ($clicked_btn.hasClass("far")) {
       action = "dislike";
@@ -137,7 +158,7 @@ function addDislikeButtonListeners() {
       type: "post",
       data: {
         action: action,
-        post_id: post_id,
+        post_id: $clicked_btn.data("id"),
         _CSRF_TOKEN: token,
         _CSRF_INDEX: index
       },
@@ -179,11 +200,14 @@ function addDislikeButtonListeners() {
  ******************************************************************************/
 function addRemoveButtonListeners() {
   $(".delete-post").on("click", function() {
-    const post_id = $(this).data("id");
-    console.log("Post_id: ", post_id);
-    const token = byId("delete-post_CSRF_TOKEN").value;
-    const index = byId("delete-post_CSRF_INDEX").value;
     $clicked_btn = $(this);
+    const postID = $clicked_btn.data("id");
+    const { token, index } = getTokens("delete-post");
+
+    if (!token || !index) {
+      // We have no tokens do nothing
+      return false;
+    }
 
     $.ajax({
       url: "delete-post.php",
@@ -191,7 +215,7 @@ function addRemoveButtonListeners() {
       data: {
         _CSRF_TOKEN: token,
         _CSRF_INDEX: index,
-        post_id: post_id
+        post_id: postID
       },
       dataType: "json",
       success: function(data) {
@@ -206,7 +230,7 @@ function addRemoveButtonListeners() {
           return;
         }
 
-        const postElem = document.querySelector(`article#post-${post_id}`);
+        const postElem = document.querySelector(`article#post-${postID}`);
         console.log(postElem);
 
         if (!postElem.parentNode) {
