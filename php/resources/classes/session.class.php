@@ -117,6 +117,11 @@ class TestSession implements SessionAdapter
 
     public function unset(string $key): void
     {
+        unset($this->session[$key]);
+    }
+
+    public function kill(): void
+    {
         $this->session = [];
     }
 }
