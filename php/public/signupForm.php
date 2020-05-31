@@ -45,6 +45,7 @@ if (Member::loggedIn()) {
     <aside>
         <?php require '../resources/views/aside-login.php'; ?>
         <?php require '../resources/views/aside-search.php'; ?>
+        <a href="index.php">Back to guestbook</a>
     </aside>
     <section class="content-wrapper">
         <div id="new_member">
